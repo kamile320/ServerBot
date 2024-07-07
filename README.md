@@ -22,3 +22,6 @@ Commands/Programs that you need install first (Linux):
 - dialog
 - python3 (3.9 or newer)
 - python3-pip
+
+ServerBot is a bot based on my private code in version 1.8. That's why actual version of public Bot is X.X-<b>p</b> <- <b>p</b>ublic.
+Every ideas, bug reports or helping in code improvement you can send me on Discord: 
