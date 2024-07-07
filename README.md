@@ -16,4 +16,9 @@ If you're using not-Ubuntu 22.04 based distros you need to create python3 virtua
 
 More information and instructions you can find in manual.html or manualEN.html.
 
-ServerBot is an open project - that means you can make your own version of bot, or help me with making ServerBot way better - better english translations, code improvements, bug report etc.
+ServerBot is an open project - that means you can make your own version of bot, or help me with making ServerBot way better - better english translations/text, code improvements, bug report etc.
+
+Commands/Programs that you need install first (Linux):
+- dialog
+- python3 (3.9 or newer)
+- python3-pip
