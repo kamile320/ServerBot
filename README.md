@@ -24,4 +24,5 @@ Commands/Programs that you need install first (Linux):
 - python3-pip
 
 ServerBot is a bot based on my private code in version 1.8. That's why actual version of public Bot is X.X-<b>p</b> <- <b>p</b>ublic.
-Every ideas, bug reports or helping in code improvement you can send me on Discord: 
+Every ideas, bug reports or helping in code improvement you can send me on <a href="
+https://discord.gg/UMtYGAx5ac">Discord</a>
