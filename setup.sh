@@ -6,7 +6,7 @@ OPTIONS=(1 "Start Bot"
          4 "Create Python3 venv in current dir")
 
 select=$(dialog --clear \
---backtitle "ServerBot v1.8" \
+--backtitle "ServerBot v1.0" \
 --title "ServerBot Setup" \
 --menu "Select Operation:" \
 15 50 4 \
