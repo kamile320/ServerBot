@@ -1,0 +1,11 @@
+[ServerBot Ver. 1.0]
+    Changelog:
+-more fixes
+-code improvements
+-command improvements
+-slash (/) commands (test)
+-'.env' file for better token input/usage
+-better '.dir list'
+-'.mksysctlstart', '.webreq', '.pingip' commands
+-'mkvenv.sh' script (to create python virtual environment only for Discord Bot)
+-better 'setup.sh' script 

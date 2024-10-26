@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServerBot - Manual</title>
+    <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
+    <meta name="description" content="ServerBot 1.8 user Manual [EN]">
+    <meta name="author" content="Kamile320">
+
+    <style>
+        body {
+            background-image: linear-gradient(to right, rgb(141, 205, 226), rgb(62, 62, 255), rgb(3, 165, 3));
+        } 
+
+        h1 {
+            margin: 0;
+            font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        }
+
+        .card {
+            background-color: rgb(241, 220, 174);
+            margin: 50px auto;
+            width: 80%;
+            height: auto;
+            padding: 20px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <font size="6">
+            <center><h1><i>ServerBot User Manual</i></h1></center>
+        </font>
+        <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
+
+        <iframe align="right" src="https://discord.com/widget?id=1243950731954749450&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+
+        <font color="Blue">ServerBot</font> - Discord Bot developed by <b><u>Kamile320</u></b> enabling:<br>
+        <ul>
+            <li>Listening to local music from the host</li>
+            <li>Creating threads</li>
+            <li>Server Administration</li>
+            <li>Host Computer Management (+ Diagnosis)</li>
+            <li>File and Directory Management</li>
+            <li>And more</li>
+        </ul>
+        
+        <br>
+
+        <h3>Content:</h3>
+        <ol>
+            <li><a href="#dirs">Structure of Directory</a></li>
+            <li><a href="#start">First Run</a></li>
+            <li><a href="#comma">Commands</a></li>
+            <li><a href="#autostart">Autostart</a></li>
+            <li><a href="#token">Tokeny</a></li>
+        </ol>
+
+        <br>
+
+        <h3 id="dirs">List of Files and Directories:</h3>
+
+        <ol>
+            <li><u>ServerBot.py</u> - Main script file</li>
+            <li><u>setup.bat</u> - File that installs required python libraries (Windows)</li>
+            <li><u>setup.sh</u> - Operation menu: starting the bot, installing required libraries, etc. (requires installation of the "dialog" command)</li>
+            <li><u>Logs.txt</u> - File with the bot event log on the server</li>
+            <li><u>ManualSB.html</u> - Bot Manual</li>
+            <li><u>Media</u> - Directory with Default Music/Sounds</li>
+            <li>
+                <u>Files</u> - Directory with required (and not) Bot files
+                <ul>
+                    <li><u>favicon.ico</u> - Manuala icon</li>
+                    <li><u>updates.txt</u> - List of recent updates</li>
+                    <li><u>Logs.txt</u> - Copy of Bot Logs</li>
+                    <li><u>autorun.sh</u> - After using <a href="#autostart">.mksysctlstart</a></li>
+                    <li>Other Files (photos, videos, etc.)</li>
+                    <li><u>setup</u> - Config Files</li>
+                    <ul>
+                        <li><u>setuplib.sh</u> - Installer of pip3 Libraries</li>
+                        <li><u>mkvenv.sh</u> - Creates <a href="#autostart">venv</a></li>
+                    </ul>
+                </ul>
+            </li>
+        </ol>
+        
+        <br>
+
+        <p align="right">Pic. 1 - Running the script</p>
+        <img align="right" src="Files/UbuntuSB.png" width="50%" height="50%">
+        
+        <h3 id="start">First run:</h3>
+        <h5>The Bot requires:</h5>
+        <ul type="square">
+            <li>Python 3.10 or later</li>
+            <li>Internet connection</li>
+            <li>Required python libraries installed (see setup.sh/setuplib.sh contents)</li>
+            <li>Adding FFmpeg files to the PATH environment - Windows only (see YT)</li>
+            <li>Operating System: Linux (recommended) / Windows / MacOS - 64 bit (Recommended)</li>
+            <li>setup.sh - requires the "dialog" command</li>
+        </ul>
+
+        <br>
+        
+        You should run the script through the IDE, terminal or other program,<br>
+        if something goes wrong, the Bot should let you know what the problem is<br>
+        and ask for approval of the correction or it will abandon the launch/installation.<br>
+
+        <br>
+
+        The current Bot Commands can be seen using the .help command
+
+        <br>
+
+        <h3 id="autostart">Autostart via systemctl:</h3>
+
+        When using the Bot, you may want it to start automatically with the operating system (Linux).<br>
+        To easily enable this, there is the .mksysctlstart command.<br>
+        After entering the command, you must provide an additional value:<br><br>
+        
+        <b>none</b> -> creates a regular autorun.sh file in the <a href="#dirs">Files</a> directory. Works on systems based on Ubuntu <b>22.04</b><br><br>
+
+        <b>other value</b> -> sometimes when installing modules using pip3 an <i>externally managed pip</i>error may appear .<br>
+        In this case, instead of <i>none</i>, enter the directory where the Python Virtual Environment/Venv is located.<br>
+        If you have not created it yet, it is recommended to create it in the main Bot directory (ServerBot).<br><br>
+        Przykład: .mksysctl .venv/bin/python <- wykonujesz tą komendę w głównym katalogu Bota<br>
+        .venv -> located in the ServerBot directory<br>
+        NOTE! The bot (or rather setup.sh) is adapted to the name of a directory with a virtual environment called ".venv".<br>
+        If you enter a different value, the bot may not start!<br>
+        It is recommended to use option 4 from setup.sh -> It will easily install and configure everything as needed.<br>
+        For the autostart to work, you need to set the Bot files with read/write/execute permissions to 777 (for everyone). I recommend moving the Bot files to the /ServerBot directory (so that it is not in other directories)<br><br>
+
+        <b><i>How to create venv:</i></b><br>
+        <ol>
+            <li>in the main bot directory, type: <b>python3 -m venv .venv</b></li>
+            <li>to activate venv: <b>source .venv/bin/activate</b> (as root)</li>
+            <li>check version and location: <b>which python</b></li>
+            <li>once you are in venv, run <b>setup.sh</b></li>
+            <li>(optional) to exit venv, type: <b>deactivate</b></li>
+            <li>or simpler - just use option 4 in <b>setup.sh</b> to run automatic install and enter to venv</li>
+        </ol>
+
+        <p>Full documentation of venv <a href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/">here</a></p>
+
+        <p align="right">Pic. 2 - setup.sh options</p>
+        <img align="right" src="Files/setupSB.png" width="50%" height="50%">
+
+        <h3 id="token">Tokens</h3>
+        The bot uses tokens: Discord API, ApenAI and user IDs.<br>
+        In order for the bot to run, you need to fill in the <b>.env</b> file with the appropriate data.<br><br>
+        Scheme:<br>
+        TOKEN="your bot token"<br>
+        OpenAI="your token (API key)"<br>
+        admin_usr = ['your discord user ID']<br><br>
+
+        
+        <h4>User ID</h4>
+        Some commands require administrator privileges to run.<br>
+        To execute them, you must provide the ID of authorized users to execute these commands in <b>admin_usr</b>.<br>
+
+
+        <h3 id="comma">Basic Commands:</h3>
+        <table border>
+            <tr valign="top" align="center">
+                <td>
+                    =====Chat=====<br>
+                    hello<br>
+                    bye<br>
+                    hi<br>
+                    hello_there<br>
+                </td>
+
+                <td>
+                    ====Utility_and_Diagnostics====<br>
+                    testos {os}<br>
+                    test<br>
+                    bytes<br>
+                    delete<br>
+                    cleaner<br>
+                    binary {dec. number}<br>
+                    hexa {dec. number}<br>
+                    convert<br>
+                    rebuild<br>
+                    bash<br>
+                </td>
+
+                <td>
+                    =======Fun=======<br>
+                    random<br>
+                    banner<br>
+                    blankthing<br>
+                    apple<br>
+                </td>
+
+                <td>
+                    =====Admin=====<br>
+                    ShutDown<br>
+                    copylog<br>
+                    addbot<br>
+                    testbot<br>
+                    gpt<br>
+                    kick<br>
+                    ban<br>
+                    unban<br>
+                    mkshortcut<br>
+                    mksysctlstart<br>
+                </td>
+            </tr>
+            <tr valign="top" align="center">
+                <td>
+                    ====BotInfo====<br>
+                    commands<br>
+                    credits<br>
+                    time<br>
+                    ping<br>
+                </td>
+
+                <td>
+                    ========FileManager========<br>
+                    cd {directory}<br>
+                    dir {mode}<br>
+                    file {mode} {filename}<br>
+                    touch<br>
+                </td>
+
+                <td>
+                    ====VoiceChannel====<br>
+                    join<br>
+                    leave<br>
+                    play<br>
+                    stop<br>
+                    waiting<br>
+                    micspam<br>
+                    pause<br>
+                </td>
+
+                <td>
+                    ====UpdateInfo====<br>
+                    newest_update<br>
+                    next_update<br>
+                </td>
+            </tr>
+        </table>
+        
+        
+    </div>
+</body>
+</html>
