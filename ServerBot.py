@@ -12,12 +12,10 @@ def os_selector():
     else:
         print('Failed to run Script. Aborting Install')
 
-
-
 try:
     import discord
     from discord.ext import commands
-    from discord import app_commands
+    #from discord import app_commands
     from discord import FFmpegPCMAudio
     from discord import *
     import datetime
@@ -36,12 +34,17 @@ except:
     os_selector()
 
 
-
 #Baner
 baner = pyfiglet.figlet_format("ServerBot")
 print(baner)
 bluescreenface = pyfiglet.figlet_format(": (")
-
+#Intents
+intents = discord.Intents.default()
+intents.message_content = True
+status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux']
+choice = random.choice(status)
+ver = "1.0.1"
+client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
 
 
 try:
@@ -54,17 +57,7 @@ except:
     print("CAN'T LOAD .env FILE!\nCreate file named '.env' with content:\nTOKEN=''\nOpenAI=''\nadmin_usr=['','']")
 
 
-
-intents = discord.Intents.default()
-intents.message_content = True
-status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', "Garry's Mod", 'Intel Inside', 'Team Fortress 2', 'Discord Moderator Simulator', 'Rayman 3: Hoodlum Havoc', 'Arch Linux']
-choice = random.choice(status)
-ver = "1.0"
-client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
-
-
-
-#log_file
+#Log_File
 logs = open('Logs.txt', 'w')
 def createlogs():
     logs.write(f"""S E R V E R  B O T
@@ -76,14 +69,12 @@ Info: Remember to shut down bot by .ShutDown command or log will be empty.
 createlogs()
 
 
-
-#directory
+#Directory
 maindir = os.getcwd()
 SBbytes = os.path.getsize('ServerBot.py')
 
 
-
-#information/errors
+#Information/Errors
 fileerror = "Error: File not found or don't exist"
 filelarge = "Error: File too large"
 banned = f'Information[Server/Members]: Banned {member}\n'
@@ -98,9 +89,7 @@ voice_not_connected_error = "You must be connected to VC first!"
 leave_error = "How can I left, when I'm not in VC?"
 thread_error = "Something Happened. Try to type:\n.thread {NameWithoutSpaces} {Reason}\nIf no reason, type: None"
 not_allowed = "You're not allowed to use this command."
-SBservice = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo systemctl enable ServerBot\nsudo systemctl start ServerBot <== Optional\nsudo systemctl daemon-reload <== if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
-
-
+SBservice = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo chmod 777 -R /BotDirectory/*\nsudo systemctl enable ServerBot <== Enables automatic startup\nsudo systemctl start ServerBot <== Optional (turns on Service)\nsudo systemctl daemon-reload <== if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
 
 #ClientEvent
 @client.event
@@ -117,10 +106,7 @@ async def on_ready():
     print('=' *40)
 
 
-
-
         #ChatBot
-
 #Chat
 #1
 @client.command()
@@ -141,11 +127,11 @@ async def hi(ctx):
 @client.command()
 async def hello_there(ctx):
     await ctx.send(f'OH, HELLO THERE!')
-
         #Chat-END
 
 
-        #random/essa/fun
+
+        #Random/Fun
 #1
 @client.command(name='random', help='Shows your random number')
 async def random(ctx):
@@ -205,9 +191,11 @@ async def gpt(ctx, *, question):
 @client.command(name='GNU+Linux', help='Richard Stallman.')
 async def gnu(ctx):
     await ctx.send("I’d just like to interject for a moment. What you’re refering to as Linux, is in fact, GNU/Linux, or as I’ve recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX.  Many computer users run a modified version of the GNU system every day, without realizing it. Through a peculiar turn of events, the version of GNU which is widely used today is often called Linux, and many of its users are not aware that it is basically the GNU system, developed by the GNU Project.  There really is a Linux, and these people are using it, but it is just a part of the system they use. Linux is the kernel: the program in the system that allocates the machine’s resources to the other programs that you run. The kernel is an essential part of an operating system, but useless by itself; it can only function in the context of a complete operating system. Linux is normally used in combination with the GNU operating system: the whole system is basically GNU with Linux added, or GNU/Linux. All the so-called Linux distributions are really distributions of GNU/Linux!")
-        #random/essa/fun-END
+        #Random/Fun-END
 
-        #botinfo
+
+
+        #BotInfo
 #1
 @client.command(name='man', help='Sends HTML manual ')
 async def commands(ctx):
@@ -255,25 +243,23 @@ async def pingip(ctx, ip):
         await ctx.send(f"```{subprocess.getoutput([f'ping {ipaddr} -c 1'])}```")
     except:
         await ctx.send('Something went wrong')
-        #botinfo-END
+        #BotInfo-END
 
 
-        #updateinfo
+
+        #UpdateInfo
 #1
 @client.command(name='newest_update', help='Shows last changes of Bot functions/Changelog')
 async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot Ver. {ver}]
     Changelog:
--more fixes
--code improvements
--command improvements
--slash (/) commands (test)
--'.env' file for better token input/usage
--better '.dir list'
--'.mksysctlstart', '.webreq', '.pingip' commands
--'mkvenv.sh' script (to create python virtual environment only for Discord Bot)
--better 'setup.sh' script 
+- ServerBot.py cleaned
+- Code improvoments
+- SBservice value updated (.sysctladd final message)
+- Fixed error that makes bold font wrong "applied" 
+on text in .testbot while running Bot on ARM devices
+- '.issues' command
 
 To see older releases, find 'updates.txt' in folder 'Files' 
 """)
@@ -285,12 +271,22 @@ async def next_update(ctx):
 next update
 [n/a]
 """)
+    
+#3
+@client.command(name='issues', help='Known Issues of Bot')
+async def issues(ctx):
+    await ctx.send("""
+**Known Issues:**
+**1.** bold font wrong "applies" 
+on text in .testbot while running Bot on ARM devices
+    **Why:** 'platform.processor' nothing gives on ARM devices (tested on Raspberry Pi Zero 2)
+    **How Fixed:** Added 'ㅤ' at the end of line: 'CPU Type: **{platform.processor()}ㅤ**'
+""")
+        #UpdateInfo-END
 
-        #updateinfo-END
 
 
-        #admin_only
-
+        #AdminOnly
 #1
 @client.command(name='ShutDown', help='Turns Off the Bot')
 async def ShutDown(ctx):
@@ -424,12 +420,12 @@ async def disk(ctx):
         try:
             await ctx.send(f"```{subprocess.getoutput(['df -h'])}```")
         except:
-            await ctx.send('Something went wrong')
+            await ctx.send('Something went wrong\nDo you use Linux?')
     else:
         await ctx.send(not_allowed)
 
 #10
-@client.command(name="mksysctlstart", help="Adds ServerBot to systemctl to start with system startup (Bot needs to be running as root)\nMode:\n'none' -> creates default autorun entry (python3)\n'your entry' -> you need enter pwd of your python virtual environment (eg. .venv/bin/python)\n.venv file in this example hides in ServerBot main directory)\nIt's recommended to save bot files into main directory (/ServerBot) with full permissions (chmod 777 recursive). Without full permissions to bot files systemctl startup will not work.")
+@client.command(name="mksysctlstart", help="Adds ServerBot to systemctl to start with system startup (Bot needs to be running as root)\nMode:\n'none' -> creates default autorun entry (python3)\n'your entry' -> you need enter pwd of your python virtual environment (eg. .venv/bin/python)\n.venv file in this example hides in ServerBot main directory)\nIt's recommended to save bot files into main (root) directory (/ServerBot) with full permissions (chmod 777 recursive). Without full permissions to bot files systemctl startup will not work.")
 async def mksysctlstart(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -441,6 +437,11 @@ async def mksysctlstart(ctx, mode):
                         auto.write(f"#!/bin/bash\ncd {maindir}\npython3 ServerBot.py")
                         auto.close()
                         await ctx.send('Done.')
+
+                        print(f"Information: Created autorun.sh file (Files/autorun.sh)")
+                        logs = open(f'{maindir}/Logs.txt', 'a')
+                        logs.write(f"Information: Created autorun.sh file (Files/autorun.sh)\n")
+                        logs.close()
                     except:
                         await ctx.send("Can't create file!")
 
@@ -449,11 +450,16 @@ async def mksysctlstart(ctx, mode):
                         sys = open('/etc/systemd/system/ServerBot.service', 'w')
                         sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
                         await ctx.send("Done!")
-                        await ctx.send("Run post installation commands to enable ServerBot.service to start with system startup:\nsudo systemctl enable ServerBot\nsudo systemctl start ServerBot <== Optional\nsudo systemctl daemon-reload <== if you're running this command second time\nREMEBER about Reading/Executing permissions for others!")
+                        await ctx.send(SBservice)
+
+                        print(f"Information: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}")
+                        logs = open(f'{maindir}/Logs.txt', 'a')
+                        logs.write(f"Information: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}\n")
+                        logs.close()
                     except:
                         await ctx.send("Can't create service file!\nAre you root?")
                 except:
-                    await ctx.send('Got 1 error (or more) after creating systemctl entry.\nAborting..')
+                    await ctx.send('Got 1 error (or more) while creating systemctl entry.')
             else:
                 try:
                     await ctx.send('Making autorun.sh file..')
@@ -471,7 +477,6 @@ async def mksysctlstart(ctx, mode):
                         await ctx.send("Can't create file!")
 
                     await ctx.send('Making ServerBot.service in /etc/systemd/system..')
-
                     try:
                         sys = open('/etc/systemd/system/ServerBot.service', 'w')
                         sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
@@ -485,16 +490,16 @@ async def mksysctlstart(ctx, mode):
                     except:
                         await ctx.send("Can't create service file!\nAre you root?")
                 except:
-                    await ctx.send('Got 1 error (or more) after creating systemctl entry.\nAborting..')
+                    await ctx.send('Got 1 error (or more) while creating systemctl entry.')
         except:
             await ctx.send(f"""```{bluescreenface}``` Unexpected problem ocurred""")
     else:
         await ctx.send(not_allowed)
+        #AdminOnly-END
 
-        #admin_only-END
 
 
-        #utility_and_diagnostics
+        #Utility_and_Diagnostics
 #1
 @client.command(name='testbot', help='Tests some functions of Host and Bot')
 async def testbot(ctx):
@@ -507,7 +512,7 @@ Bot name: **{client.user}**
 Version: **{ver}**
 CPU Usage: **{psutil.cpu_percent()}** (%)
 CPU Count: **{psutil.cpu_count()}**
-CPU Type: **{platform.processor()}**
+CPU Type: **{platform.processor()}ㅤ**
 V. Mem. Usage: **{psutil.virtual_memory().percent}** (%)
 Ping: **{round(client.latency * 1000)}ms**
 OS Test (Windows): **{psutil.WINDOWS}**
@@ -521,9 +526,8 @@ File size: **{os.path.getsize(f'{maindir}/ServerBot.py')}**
 Floppy: **{os.path.exists('/dev/fd0')}**
 ====================================================""")
 
-
 #2
-@client.command(name='testos', help='Checks OS of server with running bot. \n .testos <os name> \n eg. .testos linux/windows/macos')
+@client.command(name='testos', help='Check OS of server with running bot. \n .testos <os name> \n eg. .testos linux/windows/macos')
 async def testos(ctx, operatingsys):
     if operatingsys == 'linux':
         await ctx.send(f'Linux: {psutil.LINUX}')
@@ -535,17 +539,11 @@ async def testos(ctx, operatingsys):
         await ctx.send(f'Please enter windows/linux/macos')
 
 #3
-    #test
-@client.command(name='test', help='test')
-async def test(ctx):
-    await ctx.send(f'test {ctx.author.mention}')
-
-#4
 @client.command(name='bytes', help='Shows size of main code')
 async def bytes(ctx):
     await ctx.send(f'{SBbytes} bytes of code!')
 
-#5
+#4
 @client.command(name='delete', help='Deletes set amount of messages (eg. .delete 6 => will delete 6 messages)')
 async def delete(ctx, amount: int = 0):
     deleted = await ctx.channel.purge(limit=amount)
@@ -555,7 +553,7 @@ async def delete(ctx, amount: int = 0):
     logs.write(f"Information: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}\n")
     logs.close()
 
-#6
+#5
 @client.command(name='cleaner', help='Cleans channel from last 100 messages')
 async def cleaner(ctx):
     deleted = await ctx.channel.purge(limit=100)
@@ -565,7 +563,7 @@ async def cleaner(ctx):
     logs.write(f"Information: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}\n")
     logs.close()
 
-#7
+#6
 @client.command(name='binary', help='Converts decimal number to binary. \n .binary <dec number>; eg. binary 2019')
 async def binary(ctx, number):
     binn = bin(int(number))
@@ -575,7 +573,7 @@ async def binary(ctx, number):
     logs.write(f'Information[Command]: Converted {number} to {binn} using .binary\n')
     logs.close()
 
-#8
+#7
 @client.command(name='hexa', help="Converts decimal number to hexadecimal. \n .hexa <dec number>; eg. hexa 2007")
 async def hexadecimal(ctx, number):
     hexa = hex(int(number))
@@ -585,7 +583,7 @@ async def hexadecimal(ctx, number):
     logs.write(f'Information[Command]: Converted {number} to {hexa} using .hexa\n')
     logs.close()
 
-#9
+#8
 @client.command(name='convert', help='Advanced Converter\n\nConverts one number to other number systems - binary, octal, decimal, hexa (hexadecimal)')
 async def multiconv(ctx, type, number):
     try:
@@ -633,7 +631,7 @@ async def multiconv(ctx, type, number):
     except:
         await ctx.send(f'```{bluescreenface}\nUnexpected error occurred```')
 
-#10
+#9
 @client.command(name="thread", help="Makes server threads\n.thread {name} {reason}")
 async def thread(ctx, name, *, reason):
     try:
@@ -647,7 +645,7 @@ async def thread(ctx, name, *, reason):
     except:
         await ctx.send(thread_error)
 
-#11
+#10
 @client.command(name="webreq", help="Sends websites request codes")
 async def webreq(ctx, *, web):
     try:
@@ -655,7 +653,7 @@ async def webreq(ctx, *, web):
         await ctx.send(f"Response: {rq}")
     except:
         await ctx.send("Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist? ")
-        #utility_and_diagnostics-END
+        #Utility_and_Diagnostics-END
 
 
 
@@ -694,7 +692,7 @@ async def disconnect(ctx):
     else:
         await ctx.reply("How can I left, when I'm not in VC?")
 
-#3
+#3 - play
 @client.command(name='play', help='Plays a local music file.\n.play {loc}')
 async def play(ctx, *, name):
     try:
@@ -724,7 +722,7 @@ async def play(ctx, *, name):
     except:
         await ctx.reply(voice_not_connected_error)
 
-#4
+#4 - stop
 @client.command(pass_context=True, name='stop', help='Stops playing audio')
 async def stop(ctx):
     voice = ctx.guild.voice_client
@@ -768,13 +766,12 @@ async def pause(ctx):
         voice.resume()
     else:
         await ctx.reply('Music is not playing on voice channel right now')
-
         #VoiceChannelEND
 
 
 
         #FileManager/Directory
-
+#1
 @client.command(name='cd', help="changes directory\nRemember, If you go out from main dir, you can't use commands like .commands; .sbupdates; .Rayman2 etc. \n You can go back by .dir <return>")
 async def chdir(ctx, *, directory):
     try:
@@ -783,6 +780,7 @@ async def chdir(ctx, *, directory):
     except:
         await ctx.send("You can't go to this directory; make it or enter existing one")
 
+#2
 @client.command(name='dir', help='Directory commands \n.dir <mode> \n   mode: \nreturn -> Goes back to main dir\ncheck -> checks dir that you are in\nlist -> list of files and directories in your dir\nlistall -> same but easier to read')
 async def dir(ctx, *, mode):
     if mode == 'return':#
@@ -801,8 +799,8 @@ async def dir(ctx, *, mode):
         await ctx.send(f'Files in this directory:')
         for file in listdir:
             await ctx.send(file)
-        
 
+#3      
 @client.command(name='file', help='Commands for file/directory creating, deleting etc.\n.file <mode> <filename> \n    mode:\nopen -> opens file (REMEMBER to add extension (.py/.png/etc))\nmakedir -> creates directory (folder)\nchksize -> checks the size of selected file')
 async def file(ctx, mode, *,filename):
     if mode == 'open':#
@@ -825,6 +823,7 @@ async def file(ctx, mode, *,filename):
     else:
         await ctx.send('Incorrect mode/filename')
 
+#4
 @client.command(name='touch', help='Creates files with selected extension and content.\nGo to selected directory and use .touch command')
 async def makefile(ctx, name, *, content):
     directory = os.getcwd()
@@ -839,7 +838,6 @@ async def makefile(ctx, name, *, content):
         logs.close()
     except:
         await ctx.send(f'Error')
-
         #FileManager/Directory-END
 
 
@@ -879,6 +877,7 @@ Serv3
     -Port:
     -Link:
 ```""")
+    
 #2
 @client.command(name='dscserv', help='Shows link to Discord Server')
 async def dscserv(ctx):
@@ -896,7 +895,7 @@ async def addbot(ctx, version):
         #Links_and_Servers-END
 
 
-        #File sending
+        #FileSending
 #1
 @client.command(name='Teensie', help='TeensieGif')
 async def Teensie(ctx):
@@ -904,18 +903,25 @@ async def Teensie(ctx):
         await ctx.send(file=discord.File(f'{maindir}/Files/Teensie.gif'))
     except:
         await ctx.send('https://media.discordapp.net/attachments/1099605026948780143/1099605179193622570/Teensien.gif')
-        #File sending-END
+        #FileSending-END
 
+
+        #Test_Commands
+#1
+@client.command(name='test', help='test', tts=True)
+async def test(ctx):
+    await ctx.send(f'test {ctx.author.mention}')
+
+#2
 #@client.command(name='ServerKiller', help="Don't use this")
 #async def kill(ctx):
 #    while True:
 #        await ctx.send('@everyone')
 #
-        #Test_Commands
+        #Test_Commands-END
 
 
 ################################################ S L A S H   C O M M A N D S ###########################################################################################
-
 @client.tree.command(name='random', description='Shows your random number')
 async def random(interaction):
     import random
@@ -937,7 +943,7 @@ Bot name: **{client.user}**
 Version: **{ver}**
 CPU Usage: **{psutil.cpu_percent()}** (%)
 CPU Count: **{psutil.cpu_count()}**
-CPU Type: **{platform.processor()}**
+CPU Type: **{platform.processor()}ㅤ**
 V. Mem. Usage: **{psutil.virtual_memory().percent}** (%)
 Ping: **{round(client.latency * 1000)}ms**
 OS Test (Windows): **{psutil.WINDOWS}**
@@ -950,9 +956,7 @@ Localization of Bot files: **{maindir}**
 File size: **{os.path.getsize(f'{maindir}/ServerBot.py')}**
 Floppy: **{os.path.exists('/dev/fd0')}**
 ====================================================""")
-
 ################################################ S L A S H   C O M M A N D S  - E N D #######################################################################################
-
 
 try:
     client.run(os.getenv('TOKEN'))

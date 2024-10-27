@@ -72,7 +72,7 @@
             <li><u>setup.bat</u> - File that installs required python libraries (Windows)</li>
             <li><u>setup.sh</u> - Operation menu: starting the bot, installing required libraries, etc. (requires installation of the "dialog" command)</li>
             <li><u>Logs.txt</u> - File with the bot event log on the server</li>
-            <li><u>ManualSB.html</u> - Bot Manual</li>
+            <li><u>manual.html</u> - Bot Manual</li>
             <li><u>Media</u> - Directory with Default Music/Sounds</li>
             <li>
                 <u>Files</u> - Directory with required (and not) Bot files
@@ -127,10 +127,10 @@
         
         <b>none</b> -> creates a regular autorun.sh file in the <a href="#dirs">Files</a> directory. Works on systems based on Ubuntu <b>22.04</b><br><br>
 
-        <b>other value</b> -> sometimes when installing modules using pip3 an <i>externally managed pip</i>error may appear .<br>
+        <b>other value</b> -> sometimes when installing modules using pip3 an <i>externally managed pip</i> error may appear .<br>
         In this case, instead of <i>none</i>, enter the directory where the Python Virtual Environment/Venv is located.<br>
         If you have not created it yet, it is recommended to create it in the main Bot directory (ServerBot).<br><br>
-        Przykład: .mksysctl .venv/bin/python <- wykonujesz tą komendę w głównym katalogu Bota<br>
+        Example: .mksysctl .venv/bin/python <- executing command on Discord; script of the Bot runs in main directory [ServerBot]<br>
         .venv -> located in the ServerBot directory<br>
         NOTE! The bot (or rather setup.sh) is adapted to the name of a directory with a virtual environment called ".venv".<br>
         If you enter a different value, the bot may not start!<br>
@@ -247,9 +247,7 @@
                     next_update<br>
                 </td>
             </tr>
-        </table>
-        
-        
+        </table>       
     </div>
 </body>
 </html>

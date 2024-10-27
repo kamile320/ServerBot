@@ -8,4 +8,14 @@
 -better '.dir list'
 -'.mksysctlstart', '.webreq', '.pingip' commands
 -'mkvenv.sh' script (to create python virtual environment only for Discord Bot)
--better 'setup.sh' script 
+-better 'setup.sh' script
+
+
+[ServerBot Ver. 1.0.1]
+    Changelog:
+- ServerBot.py cleaned
+- Code improvoments
+- SBservice value updated (.sysctladd final message)
+- Fixed error that makes bold font wrong "applied" 
+on text in .testbot while running Bot on ARM devices
+- '.issues' command
