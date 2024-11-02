@@ -19,3 +19,13 @@
 - Fixed error that makes bold font wrong "applied" 
 on text in .testbot while running Bot on ARM devices
 - '.issues' command
+
+
+[ServerBot Ver. 1.1]
+    Changelog:
+- added '.service' command
+- added 'create' mode in '.file' command
+- setup.sh: added option 5 - create empty .env file for Bot Tokens
+- updated '.man' command (and manual.html/manualEN.html)
+- updated '.touch' command
+- updated '.testbot' command
