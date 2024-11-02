@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot - Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.8 user Manual [PL]">
+    <meta name="description" content="ServerBot 1.1 user Manual [PL]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -42,7 +42,7 @@
 
         <iframe align="right" src="https://discord.com/widget?id=1243950731954749450&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 
-        <font color="Blue">ServerBot</font> - Bot Discordowy rozwijany przez <b><u>Kamile320</u></b> umożliwiający:<br>
+        <a href="https://github.com/kamile320/ServerBot">ServerBot</a> - Bot Discordowy rozwijany przez <b><u>Kamile320</u></b> umożliwiający:<br>
         <ul>
             <li>Słuchanie lokalnej muzyki z hosta</li>
             <li>Tworzenie wątków</li>
@@ -74,6 +74,8 @@
             <li><u>Logs.txt</u> - Plik z Dziennikiem zdarzeń bota na serwerze</li>
             <li><u>manual.html</u> - Manual Bota</li>
             <li><u>Media</u> - Katalog z Domyślnymi Muzykami/Dźwiękami</li>
+            <li><u>sctl</u> - Katalog z wpisami usług (po użyciu .service prepare)</li>
+            <li><u>.env</u> - Specialny plik do przechowywania Tokenów Bota</li>
             <li>
                 <u>Files</u> - Katalog z wymaganymi (i nie) plikami Bota 
                 <ul>
@@ -210,15 +212,17 @@
                     unban<br>
                     mkshortcut<br>
                     mksysctlstart<br>
+                    service<br>
                 </td>
             </tr>
             <tr valign="top" align="center">
                 <td>
                     ====BotInfo====<br>
-                    commands<br>
+                    manual<br>
                     credits<br>
                     time<br>
                     ping<br>
+                    pingip {IPv4 address}<br>
                 </td>
 
                 <td>
@@ -226,7 +230,7 @@
                     cd {directory}<br>
                     dir {mode}<br>
                     file {mode} {filename}<br>
-                    touch<br>
+                    touch {file} {content}<br>
                 </td>
 
                 <td>

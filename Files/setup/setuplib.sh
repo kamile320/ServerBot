@@ -25,6 +25,7 @@ pip3 install requests
 pip3 install pyfiglet
 
 echo "'Externally managed' error? Run 'mkvenv.sh' script from 'Files/setup' directory to easily create one."
+sleep 1
 
 echo "Done. In Discord Server you can create Desktop shortcut using '.mkshortcut' and add ServerBot to system startup using '.mksysctlstart'"
 read -p "Type anything to continue.."

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot - Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.8 user Manual [EN]">
+    <meta name="description" content="ServerBot 1.1 user Manual [EN]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -42,7 +42,7 @@
 
         <iframe align="right" src="https://discord.com/widget?id=1243950731954749450&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 
-        <font color="Blue">ServerBot</font> - Discord Bot developed by <b><u>Kamile320</u></b> enabling:<br>
+        <a href="https://github.com/kamile320/ServerBot">ServerBot</a> - Discord Bot developed by <b><u>Kamile320</u></b> enabling:<br>
         <ul>
             <li>Listening to local music from the host</li>
             <li>Creating threads</li>
@@ -59,8 +59,8 @@
             <li><a href="#dirs">Structure of Directory</a></li>
             <li><a href="#start">First Run</a></li>
             <li><a href="#comma">Commands</a></li>
-            <li><a href="#autostart">Autostart</a></li>
-            <li><a href="#token">Tokeny</a></li>
+            <li><a href="#autostart">Autostartup</a></li>
+            <li><a href="#token">Tokens</a></li>
         </ol>
 
         <br>
@@ -74,6 +74,8 @@
             <li><u>Logs.txt</u> - File with the bot event log on the server</li>
             <li><u>manual.html</u> - Bot Manual</li>
             <li><u>Media</u> - Directory with Default Music/Sounds</li>
+            <li><u>sctl</u> - Directory with service entries (After using .service prepare)</li>
+            <li><u>.env</u> - Special file for Bot Tokens</li>
             <li>
                 <u>Files</u> - Directory with required (and not) Bot files
                 <ul>
@@ -211,15 +213,17 @@
                     unban<br>
                     mkshortcut<br>
                     mksysctlstart<br>
+                    service<br>
                 </td>
             </tr>
             <tr valign="top" align="center">
                 <td>
                     ====BotInfo====<br>
-                    commands<br>
+                    manual<br>
                     credits<br>
                     time<br>
                     ping<br>
+                    pingip {IPv4 address}<br>
                 </td>
 
                 <td>
@@ -227,7 +231,7 @@
                     cd {directory}<br>
                     dir {mode}<br>
                     file {mode} {filename}<br>
-                    touch<br>
+                    touch {file} {content}<br>
                 </td>
 
                 <td>

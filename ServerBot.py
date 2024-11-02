@@ -15,7 +15,6 @@ def os_selector():
 try:
     import discord
     from discord.ext import commands
-    #from discord import app_commands
     from discord import FFmpegPCMAudio
     from discord import *
     import datetime
@@ -43,7 +42,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux']
 choice = random.choice(status)
-ver = "1.0.1"
+ver = "1.1"
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
 
 
@@ -90,6 +89,8 @@ leave_error = "How can I left, when I'm not in VC?"
 thread_error = "Something Happened. Try to type:\n.thread {NameWithoutSpaces} {Reason}\nIf no reason, type: None"
 not_allowed = "You're not allowed to use this command."
 SBservice = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo chmod 777 -R /BotDirectory/*\nsudo systemctl enable ServerBot <== Enables automatic startup\nsudo systemctl start ServerBot <== Optional (turns on Service)\nsudo systemctl daemon-reload <== if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
+sctlerr = "Something went wrong.\n'sctl' directory with service entries exists?"
+sctlmade = "Created 'sctl' directory for systemctl service entry."
 
 #ClientEvent
 @client.event
@@ -198,7 +199,7 @@ async def gnu(ctx):
         #BotInfo
 #1
 @client.command(name='man', help='Sends HTML manual ')
-async def commands(ctx):
+async def manual(ctx):
     try:
         await ctx.send(file=discord.File('manual.html'))
     except:
@@ -254,12 +255,12 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot Ver. {ver}]
     Changelog:
-- ServerBot.py cleaned
-- Code improvoments
-- SBservice value updated (.sysctladd final message)
-- Fixed error that makes bold font wrong "applied" 
-on text in .testbot while running Bot on ARM devices
-- '.issues' command
+- added '.service' command
+- added 'create' mode in '.file' command
+- setup.sh: added option 5 - create empty .env file for Bot Tokens
+- updated '.man' command (and manual.html/manualEN.html)
+- updated '.touch' command
+- updated '.testbot' command
 
 To see older releases, find 'updates.txt' in folder 'Files' 
 """)
@@ -495,6 +496,43 @@ async def mksysctlstart(ctx, mode):
             await ctx.send(f"""```{bluescreenface}``` Unexpected problem ocurred""")
     else:
         await ctx.send(not_allowed)
+
+#11
+@client.command(name='service', help="Lists active/inactive services. To add service entry, create empty file in directory 'sctl'\nUses systemctl\n\nlist -> lists created entries in 'sctl' directory\nstatus -> lists service entries and checks if they're active\nprepare -> creates 'sctl' directory for service entries")
+async def service(ctx, mode):
+    if str(ctx.message.author.id) in admin_usr:
+        try:
+            if mode == 'list':
+                try:
+                    listdir = os.listdir(f"{maindir}/sctl")
+                    await ctx.send(f'Service Entries:')
+                    for file in listdir:
+                        await ctx.send(file)
+                except:
+                    await ctx.send(sctlerr)
+            elif mode == 'status':
+                try:
+                    await ctx.send("**Service Activity:**")
+                    listdir = os.listdir(f"{maindir}/sctl")
+                    for file in listdir:
+                        await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl is-active {file}'])}```")
+                except:
+                    await ctx.send(sctlerr)
+            elif mode == 'prepare':
+                try:
+                    os.makedirs('sctl')
+                    await ctx.send(f"{sctlmade}\nCreate empty files named as systemctl services in this directory to see if they're active/inactive.")
+                
+                    print(f"Information[Files/Directories]: {sctlmade}\n")
+                    logs = open(f'{maindir}/Logs.txt', 'a')
+                    logs.write(f"Information[Files/Directories]: {sctlmade}\n")
+                    logs.close()
+                except:
+                    await ctx.send("Can't create directory.")
+        except:
+            await ctx.send('Something went wrong.')
+    else:
+        await ctx.send(not_allowed)
         #AdminOnly-END
 
 
@@ -513,7 +551,7 @@ Version: **{ver}**
 CPU Usage: **{psutil.cpu_percent()}** (%)
 CPU Count: **{psutil.cpu_count()}**
 CPU Type: **{platform.processor()}ㅤ**
-V. Mem. Usage: **{psutil.virtual_memory().percent}** (%)
+RAM Usage: **{psutil.virtual_memory().percent}** (%)
 Ping: **{round(client.latency * 1000)}ms**
 OS Test (Windows): **{psutil.WINDOWS}**
 OS Test (MacOS): **{psutil.MACOS}**
@@ -690,7 +728,7 @@ async def disconnect(ctx):
         logs.write(f'Information[VoiceChat/Client]: User forced bot to leave from: {channel.name}\n')
         logs.close()
     else:
-        await ctx.reply("How can I left, when I'm not in VC?")
+        await ctx.reply(leave_error)
 
 #3 - play
 @client.command(name='play', help='Plays a local music file.\n.play {loc}')
@@ -820,24 +858,33 @@ async def file(ctx, mode, *,filename):
             await ctx.send(f'Size of {filename} is {size} bytes')
         except:
             await ctx.send('Error')
+    elif mode == 'create':#
+        try:
+            mkfile = open(filename, 'wt')
+            mkfile.close()
+            await ctx.send("Created new empty file. Use '.dir list' to check this")
+        except:
+            await ctx.send("Can't create file.")
     else:
         await ctx.send('Incorrect mode/filename')
 
 #4
 @client.command(name='touch', help='Creates files with selected extension and content.\nGo to selected directory and use .touch command')
 async def makefile(ctx, name, *, content):
-    directory = os.getcwd()
-    mkfile = open(name, 'wt')
-    mkfile.write(content)
-    mkfile.close()
     try:
+        directory = os.getcwd()
+        mkfile = open(name, 'wt')
+        mkfile.write(content)
+        mkfile.close()
+
+        created = f'Created file {name}, in directory {directory}.\nContent: {content}'
         await ctx.send(f'Created file {name}, in directory {directory}.')
-        print(f'Created file {name}, in directory {directory}.\nContent: {content}')
+        print(created)
         logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f'Information[Files/Directories]: Created file {name}, in directory {directory}.\nContent: {content}\n')
+        logs.write(f'Information[Files/Directories]: {created}\n')
         logs.close()
     except:
-        await ctx.send(f'Error')
+        await ctx.send(f'Something went wrong while creating file.')
         #FileManager/Directory-END
 
 
@@ -944,7 +991,7 @@ Version: **{ver}**
 CPU Usage: **{psutil.cpu_percent()}** (%)
 CPU Count: **{psutil.cpu_count()}**
 CPU Type: **{platform.processor()}ㅤ**
-V. Mem. Usage: **{psutil.virtual_memory().percent}** (%)
+RAM Usage: **{psutil.virtual_memory().percent}** (%)
 Ping: **{round(client.latency * 1000)}ms**
 OS Test (Windows): **{psutil.WINDOWS}**
 OS Test (MacOS): **{psutil.MACOS}**
