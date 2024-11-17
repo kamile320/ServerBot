@@ -42,7 +42,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux']
 choice = random.choice(status)
-ver = "1.1"
+ver = "1.1.1"
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
 
 
@@ -76,12 +76,6 @@ SBbytes = os.path.getsize('ServerBot.py')
 #Information/Errors
 fileerror = "Error: File not found or don't exist"
 filelarge = "Error: File too large"
-banned = f'Information[Server/Members]: Banned {member}\n'
-banneddsc = f'Banned {member}'
-kicked = f'Information[Server/Members]: Kicked {member}\n'
-kickeddsc = f'Kicked {member}'
-unbanned = f'Information[Server/Members]: Unbanned {member}\n'
-unbanneddsc = f'Unbanned {member}'
 copiedlog = f"Information[ServerLog]: Copied Log to: {maindir}/Files"
 ffmpeg_error = "FFmpeg is not installed or File not found"
 voice_not_connected_error = "You must be connected to VC first!"
@@ -217,7 +211,7 @@ Thanks to:
 - friends for testing Bot
 - <@632682413776175107> for some retranslations
 
-Source: ```https://github.com/kamile320```
+Source: ```https://github.com/kamile320/ServerBot```
 Used Sounds:
     WinXP/98 sounds -> files from OG OS by Microsoft
     Omegatronic Bot Micspam: ```https://www.youtube.com/watch?v=BNJxlSpBR5A```
@@ -255,12 +249,9 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot Ver. {ver}]
     Changelog:
-- added '.service' command
-- added 'create' mode in '.file' command
-- setup.sh: added option 5 - create empty .env file for Bot Tokens
-- updated '.man' command (and manual.html/manualEN.html)
-- updated '.touch' command
-- updated '.testbot' command
+- fixed .kick .ban
+- '.unban' doesn't work
+- updated '.service' command
 
 To see older releases, find 'updates.txt' in folder 'Files' 
 """)
@@ -278,10 +269,9 @@ next update
 async def issues(ctx):
     await ctx.send("""
 **Known Issues:**
-**1.** bold font wrong "applies" 
-on text in .testbot while running Bot on ARM devices
-    **Why:** 'platform.processor' nothing gives on ARM devices (tested on Raspberry Pi Zero 2)
-    **How Fixed:** Added 'ㅤ' at the end of line: 'CPU Type: **{platform.processor()}ㅤ**'
+**1.** '.unban' command doesn't work.
+    **Why:** Can't find banned user
+    **How Fixed:** Waits for fix.
 """)
         #UpdateInfo-END
 
@@ -325,9 +315,10 @@ async def copylog(ctx):
 #3
 @client.command(name='kick', help='Kicks Members')
 async def kick(ctx, member: discord.Member, *, reason=None):
+    kicked = f'Information[Server/Members]: Kicked {member}. Reason: {reason}\n'
     if str(ctx.message.author.id) in admin_usr:
         await member.kick(reason=reason)
-        await ctx.send(kickeddsc)
+        await ctx.send(f'Kicked **{member}**')
         print(kicked)
         logs = open(f'{maindir}/Logs.txt', 'a')
         logs.write(kicked)
@@ -338,9 +329,10 @@ async def kick(ctx, member: discord.Member, *, reason=None):
 #4
 @client.command(name='ban', help='Bans Members')
 async def ban(ctx, member: discord.Member, *, reason=None):
+    banned = f'Information[Server/Members]: Banned {member}. Reason: {reason}\n'
     if str(ctx.message.author.id) in admin_usr:
         await member.ban(reason=reason)
-        await ctx.send(banneddsc)
+        await ctx.send(f'Banned **{member}**')
         print(banned)
         logs = open(f'{maindir}/Logs.txt', 'a')
         logs.write(banned)
@@ -351,9 +343,10 @@ async def ban(ctx, member: discord.Member, *, reason=None):
 #5
 @client.command(name='unban', help='Unbans Members')
 async def unban(ctx, member: discord.Member, *, reason=None):
+    unbanned = f'Information[Server/Members]: Unbanned {member}. Reason: {reason}\n'
     if str(ctx.message.author.id) in admin_usr:
         await member.unban(reason=reason)
-        await ctx.send(unbanneddsc)
+        await ctx.send(f'Unbanned **{member}**')
         print(unbanned)
         logs = open(f'{maindir}/Logs.txt', 'a')
         logs.write(unbanned)
@@ -518,6 +511,14 @@ async def service(ctx, mode):
                         await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl is-active {file}'])}```")
                 except:
                     await ctx.send(sctlerr)
+            elif mode == 'status-detailed':
+                try:
+                    await ctx.send("**Service Activity:**")
+                    listdir = os.listdir(f"{maindir}/sctl")
+                    for file in listdir:
+                        await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl status {file}'])}```")
+                except:
+                    await ctx.send(sctlerr)
             elif mode == 'prepare':
                 try:
                     os.makedirs('sctl')
@@ -529,6 +530,8 @@ async def service(ctx, mode):
                     logs.close()
                 except:
                     await ctx.send("Can't create directory.")
+            else:
+                await ctx.send("Incorrect mode.")
         except:
             await ctx.send('Something went wrong.')
     else:

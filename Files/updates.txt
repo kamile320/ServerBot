@@ -29,3 +29,10 @@ on text in .testbot while running Bot on ARM devices
 - updated '.man' command (and manual.html/manualEN.html)
 - updated '.touch' command
 - updated '.testbot' command
+
+
+[ServerBot Ver. 1.1.1]
+    Changelog:
+- fixed .kick .ban
+- '.unban' doesn't work
+- updated '.service' command
