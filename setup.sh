@@ -7,10 +7,10 @@ OPTIONS=(1 "Start Bot"
          5 "Create .env file")
 
 select=$(dialog --clear \
---backtitle "ServerBot v1.1" \
+--backtitle "ServerBot v1.2" \
 --title "ServerBot Setup" \
 --menu "Select Operation:" \
-15 50 4 \
+18 52 4 \
 "${OPTIONS[@]}" \
 2>&1 >/dev/tty)
 

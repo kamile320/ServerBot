@@ -36,3 +36,13 @@ on text in .testbot while running Bot on ARM devices
 - fixed .kick .ban
 - '.unban' doesn't work
 - updated '.service' command
+
+
+[ServerBot Ver. 1.2]
+    Changelog:
+- added '.badge' command
+- updated '.convert' '.testbot' commands
+- small code improvements
+- updated 'setup.sh' 'setuplib.sh'
+- updated HTML manuals
+- updated pictures in HTML manuals

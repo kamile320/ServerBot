@@ -42,7 +42,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux']
 choice = random.choice(status)
-ver = "1.1.1"
+ver = "1.2"
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
 
 
@@ -186,6 +186,13 @@ async def gpt(ctx, *, question):
 @client.command(name='GNU+Linux', help='Richard Stallman.')
 async def gnu(ctx):
     await ctx.send("I’d just like to interject for a moment. What you’re refering to as Linux, is in fact, GNU/Linux, or as I’ve recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX.  Many computer users run a modified version of the GNU system every day, without realizing it. Through a peculiar turn of events, the version of GNU which is widely used today is often called Linux, and many of its users are not aware that it is basically the GNU system, developed by the GNU Project.  There really is a Linux, and these people are using it, but it is just a part of the system they use. Linux is the kernel: the program in the system that allocates the machine’s resources to the other programs that you run. The kernel is an essential part of an operating system, but useless by itself; it can only function in the context of a complete operating system. Linux is normally used in combination with the GNU operating system: the whole system is basically GNU with Linux added, or GNU/Linux. All the so-called Linux distributions are really distributions of GNU/Linux!")
+
+#9
+@client.command(name='badge')
+async def badge(ctx, member: discord.Member):
+    user_flags = member.public_flags.all()
+    badges = [flag.name for flag in user_flags]
+    await ctx.send(f'{member.display_name} has the following badges: {", ".join(badges)}')
         #Random/Fun-END
 
 
@@ -229,15 +236,6 @@ async def time(ctx):
 @client.command(name='ping', help='Pings the Bot')
 async def ping(ctx):
     await ctx.send(f':tennis: Pong! ({round(client.latency * 1000)}ms)')
-
-#5
-@client.command(name='pingip', help='Pings selected IPv4 address.')
-async def pingip(ctx, ip):
-    try:
-        ipaddr = ip
-        await ctx.send(f"```{subprocess.getoutput([f'ping {ipaddr} -c 1'])}```")
-    except:
-        await ctx.send('Something went wrong')
         #BotInfo-END
 
 
@@ -249,9 +247,12 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot Ver. {ver}]
     Changelog:
-- fixed .kick .ban
-- '.unban' doesn't work
-- updated '.service' command
+- added '.badge' command
+- updated '.convert' '.testbot' commands
+- small code improvements
+- updated 'setup.sh' 'setuplib.sh'
+- updated HTML manuals
+- updated pictures in HTML manuals
 
 To see older releases, find 'updates.txt' in folder 'Files' 
 """)
@@ -271,8 +272,7 @@ async def issues(ctx):
 **Known Issues:**
 **1.** '.unban' command doesn't work.
     **Why:** Can't find banned user
-    **How Fixed:** Waits for fix.
-""")
+    **How Fixed:** Waits for fix.""")
         #UpdateInfo-END
 
 
@@ -561,8 +561,8 @@ OS Test (MacOS): **{psutil.MACOS}**
 OS Test (Linux): **{psutil.LINUX}**
 OS Version: **{platform.version()}**
 OS Kernel: **{platform.system()} {platform.release()}**
-Bot Localization: **{os.getcwd()}**
-Localization of Bot files: **{maindir}**
+Bot Current Dir: **{os.getcwd()}**
+Bot Main Dir: **{maindir}**
 File size: **{os.path.getsize(f'{maindir}/ServerBot.py')}**
 Floppy: **{os.path.exists('/dev/fd0')}**
 ====================================================""")
@@ -625,7 +625,7 @@ async def hexadecimal(ctx, number):
     logs.close()
 
 #8
-@client.command(name='convert', help='Advanced Converter\n\nConverts one number to other number systems - binary, octal, decimal, hexa (hexadecimal)')
+@client.command(name='convert', help='Advanced Converter v1.0\n========================\n\nConverts one number to other number systems - binary, octal, decimal, hexa (hexadecimal)')
 async def multiconv(ctx, type, number):
     try:
         if type == 'decimal':
@@ -694,6 +694,15 @@ async def webreq(ctx, *, web):
         await ctx.send(f"Response: {rq}")
     except:
         await ctx.send("Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist? ")
+
+#11
+@client.command(name='pingip', help='Pings selected IPv4 address.')
+async def pingip(ctx, ip):
+    try:
+        ipaddr = ip
+        await ctx.send(f"```{subprocess.getoutput([f'ping {ipaddr} -c 1'])}```")
+    except:
+        await ctx.send('Something went wrong')
         #Utility_and_Diagnostics-END
 
 
@@ -831,7 +840,7 @@ async def dir(ctx, *, mode):
     elif mode == 'check':#
         await ctx.send(f'You are here: {os.getcwd()}')
 
-    elif mode == 'list':
+    elif mode == 'list':#
         listdir = os.listdir()
         await ctx.send(f'Files in this directory:\n{listdir}')
 
@@ -903,6 +912,7 @@ async def yt(ctx, YTname):
         #YouTubeLinks-END
 
 
+
         #Links_and_Servers
 #1
 @client.command(name='mcservs', help='Shows Addresses to Minecraft Servers\nYou need to enter your own addresses')
@@ -945,6 +955,7 @@ async def addbot(ctx, version):
         #Links_and_Servers-END
 
 
+
         #FileSending
 #1
 @client.command(name='Teensie', help='TeensieGif')
@@ -954,6 +965,7 @@ async def Teensie(ctx):
     except:
         await ctx.send('https://media.discordapp.net/attachments/1099605026948780143/1099605179193622570/Teensien.gif')
         #FileSending-END
+
 
 
         #Test_Commands
@@ -969,6 +981,7 @@ async def test(ctx):
 #        await ctx.send('@everyone')
 #
         #Test_Commands-END
+
 
 
 ################################################ S L A S H   C O M M A N D S ###########################################################################################
@@ -1001,8 +1014,8 @@ OS Test (MacOS): **{psutil.MACOS}**
 OS Test (Linux): **{psutil.LINUX}**
 OS Version: **{platform.version()}**
 OS Kernel: **{platform.system()} {platform.release()}**
-Bot Localization: **{os.getcwd()}**
-Localization of Bot files: **{maindir}**
+Bot Current Dir: **{os.getcwd()}**
+Bot Main Dir: **{maindir}**
 File size: **{os.path.getsize(f'{maindir}/ServerBot.py')}**
 Floppy: **{os.path.exists('/dev/fd0')}**
 ====================================================""")
