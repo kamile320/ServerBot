@@ -46,3 +46,11 @@ on text in .testbot while running Bot on ARM devices
 - updated 'setup.sh' 'setuplib.sh'
 - updated HTML manuals
 - updated pictures in HTML manuals
+
+
+[ServerBot Ver. 1.3]
+    Changelog:
+- removed SandvichBlues.ogg
+- renamed .man -> .manual
+- updated .copylog .ShutDown .gpt .rebuild commands and more
+- commands that uses other files are now usable in every directory

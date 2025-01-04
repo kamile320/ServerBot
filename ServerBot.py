@@ -42,7 +42,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux']
 choice = random.choice(status)
-ver = "1.2"
+ver = "1.3"
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
 
 
@@ -89,7 +89,7 @@ sctlmade = "Created 'sctl' directory for systemctl service entry."
 #ClientEvent
 @client.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    print('Logged as {0.user}'.format(client))
     print(f'Welcome in ServerBot Version {ver}')
     #slash_command_sync
     try:
@@ -176,11 +176,13 @@ async def gpt(ctx, *, question):
         )
         reply_content = completion.choices[0].message.content
         await ctx.reply(reply_content)
-    except:
+    except Exception as error:
         await ctx.reply("""Something went wrong, possible causes:
 1. Bad Token - contact with admin to type new one
 2. Too long response for Discord
 3. Good Token but expired/not working""")
+        await ctx.send(f"Exception:\n{error}")
+        print(error)
         
 #8
 @client.command(name='GNU+Linux', help='Richard Stallman.')
@@ -199,10 +201,10 @@ async def badge(ctx, member: discord.Member):
 
         #BotInfo
 #1
-@client.command(name='man', help='Sends HTML manual ')
+@client.command(name='manual', help='Sends HTML manual ')
 async def manual(ctx):
     try:
-        await ctx.send(file=discord.File('manual.html'))
+        await ctx.send(file=discord.File(f'{maindir}/manual.html'))
     except:
         await ctx.send(f"Can't open manual.html")
 
@@ -223,7 +225,6 @@ Used Sounds:
     WinXP/98 sounds -> files from OG OS by Microsoft
     Omegatronic Bot Micspam: ```https://www.youtube.com/watch?v=BNJxlSpBR5A```
     TF2 upgrade station: ```https://youtube.com/watch?v=Q7eJg7hRvqE```
-    Sandvich Blues [by: John Lowrie]: ```https://www.youtube.com/watch?v=7SfsJ0X-2fk```
 """)
 
 #3
@@ -247,12 +248,10 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot Ver. {ver}]
     Changelog:
-- added '.badge' command
-- updated '.convert' '.testbot' commands
-- small code improvements
-- updated 'setup.sh' 'setuplib.sh'
-- updated HTML manuals
-- updated pictures in HTML manuals
+- removed SandvichBlues.ogg
+- renamed .man -> .manual
+- updated .copylog .ShutDown .gpt .rebuild commands and more
+- commands that uses other files are now usable in every directory
 
 To see older releases, find 'updates.txt' in folder 'Files' 
 """)
@@ -262,7 +261,8 @@ To see older releases, find 'updates.txt' in folder 'Files'
 async def next_update(ctx):
     await ctx.send("""
 next update
-[n/a]
+[v1.4]
+- commands playing music from YouTube URL's
 """)
     
 #3
@@ -282,10 +282,19 @@ async def issues(ctx):
 @client.command(name='ShutDown', help='Turns Off the Bot')
 async def ShutDown(ctx):
     if str(ctx.message.author.id) in admin_usr:
-        src_path = fr"{maindir}/Logs.txt"
-        dst_path = fr"{maindir}/Files/Logs.txt"
-        shutil.copy(src_path, dst_path)
-        logs.close()
+        print("Information[ShutDown]: Started turning off the Bot")
+        try:
+            print("Information[ShutDown]: Saving Logs.txt...")
+            src = open(f'{maindir}/Logs.txt', 'r')
+            logs = open(f'{maindir}/Files/Logs.txt', 'a')
+            append = f"\n\n{src.read()}"
+            logs.write(append)
+            logs.close()
+            src.close()
+            print("Logs.txt saved successfully.")
+        except:
+            print("Error occurred while saving log.")
+        print("Information[ShutDown]: Shutting Down...")
         await ctx.send(f'ClosingBot.')
         await asyncio.sleep(1)
         await ctx.send(f'ClosingBot..')
@@ -297,18 +306,42 @@ async def ShutDown(ctx):
         await ctx.reply(not_allowed)
 
 #2
-@client.command(name='copylog', help='Copies Bot Log file\n')
-async def copylog(ctx):
+@client.command(name='copylog', help='Copies Bot Log file\nappend -> adds new value to older in Files/Logs.txt\nreplace -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs')
+async def copylog(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
-        try:
-            src_path = fr"{maindir}/Logs.txt"
-            dst_path = fr"{maindir}/Files/Logs.txt"
-            shutil.copy(src_path, dst_path)
-            print(copiedlog)
-            await ctx.send(
-                f'Copied log to main folder ({dst_path})\nREMEMBER!\nAfter copying Log, you must save this file to another directory; after second use of copylog, file will be reused for new value')
-        except:
-            await ctx.send("Error occurred with copying log. Maybe folder doesn't exist?")
+        if mode == 'append':
+            try:
+                src = open(f'{maindir}/Logs.txt', 'r')
+                logs = open(f'{maindir}/Files/Logs.txt', 'a')
+                append = f"\n\n{src.read()}"
+                logs.write(append)
+                logs.close()
+                src.close()
+                await ctx.send('Appending logs to Files/Logs.txt succeed.')
+            except:
+                await ctx.send(f"Error occurred while copying log.")
+        elif mode == 'replace':
+            try:
+                src_path = fr"{maindir}/Logs.txt"
+                dst_path = fr"{maindir}/Files/Logs.txt"
+                shutil.copy(src_path, dst_path)
+                print(copiedlog)
+                await ctx.send(f'Successfully replaced Files/Logs.txt content.')
+            except:
+                await ctx.send("Error occurred while copying log. Maybe folder doesn't exist?")
+        elif mode == 'clearall':
+            try:
+                l1 = open(f"{maindir}/Logs.txt", 'w')
+                l1.write("")
+                l1.close()
+                l2 = open(f"{maindir}/Files/Logs.txt", 'w')
+                l2.write("")
+                l2.close()
+                await ctx.send("Successfully cleared Logs.")
+            except:
+                await ctx.send("Can't clear logs.")
+        else:
+            await ctx.send("Wrong copylog mode.")        
     else:
         await ctx.reply(not_allowed)
 
@@ -366,21 +399,27 @@ async def bash(ctx, file):
         await ctx.reply(not_allowed)
 
 #7
-@client.command(name='rebuild', help='Rebuilds files')
+@client.command(name='rebuild', help='Rebuilds files and directories')
 async def rebuild(ctx):
     if str(ctx.message.author.id) in admin_usr:
         await ctx.send('Trying to rebuild files...')
         try:
+            os.chdir(maindir)
+            logs1 = open('Logs.txt', 'w')
+            logs1.close()
+
             os.makedirs(f'{maindir}/Files')
             os.chdir(f'{maindir}/Files')
             updates = open('updates.txt', 'w')
             updates.close()
             logs2 = open('Logs.txt', 'w')
             logs2.close()
+            
+            os.makedirs(f'{maindir}/setup')
             os.chdir(maindir)
             await ctx.send("Success.\nRebuilded Files with no content")
         except:
-            await ctx.send("Can't rebuild files. Contact with Admin")
+            await ctx.send("Can't rebuild files.")
     else:
         await ctx.reply(not_allowed)
 
@@ -709,7 +748,7 @@ async def pingip(ctx, ip):
 
         #VoiceChannel
 #1 - connect
-@client.command(pass_context=True, name='join', help='Join VC')
+@client.command(pass_context=True, name='join', help='Join Voice Channel')
 async def connect(ctx):
     if (ctx.author.voice):
         channel = ctx.message.author.voice.channel
@@ -725,7 +764,7 @@ async def connect(ctx):
         await ctx.reply(voice_not_connected_error)
 
 #2 - disconnect
-@client.command(pass_context=True, name='leave', help='Leaves VC')
+@client.command(pass_context=True, name='leave', help='Leave Voice Channel')
 async def disconnect(ctx):
     if (ctx.voice_client):
         channel = ctx.message.author.voice.channel
@@ -743,7 +782,7 @@ async def disconnect(ctx):
         await ctx.reply(leave_error)
 
 #3 - play
-@client.command(name='play', help='Plays a local music file.\n.play {loc}')
+@client.command(name='play', help="Play a local music file.\n.play {filename*}\n*With complete directory path when file isn't in maindir")
 async def play(ctx, *, name):
     try:
         try:
@@ -782,7 +821,7 @@ async def stop(ctx):
         await ctx.reply('Music is not playing right now')
 
 #5
-@client.command(name='waiting', help="Say someone that you're waiting!")
+@client.command(name='waiting', help="Say everyone that you're waiting!")
 async def wait(ctx):
     try:
         voice = ctx.guild.voice_client
@@ -822,7 +861,7 @@ async def pause(ctx):
 
         #FileManager/Directory
 #1
-@client.command(name='cd', help="changes directory\nRemember, If you go out from main dir, you can't use commands like .commands; .sbupdates; .Rayman2 etc. \n You can go back by .dir <return>")
+@client.command(name='cd', help="Changes directory\nYou can go back by .dir <return>")
 async def chdir(ctx, *, directory):
     try:
         os.chdir(directory)

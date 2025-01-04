@@ -7,7 +7,7 @@ OPTIONS=(1 "Start Bot"
          5 "Create .env file")
 
 select=$(dialog --clear \
---backtitle "ServerBot v1.2" \
+--backtitle "ServerBot v1.3" \
 --title "ServerBot Setup" \
 --menu "Select Operation:" \
 18 52 4 \
