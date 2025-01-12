@@ -27,6 +27,7 @@ try:
     import openai
     import pyfiglet
     import platform
+    import yt_dlp as youtube_dl
     from dotenv import load_dotenv
 except:
     print("Error in importing Library's. Trying to install it and update pip3")
@@ -37,12 +38,16 @@ except:
 baner = pyfiglet.figlet_format("ServerBot")
 print(baner)
 bluescreenface = pyfiglet.figlet_format(": (")
+#YT_DLP
+yt_dl_opts = {'format': 'bestaudio/best'}
+ytdl = youtube_dl.YoutubeDL(yt_dl_opts)
+ffmpeg_options = {'options': "-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2"}
 #Intents
 intents = discord.Intents.default()
 intents.message_content = True
 status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux']
 choice = random.choice(status)
-ver = "1.3"
+ver = "1.4"
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
 
 
@@ -76,7 +81,7 @@ SBbytes = os.path.getsize('ServerBot.py')
 #Information/Errors
 fileerror = "Error: File not found or don't exist"
 filelarge = "Error: File too large"
-copiedlog = f"Information[ServerLog]: Copied Log to: {maindir}/Files"
+copiedlog = f"Information[ServerLog]: Copied Log to {maindir}/Files"
 ffmpeg_error = "FFmpeg is not installed or File not found"
 voice_not_connected_error = "You must be connected to VC first!"
 leave_error = "How can I left, when I'm not in VC?"
@@ -89,7 +94,7 @@ sctlmade = "Created 'sctl' directory for systemctl service entry."
 #ClientEvent
 @client.event
 async def on_ready():
-    print('Logged as {0.user}'.format(client))
+    print(f'Logged as {client.user}')
     print(f'Welcome in ServerBot Version {ver}')
     #slash_command_sync
     try:
@@ -128,11 +133,14 @@ async def hello_there(ctx):
 
         #Random/Fun
 #1
-@client.command(name='random', help='Shows your random number')
-async def random(ctx):
+@client.command(name='random', help='Shows your random number.\nType .random [min] [max]')
+async def random_num(ctx, min = int(), max = int()):
     import random
-    randomn = random.randrange(-1, 999999)
-    await ctx.send(f'This is your random number: {randomn}')
+    try:
+        randomn = random.randrange(min, max)
+        await ctx.reply(f'This is your random number: {randomn}')
+    except:
+        await ctx.reply(f'Something went wrong. Did you typed correct min/max values?')
 
 #2
 @client.command(name='essa', help='Check your "essa"')
@@ -140,9 +148,9 @@ async def essa(ctx):
     import random
     losessa = random.randrange(101)
     await ctx.send(f'Twój dzisiejszy poziom essy: {losessa}%')
-    print(f'Information[random/essa/fun]: Someone has {losessa}% of essa')
+    print(f'Information[Random/Fun]: Someone has {losessa}% of essa')
     logs = open(f'{maindir}/Logs.txt', 'a')
-    logs.write(f'Information[random/essa/fun]: Someone has {losessa}% of essa\n')
+    logs.write(f'Information[Random/Fun]: Someone has {losessa}% of essa\n')
     logs.close()
 
 #3
@@ -194,7 +202,7 @@ async def gnu(ctx):
 async def badge(ctx, member: discord.Member):
     user_flags = member.public_flags.all()
     badges = [flag.name for flag in user_flags]
-    await ctx.send(f'{member.display_name} has the following badges: {", ".join(badges)}')
+    await ctx.send(f'{member} has the following badges: {", ".join(badges)}')
         #Random/Fun-END
 
 
@@ -237,35 +245,30 @@ async def time(ctx):
 @client.command(name='ping', help='Pings the Bot')
 async def ping(ctx):
     await ctx.send(f':tennis: Pong! ({round(client.latency * 1000)}ms)')
-        #BotInfo-END
-
-
-
-        #UpdateInfo
-#1
+        
+#5
 @client.command(name='newest_update', help='Shows last changes of Bot functions/Changelog')
 async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot Ver. {ver}]
     Changelog:
-- removed SandvichBlues.ogg
-- renamed .man -> .manual
-- updated .copylog .ShutDown .gpt .rebuild commands and more
-- commands that uses other files are now usable in every directory
+- updated .random command and more
+- /random still in old version
+- code improvements
+- added .ytplay command
 
 To see older releases, find 'updates.txt' in folder 'Files' 
 """)
 
-#2
+#6
 @client.command(name='next_update', help='Shows future functions/updates')
 async def next_update(ctx):
     await ctx.send("""
 next update
-[v1.4]
-- commands playing music from YouTube URL's
+[N/A]
 """)
     
-#3
+#7
 @client.command(name='issues', help='Known Issues of Bot')
 async def issues(ctx):
     await ctx.send("""
@@ -273,7 +276,7 @@ async def issues(ctx):
 **1.** '.unban' command doesn't work.
     **Why:** Can't find banned user
     **How Fixed:** Waits for fix.""")
-        #UpdateInfo-END
+        #BotInfo-END
 
 
 
@@ -424,7 +427,7 @@ async def rebuild(ctx):
         await ctx.reply(not_allowed)
 
 #8
-@client.command(name="mkshortcut", help="Creates a shortcut on Host Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of Desktop Folder (Desktop/Pulpit etc.)]")
+@client.command(name="mkshortcut", help="Creates a shortcut on your Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of your Desktop Folder (Desktop/Pulpit etc.)]")
 async def shrtct(ctx, desk):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -726,7 +729,7 @@ async def thread(ctx, name, *, reason):
         await ctx.send(thread_error)
 
 #10
-@client.command(name="webreq", help="Sends websites request codes")
+@client.command(name="webreq", help="Sends website request code")
 async def webreq(ctx, *, web):
     try:
         rq = requests.get(web)
@@ -756,9 +759,9 @@ async def connect(ctx):
         source = FFmpegPCMAudio(f'{maindir}/Media/Windows XP - Autostart.wav')
         player = voice.play(source)
         await ctx.reply(f'Connected to {channel.name}')
-        print(f'Information[VoiceChat/Client]: Joined to {channel.name}')
+        print(f'Information[VoiceChat]: Joined to {channel.name}')
         logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f'Information[VoiceChat/Client]: Joined to {channel.name}\n')
+        logs.write(f'Information[VoiceChat]: Joined to {channel.name}\n')
         logs.close()
     else:
         await ctx.reply(voice_not_connected_error)
@@ -774,9 +777,9 @@ async def disconnect(ctx):
         await asyncio.sleep(3)
         await ctx.guild.voice_client.disconnect()
         await ctx.reply("Left from VC")
-        print(f'Information[VoiceChat/Client]: User forced bot to leave from: {channel.name}')
+        print(f'Information[VoiceChat]: User forced bot to leave from: {channel.name}')
         logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f'Information[VoiceChat/Client]: User forced bot to leave from: {channel.name}\n')
+        logs.write(f'Information[VoiceChat]: User forced bot to leave from: {channel.name}\n')
         logs.close()
     else:
         await ctx.reply(leave_error)
@@ -788,14 +791,14 @@ async def play(ctx, *, name):
         try:
             channel = ctx.message.author.voice.channel
             voice = await channel.connect()
-            print(f'Information[VoiceChat/Client]: Joined to {channel.name}')
+            print(f'Information[VoiceChat]: Joined to {channel.name}')
             logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(f'Information[VoiceChat/Client]: Joined to {channel.name}\n')
+            logs.write(f'Information[VoiceChat]: Joined to {channel.name}\n')
             logs.close()
         except:
-            print(f"Information[VoiceChat/Client]: Can't join to {channel.name}. Already joined?")
+            print(f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?")
             logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(f"Information[VoiceChat/Client]: Can't join to {channel.name}. Already joined?\n")
+            logs.write(f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?\n")
             logs.close()
         try:
             exist = os.path.exists(name)
@@ -805,13 +808,42 @@ async def play(ctx, *, name):
                 player = voice.play(source)
                 await ctx.reply(f'Playing music...\nSource: {name}')
             else:
-                await ctx.reply("Can't play music.\nSource exist?")
+                await ctx.reply("Can't find source file.")
         except:
             await ctx.reply("Can't play music.\nSource exist?")
     except:
         await ctx.reply(voice_not_connected_error)
 
-#4 - stop
+#4 - ytplay
+@client.command(name='ytplay', help="Play music from YouTube URL\n.ytplay {URL}")
+async def ytplay(ctx, *, url):
+    try:
+        try:
+            channel = ctx.message.author.voice.channel
+            voice = await channel.connect()
+            print(f'Information[VoiceChat]: Joined to {channel.name}')
+            logs = open(f'{maindir}/Logs.txt', 'a')
+            logs.write(f'Information[VoiceChat]: Joined to {channel.name}\n')
+            logs.close()
+        except:
+            print(f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?")
+            logs = open(f'{maindir}/Logs.txt', 'a')
+            logs.write(f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?\n")
+            logs.close()
+        try:
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
+            song = data['url']
+            voice = ctx.guild.voice_client
+            player = discord.FFmpegPCMAudio(song, **ffmpeg_options)
+            voice.play(player)
+            await ctx.send(f'Playing from source: ```{url}```')
+        except:
+            await ctx.reply("Can't play music.\nSource exist?")
+    except:
+        await ctx.reply(voice_not_connected_error)
+
+#5 - stop
 @client.command(pass_context=True, name='stop', help='Stops playing audio')
 async def stop(ctx):
     voice = ctx.guild.voice_client
@@ -820,7 +852,18 @@ async def stop(ctx):
     else:
         await ctx.reply('Music is not playing right now')
 
-#5
+#6
+@client.command(pass_context = True, name='pause', help='Pause/Resume command')
+async def pause(ctx):
+    voice = ctx.guild.voice_client
+    if voice.is_playing():
+        voice.pause()
+    elif voice.is_paused():
+        voice.resume()
+    else:
+        await ctx.reply('Music is not playing on voice channel right now')
+
+#7
 @client.command(name='waiting', help="Say everyone that you're waiting!")
 async def wait(ctx):
     try:
@@ -833,7 +876,7 @@ async def wait(ctx):
     except:
         await ctx.reply(ffmpeg_error)
 
-#6
+#8
 @client.command(name='micspam')
 async def micspam(ctx):
     try:
@@ -844,17 +887,6 @@ async def micspam(ctx):
         await ctx.reply(voice_not_connected_error)
     except:
         await ctx.reply(ffmpeg_error)
-
-#7
-@client.command(pass_context = True, name='pause', help='Pause/Resume command')
-async def pause(ctx):
-    voice = ctx.guild.voice_client
-    if voice.is_playing():
-        voice.pause()
-    elif voice.is_paused():
-        voice.resume()
-    else:
-        await ctx.reply('Music is not playing on voice channel right now')
         #VoiceChannelEND
 
 
@@ -1024,16 +1056,19 @@ async def test(ctx):
 
 
 ################################################ S L A S H   C O M M A N D S ###########################################################################################
+#1
 @client.tree.command(name='random', description='Shows your random number')
 async def random(interaction):
     import random
     randomn = random.randrange(-1, 999999)
     await interaction.response.send_message(f'This is your random number: {randomn}')
 
+#2
 @client.tree.command(name='ping', description='Pings the Bot')
 async def ping(interaction):
     await interaction.response.send_message(f':tennis: Pong! ({round(client.latency * 1000)}ms)')
 
+#3
 @client.tree.command(name='testbot', description='Tests some functions of Bot')
 async def testbot(interaction):
     teraz = datetime.datetime.now()

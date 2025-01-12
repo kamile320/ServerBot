@@ -14,6 +14,7 @@ pip install asyncio
 pip install openai==0.28.1
 pip install python-dotenv
 pip install requests
+pip install yt_dlp
 
 pause
 

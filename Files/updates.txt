@@ -54,3 +54,11 @@ on text in .testbot while running Bot on ARM devices
 - renamed .man -> .manual
 - updated .copylog .ShutDown .gpt .rebuild commands and more
 - commands that uses other files are now usable in every directory
+
+
+[ServerBot Ver. 1.4]
+    Changelog:
+- updated .random command and more
+- /random still in old version
+- code improvements
+- added .ytplay command

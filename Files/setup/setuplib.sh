@@ -23,6 +23,7 @@ pip3 install ffmpeg
 pip3 install python-dotenv
 pip3 install requests
 pip3 install pyfiglet
+pip3 install yt_dlp
 
 echo "'Externally managed' error? Run 'mkvenv.sh' script from 'Files/setup' directory to easily create one."
 sleep 1
