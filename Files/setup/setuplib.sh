@@ -10,8 +10,8 @@ echo "If you are not in pip3 venv, you must create a new one (Not Ubuntu 22.04 b
 sleep 1
 read -p "Type anything to continue. (Need root privileges)"
 
-sudo apt install python3-pip
-sudo apt install ffmpeg
+sudo apt update -y
+sudo apt install -y python3-pip ffmpeg git venv
 
 pip3 install discord
 pip3 install discord.py[voice]

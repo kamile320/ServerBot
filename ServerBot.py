@@ -1,14 +1,25 @@
 import subprocess
+import os
+
+ver = "1.5"
 
 def os_selector():
-    print("Select Operating System: ")
-    print("1 - Linux")
-    print("2 - Windows")
+    print(f"====ServerBot v{ver} Recovery Menu====")
+    print("""Select Method: 
+1 - Linux
+2 - Windows
+3 - Setup.sh   
+4 - Exit
+""")
     sel = int(input(">>> "))
     if sel == 1:
-        subprocess.run(["bash", 'setup.sh'])
+        subprocess.run(["bash", 'Files/setup/setuplib.sh'])
     elif sel == 2:
         subprocess.run(['setup.bat'], shell=True)
+    elif sel == 3:
+        subprocess.run(['bash', 'setup.sh'])
+    elif sel == 4:
+        exit()
     else:
         print('Failed to run Script. Aborting Install')
 
@@ -19,7 +30,6 @@ try:
     from discord import *
     import datetime
     import psutil
-    import os
     import requests
     import asyncio
     import random
@@ -29,15 +39,15 @@ try:
     import platform
     import yt_dlp as youtube_dl
     from dotenv import load_dotenv
-except:
-    print("Error in importing Library's. Trying to install it and update pip3")
+except Exception as exc:
+    print(f"Error in importing Library's. Trying to install it and update pip3\nException: {exc}\n")
     os_selector()
 
 
 #Baner
 baner = pyfiglet.figlet_format("ServerBot")
-print(baner)
 bluescreenface = pyfiglet.figlet_format(": (")
+print(baner)
 #YT_DLP
 yt_dl_opts = {'format': 'bestaudio/best'}
 ytdl = youtube_dl.YoutubeDL(yt_dl_opts)
@@ -45,9 +55,8 @@ ffmpeg_options = {'options': "-vn -reconnect 1 -reconnect_streamed 1 -reconnect_
 #Intents
 intents = discord.Intents.default()
 intents.message_content = True
-status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux']
+status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}']
 choice = random.choice(status)
-ver = "1.4"
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
 
 
@@ -56,9 +65,10 @@ try:
     ####### token/intents/etc ##########
     openai.api_key = os.getenv('OpenAI')
     admin_usr = os.getenv('admin_usr')
+    mod_usr = os.getenv('mod_usr')
     ####################################
 except:
-    print("CAN'T LOAD .env FILE!\nCreate file named '.env' with content:\nTOKEN=''\nOpenAI=''\nadmin_usr=['','']")
+    print("CAN'T LOAD .env FILE!\nCreate .env file using setup.sh")
 
 
 #Log_File
@@ -90,12 +100,14 @@ not_allowed = "You're not allowed to use this command."
 SBservice = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo chmod 777 -R /BotDirectory/*\nsudo systemctl enable ServerBot <== Enables automatic startup\nsudo systemctl start ServerBot <== Optional (turns on Service)\nsudo systemctl daemon-reload <== if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
 sctlerr = "Something went wrong.\n'sctl' directory with service entries exists?"
 sctlmade = "Created 'sctl' directory for systemctl service entry."
+badsite = "Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist? "
+
 
 #ClientEvent
 @client.event
 async def on_ready():
     print(f'Logged as {client.user}')
-    print(f'Welcome in ServerBot Version {ver}')
+    print(f'Welcome in ServerBot v{ver}')
     #slash_command_sync
     try:
         syncd = await client.tree.sync()
@@ -252,10 +264,14 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot Ver. {ver}]
     Changelog:
-- updated .random command and more
-- /random still in old version
-- code improvements
-- added .ytplay command
+- Big code changes 
+- Removed .bytes command
+- Updated SB recovery menu
+- More things uses .env file for better value input
+- Added mod_usr for commands that should be used 
+  by moderators and admins, not regular users
+- Updated .request command and more
+- Updated setup.sh
 
 To see older releases, find 'updates.txt' in folder 'Files' 
 """)
@@ -264,8 +280,12 @@ To see older releases, find 'updates.txt' in folder 'Files'
 @client.command(name='next_update', help='Shows future functions/updates')
 async def next_update(ctx):
     await ctx.send("""
-next update
-[N/A]
+Ideas for Future Updates
+- Better Logs
+- Better setup.sh
+- More slash commands
+- Better .dir list
+- .service command that uses .env file
 """)
     
 #7
@@ -349,48 +369,6 @@ async def copylog(ctx, mode):
         await ctx.reply(not_allowed)
 
 #3
-@client.command(name='kick', help='Kicks Members')
-async def kick(ctx, member: discord.Member, *, reason=None):
-    kicked = f'Information[Server/Members]: Kicked {member}. Reason: {reason}\n'
-    if str(ctx.message.author.id) in admin_usr:
-        await member.kick(reason=reason)
-        await ctx.send(f'Kicked **{member}**')
-        print(kicked)
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(kicked)
-        logs.close()
-    else:
-        await ctx.reply(not_allowed)
-
-#4
-@client.command(name='ban', help='Bans Members')
-async def ban(ctx, member: discord.Member, *, reason=None):
-    banned = f'Information[Server/Members]: Banned {member}. Reason: {reason}\n'
-    if str(ctx.message.author.id) in admin_usr:
-        await member.ban(reason=reason)
-        await ctx.send(f'Banned **{member}**')
-        print(banned)
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(banned)
-        logs.close()
-    else:
-        await ctx.reply(not_allowed)
-
-#5
-@client.command(name='unban', help='Unbans Members')
-async def unban(ctx, member: discord.Member, *, reason=None):
-    unbanned = f'Information[Server/Members]: Unbanned {member}. Reason: {reason}\n'
-    if str(ctx.message.author.id) in admin_usr:
-        await member.unban(reason=reason)
-        await ctx.send(f'Unbanned **{member}**')
-        print(unbanned)
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(unbanned)
-        logs.close()
-    else:
-        await ctx.reply(not_allowed)
-
-#6
 @client.command(name="bash", help="Runs Bash like scripts on hosting computer (Linux only)\nUses .sh extensions\nBest to work with .touch command")
 async def bash(ctx, file):
     if str(ctx.message.author.id) in admin_usr:
@@ -401,7 +379,7 @@ async def bash(ctx, file):
     else:
         await ctx.reply(not_allowed)
 
-#7
+#4
 @client.command(name='rebuild', help='Rebuilds files and directories')
 async def rebuild(ctx):
     if str(ctx.message.author.id) in admin_usr:
@@ -426,7 +404,7 @@ async def rebuild(ctx):
     else:
         await ctx.reply(not_allowed)
 
-#8
+#5
 @client.command(name="mkshortcut", help="Creates a shortcut on your Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of your Desktop Folder (Desktop/Pulpit etc.)]")
 async def shrtct(ctx, desk):
     if str(ctx.message.author.id) in admin_usr:
@@ -449,18 +427,7 @@ async def shrtct(ctx, desk):
     else:
         await ctx.send(not_allowed)
 
-#9
-@client.command(name="disks", help="Shows mounted disks with free disk space")
-async def disk(ctx):
-    if str(ctx.message.author.id) in admin_usr:
-        try:
-            await ctx.send(f"```{subprocess.getoutput(['df -h'])}```")
-        except:
-            await ctx.send('Something went wrong\nDo you use Linux?')
-    else:
-        await ctx.send(not_allowed)
-
-#10
+#6
 @client.command(name="mksysctlstart", help="Adds ServerBot to systemctl to start with system startup (Bot needs to be running as root)\nMode:\n'none' -> creates default autorun entry (python3)\n'your entry' -> you need enter pwd of your python virtual environment (eg. .venv/bin/python)\n.venv file in this example hides in ServerBot main directory)\nIt's recommended to save bot files into main (root) directory (/ServerBot) with full permissions (chmod 777 recursive). Without full permissions to bot files systemctl startup will not work.")
 async def mksysctlstart(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
@@ -532,7 +499,7 @@ async def mksysctlstart(ctx, mode):
     else:
         await ctx.send(not_allowed)
 
-#11
+#7
 @client.command(name='service', help="Lists active/inactive services. To add service entry, create empty file in directory 'sctl'\nUses systemctl\n\nlist -> lists created entries in 'sctl' directory\nstatus -> lists service entries and checks if they're active\nprepare -> creates 'sctl' directory for service entries")
 async def service(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
@@ -578,16 +545,53 @@ async def service(ctx, mode):
             await ctx.send('Something went wrong.')
     else:
         await ctx.send(not_allowed)
+
+#8
+@client.command(name="webreq", help="Sends website request codes and headers\n.webreq {get/getheader} {website}")
+async def webreq(ctx, mode, *, web):
+    if str(ctx.message.author.id) in admin_usr:
+        try:
+            if mode == 'get':
+                try:
+                    rq = requests.get(web)
+                    await ctx.reply(f"Response: {rq.status_code}")
+                except:
+                    await ctx.reply(badsite)
+            elif mode == 'getheader':
+                try:
+                    rq = requests.get(web)
+                    await ctx.reply(f"Website Header:\n{rq.headers}")
+                except:
+                    await ctx.reply(badsite)
+            else:
+                await ctx.reply('')
+        except:
+            await ctx.reply("Wrong mode.")
+    else:
+        await ctx.reply(not_allowed)
+
+#9
+@client.command(name='pingip', help='Pings selected IPv4 address.')
+async def pingip(ctx, ip):
+    if str(ctx.message.author.id) in admin_usr:
+        try:
+            ipaddr = ip
+            await ctx.send(f"```{subprocess.getoutput([f'ping {ipaddr} -c 1'])}```")
+        except:
+            await ctx.send('Something went wrong')
+    else:
+        await ctx.send(not_allowed)
         #AdminOnly-END
 
 
 
-        #Utility_and_Diagnostics
+        #ModeratorOnly
 #1
 @client.command(name='testbot', help='Tests some functions of Host and Bot')
 async def testbot(ctx):
-    teraz = datetime.datetime.now()
-    await ctx.send(f"""
+    if str(ctx.message.author.id) in mod_usr:
+        teraz = datetime.datetime.now()
+        await ctx.send(f"""
 ***S e r v e r  B o t***  *test*:
 ====================================================
 Time: **{teraz.strftime('%d.%m.%Y, %H:%M:%S')}**
@@ -608,65 +612,108 @@ Bot Main Dir: **{maindir}**
 File size: **{os.path.getsize(f'{maindir}/ServerBot.py')}**
 Floppy: **{os.path.exists('/dev/fd0')}**
 ====================================================""")
+    else:
+        await ctx.send(not_allowed)
 
 #2
 @client.command(name='testos', help='Check OS of server with running bot. \n .testos <os name> \n eg. .testos linux/windows/macos')
 async def testos(ctx, operatingsys):
-    if operatingsys == 'linux':
-        await ctx.send(f'Linux: {psutil.LINUX}')
-    elif operatingsys == 'windows':
-        await ctx.send(f'Windows: {psutil.WINDOWS}')
-    elif operatingsys == 'macos':
-        await ctx.send(f'MacOS: {psutil.MACOS}')
+    if str(ctx.message.author.id) in mod_usr:
+        if operatingsys == 'linux':
+            await ctx.send(f'Linux: {psutil.LINUX}')
+        elif operatingsys == 'windows':
+            await ctx.send(f'Windows: {psutil.WINDOWS}')
+        elif operatingsys == 'macos':
+            await ctx.send(f'MacOS: {psutil.MACOS}')
+        else:
+            await ctx.send(f'Please enter windows/linux/macos')
     else:
-        await ctx.send(f'Please enter windows/linux/macos')
+        await ctx.send(not_allowed)
 
 #3
-@client.command(name='bytes', help='Shows size of main code')
-async def bytes(ctx):
-    await ctx.send(f'{SBbytes} bytes of code!')
+@client.command(name="disks", help="Shows mounted disks with free disk space")
+async def disk(ctx):
+    if str(ctx.message.author.id) in mod_usr:
+        try:
+            await ctx.send(f"```{subprocess.getoutput(['df -h'])}```")
+        except:
+            await ctx.send('Something went wrong\nDo you use Linux?')
+    else:
+        await ctx.send(not_allowed)
 
 #4
 @client.command(name='delete', help='Deletes set amount of messages (eg. .delete 6 => will delete 6 messages)')
 async def delete(ctx, amount: int = 0):
-    deleted = await ctx.channel.purge(limit=amount)
-    await ctx.channel.send(f'Deleted {len(deleted)} message(s)')
-    print(f"Information: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}")
-    logs = open(f'{maindir}/Logs.txt', 'a')
-    logs.write(f"Information: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}\n")
-    logs.close()
+    if str(ctx.message.author.id) in mod_usr:
+        deleted = await ctx.channel.purge(limit=amount)
+        await ctx.channel.send(f'Deleted {len(deleted)} message(s)')
+        print(f"Information: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}")
+        logs = open(f'{maindir}/Logs.txt', 'a')
+        logs.write(f"Information: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}\n")
+        logs.close()
+    else:
+        await ctx.reply(not_allowed)
 
 #5
 @client.command(name='cleaner', help='Cleans channel from last 100 messages')
 async def cleaner(ctx):
-    deleted = await ctx.channel.purge(limit=100)
-    await ctx.channel.send(f'[Cleaner] deleted max amount of messages ({len(deleted)})')
-    print(f"Information: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}")
-    logs = open(f'{maindir}/Logs.txt', 'a')
-    logs.write(f"Information: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}\n")
-    logs.close()
-
-#6
-@client.command(name='binary', help='Converts decimal number to binary. \n .binary <dec number>; eg. binary 2019')
-async def binary(ctx, number):
-    binn = bin(int(number))
-    await ctx.send(f'{number} in binary: {binn}')
-    print(f'Information[Command]: Converted {number} to {binn} using .binary')
-    logs = open(f'{maindir}/Logs.txt', 'a')
-    logs.write(f'Information[Command]: Converted {number} to {binn} using .binary\n')
-    logs.close()
-
-#7
-@client.command(name='hexa', help="Converts decimal number to hexadecimal. \n .hexa <dec number>; eg. hexa 2007")
-async def hexadecimal(ctx, number):
-    hexa = hex(int(number))
-    await ctx.send(f'{number} in hexadecimal: {hexa}')
-    print(f'Information[Command]: Converted {number} to {hexa} using .hexa')
-    logs = open(f'{maindir}/Logs.txt', 'a')
-    logs.write(f'Information[Command]: Converted {number} to {hexa} using .hexa\n')
-    logs.close()
+    if str(ctx.message.author.id) in mod_usr:
+        deleted = await ctx.channel.purge(limit=100)
+        await ctx.channel.send(f'[Cleaner] deleted max amount of messages ({len(deleted)})')
+        print(f"Information: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}")
+        logs = open(f'{maindir}/Logs.txt', 'a')
+        logs.write(f"Information: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}\n")
+        logs.close()
+    else:
+        await ctx.reply(not_allowed)
 
 #8
+@client.command(name='kick', help='Kicks Members')
+async def kick(ctx, member: discord.Member, *, reason=None):
+    kicked = f'Information[Server/Members]: Kicked {member}. Reason: {reason}\n'
+    if str(ctx.message.author.id) in mod_usr:
+        await member.kick(reason=reason)
+        await ctx.send(f'Kicked **{member}**')
+        print(kicked)
+        logs = open(f'{maindir}/Logs.txt', 'a')
+        logs.write(kicked)
+        logs.close()
+    else:
+        await ctx.reply(not_allowed)
+
+#9
+@client.command(name='ban', help='Bans Members')
+async def ban(ctx, member: discord.Member, *, reason=None):
+    banned = f'Information[Server/Members]: Banned {member}. Reason: {reason}\n'
+    if str(ctx.message.author.id) in mod_usr:
+        await member.ban(reason=reason)
+        await ctx.send(f'Banned **{member}**')
+        print(banned)
+        logs = open(f'{maindir}/Logs.txt', 'a')
+        logs.write(banned)
+        logs.close()
+    else:
+        await ctx.reply(not_allowed)
+
+#10
+@client.command(name='unban', help='Unbans Members')
+async def unban(ctx, member: discord.Member, *, reason=None):
+    unbanned = f'Information[Server/Members]: Unbanned {member}. Reason: {reason}\n'
+    if str(ctx.message.author.id) in mod_usr:
+        await member.unban(reason=reason)
+        await ctx.send(f'Unbanned **{member}**')
+        print(unbanned)
+        logs = open(f'{maindir}/Logs.txt', 'a')
+        logs.write(unbanned)
+        logs.close()
+    else:
+        await ctx.reply(not_allowed)
+        #ModeratorOnly-END
+
+
+
+        #Converters
+#1
 @client.command(name='convert', help='Advanced Converter v1.0\n========================\n\nConverts one number to other number systems - binary, octal, decimal, hexa (hexadecimal)')
 async def multiconv(ctx, type, number):
     try:
@@ -714,38 +761,26 @@ async def multiconv(ctx, type, number):
     except:
         await ctx.send(f'```{bluescreenface}\nUnexpected error occurred```')
 
-#9
-@client.command(name="thread", help="Makes server threads\n.thread {name} {reason}")
-async def thread(ctx, name, *, reason):
-    try:
-        channel = ctx.channel
-        thread = await channel.create_thread(name=name, auto_archive_duration=60, slowmode_delay=None, reason=reason)
-        await ctx.send(f"Created new thread [{name}]")
-        print(f"Information[Threads]: Created new thread [{name}] on {channel}. Reason: {reason}")
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f"Information[Threads]: Created new thread [{name}] on {channel}. Reason: {reason}\n")
-        logs.close()
-    except:
-        await ctx.send(thread_error)
+#2
+@client.command(name='binary', help='Converts decimal number to binary. \n .binary <dec number>; eg. binary 2019')
+async def binary(ctx, number):
+    binn = bin(int(number))
+    await ctx.send(f'{number} in binary: {binn}')
+    print(f'Information[Command]: Converted {number} to {binn} using .binary')
+    logs = open(f'{maindir}/Logs.txt', 'a')
+    logs.write(f'Information[Command]: Converted {number} to {binn} using .binary\n')
+    logs.close()
 
-#10
-@client.command(name="webreq", help="Sends website request code")
-async def webreq(ctx, *, web):
-    try:
-        rq = requests.get(web)
-        await ctx.send(f"Response: {rq}")
-    except:
-        await ctx.send("Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist? ")
-
-#11
-@client.command(name='pingip', help='Pings selected IPv4 address.')
-async def pingip(ctx, ip):
-    try:
-        ipaddr = ip
-        await ctx.send(f"```{subprocess.getoutput([f'ping {ipaddr} -c 1'])}```")
-    except:
-        await ctx.send('Something went wrong')
-        #Utility_and_Diagnostics-END
+#3
+@client.command(name='hexa', help="Converts decimal number to hexadecimal. \n .hexa <dec number>; eg. hexa 2007")
+async def hexadecimal(ctx, number):
+    hexa = hex(int(number))
+    await ctx.send(f'{number} in hexadecimal: {hexa}')
+    print(f'Information[Command]: Converted {number} to {hexa} using .hexa')
+    logs = open(f'{maindir}/Logs.txt', 'a')
+    logs.write(f'Information[Command]: Converted {number} to {hexa} using .hexa\n')
+    logs.close()
+        #Converters-END
 
 
 
@@ -887,7 +922,7 @@ async def micspam(ctx):
         await ctx.reply(voice_not_connected_error)
     except:
         await ctx.reply(ffmpeg_error)
-        #VoiceChannelEND
+        #VoiceChannel-END
 
 
 
@@ -971,17 +1006,31 @@ async def makefile(ctx, name, *, content):
         #FileManager/Directory-END
 
 
-        #YouTubeLinks
-@client.command(name='yt', help='Sends Link to YT\ntest1\ntest2')
-async def yt(ctx, YTname):
-    if YTname == 'test1':
-        await ctx.send(f'test1')
-    elif YTname == 'test2':
-        await ctx.send(f'test2')
-    else:
-        await ctx.send("Wrong name")
-        #YouTubeLinks-END
 
+        #Other
+#1
+@client.command(name="thread", help="Makes server threads\n.thread {name} {reason}")
+async def thread(ctx, name, *, reason):
+    try:
+        channel = ctx.channel
+        thread = await channel.create_thread(name=name, auto_archive_duration=60, slowmode_delay=None, reason=reason)
+        await ctx.send(f"Created new thread [{name}]")
+        print(f"Information[Threads]: Created new thread [{name}] on {channel}. Reason: {reason}")
+        logs = open(f'{maindir}/Logs.txt', 'a')
+        logs.write(f"Information[Threads]: Created new thread [{name}] on {channel}. Reason: {reason}\n")
+        logs.close()
+    except:
+        await ctx.send(thread_error)
+
+#2
+@client.command(name='Teensie', help='TeensieGif')
+async def Teensie(ctx):
+    try:
+        await ctx.send(file=discord.File(f'{maindir}/Files/Teensie.gif'))
+    except:
+        await ctx.send('https://media.discordapp.net/attachments/1099605026948780143/1099605179193622570/Teensien.gif')
+        #Other-END
+ 
 
 
         #Links_and_Servers
@@ -1012,30 +1061,28 @@ Serv3
 #2
 @client.command(name='dscserv', help='Shows link to Discord Server')
 async def dscserv(ctx):
-    await ctx.send(f'https://discord.gg/UMtYGAx5ac')
+    await ctx.send(os.getenv('dscserv_link'))
 
 #3
 @client.command(name='addbot', help='Shows Link to add Bot to other Servers\nstable -> sends link to stable version\ntesting -> sends link to testing version')
 async def addbot(ctx, version):
     if version == "stable":
-        await ctx.reply("Enter your link here")
+        await ctx.reply(os.getenv('addstable'))
     elif version == "testing":
-        await ctx.reply("Enter your link here")
+        await ctx.reply(os.getenv('addtesting'))
     else:
         await ctx.send("Wrong value, try again.")
+
+#4
+@client.command(name='yt', help='Sends Link to YT\ntest1\ntest2')
+async def yt(ctx, YTname):
+    if YTname == 'test1':
+        await ctx.send(f'test1')
+    elif YTname == 'test2':
+        await ctx.send(f'test2')
+    else:
+        await ctx.send("Wrong name")
         #Links_and_Servers-END
-
-
-
-        #FileSending
-#1
-@client.command(name='Teensie', help='TeensieGif')
-async def Teensie(ctx):
-    try:
-        await ctx.send(file=discord.File(f'{maindir}/Files/Teensie.gif'))
-    except:
-        await ctx.send('https://media.discordapp.net/attachments/1099605026948780143/1099605179193622570/Teensien.gif')
-        #FileSending-END
 
 
 
