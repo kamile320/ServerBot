@@ -62,3 +62,17 @@ on text in .testbot while running Bot on ARM devices
 - /random still in old version
 - code improvements
 - added .ytplay command
+
+
+[ServerBot Ver. 1.5]
+    Changelog:
+- Big code changes 
+- Removed .bytes command
+- Updated SB recovery menu
+- More things uses .env file for better value input
+- Added mod_usr for commands that should be used 
+  by moderators and admins, not regular users
+- Updated .request command and more
+- Updated setup.sh
+- renamed .next_update -> .release
+- updated HTML Manuals
