@@ -11,7 +11,7 @@ sleep 1
 read -p "Type anything to continue. (Need root privileges)"
 
 sudo apt update -y
-sudo apt install -y python3-pip ffmpeg git venv
+sudo apt install -y python3-pip ffmpeg git python3-venv
 
 pip3 install discord
 pip3 install discord.py[voice]
