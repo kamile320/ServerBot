@@ -8,7 +8,7 @@ def os_selector():
     print("""Select Method: 
 1 - Linux
 2 - Windows
-3 - Setup.sh   
+3 - Setup.sh
 4 - Exit
 """)
     sel = int(input(">>> "))
@@ -259,10 +259,10 @@ async def ping(ctx):
     await ctx.send(f':tennis: Pong! ({round(client.latency * 1000)}ms)')
         
 #5
-@client.command(name='newest_update', help='Shows last changes of Bot functions/Changelog')
+@client.command(name='release', help='Shows last changes of Bot functions/Changelog')
 async def newest_update(ctx):
     await ctx.send(f"""
-[ServerBot Ver. {ver}]
+[ServerBot v{ver}]
     Changelog:
 - Big code changes 
 - Removed .bytes command
@@ -272,6 +272,8 @@ async def newest_update(ctx):
   by moderators and admins, not regular users
 - Updated .request command and more
 - Updated setup.sh
+- renamed .next_update -> .release
+- updated HTML Manuals
 
 To see older releases, find 'updates.txt' in folder 'Files' 
 """)
