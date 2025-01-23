@@ -44,10 +44,10 @@
 
         <a href="https://github.com/kamile320/ServerBot">ServerBot</a> - Bot Discordowy rozwijany przez <b><u>Kamile320</u></b> umożliwiający:<br>
         <ul>
-            <li>Słuchanie lokalnej muzyki z hosta</li>
-            <li>Tworzenie wątków</li>
+            <li>Słuchanie muzyki z plików hosta i linków YouTube'a</li>
             <li>Administracja Serwera</li>
-            <li>Zarządzanie Komputerem Hosta (+ Diagnoza)</li>
+            <li>Tworzenie wątków</li>
+            <li>Zarządzanie Komputerem Hosta (+ Diagnostyka)</li>
             <li>Zarządzanie Plikami i Katalogami</li>
             <li>Wiele więcej</li>
         </ul>
@@ -68,26 +68,27 @@
         <h3 id="dirs">Struktura Katalogowa:</h3>
 
         <ol>
-            <li><u>ServerBot.py</u> - Główny plik skryptu</li>
-            <li><u>setup.bat</u> - Plik instalujący wymagane biblioteki pythona (Windows)</li>
-            <li><u>setup.sh</u> - Menu operacyjne: uruchamianie bota, instalowanie wymaganych biblioteki itp. (wymaga zainstalowania komendy "dialog")</li>
-            <li><u>Logs.txt</u> - Plik z Dziennikiem zdarzeń bota na serwerze</li>
-            <li><u>manual.html</u> - Manual Bota</li>
-            <li><u>Media</u> - Katalog z Domyślnymi Muzykami/Dźwiękami</li>
-            <li><u>sctl</u> - Katalog z wpisami usług (po użyciu .service prepare)</li>
-            <li><u>.env</u> - Specialny plik do przechowywania Tokenów Bota</li>
+            <li><b>ServerBot.py</b> - Główny plik skryptu</li>
+            <li><b>setup.bat</b> - Plik instalujący wymagane biblioteki pythona (Windows)</li>
+            <li><b>setup.sh</b> - Menu operacyjne: uruchamianie bota, instalowanie wymaganych biblioteki itp. (wymaga zainstalowania komendy "dialog")</li>
+            <li><b>Logs.txt</b> - Plik z Dziennikiem zdarzeń bota na serwerze</li>
+            <li><b>manual.html</b> - Manual Bota</li>
+            <li><b>Media</b> - Katalog z Domyślnymi Muzykami/Dźwiękami</li>
+            <li><b>sctl</b> - Katalog z wpisami usług (po użyciu .service prepare)</li>
+            <li><b>.env</b> - Specialny plik do przechowywania Tokenów Bota</li>
+            <li><b>.venv</b> - Wirtualne Środowisko Pythona (Po użyciu setup.sh - opcja 4)</li>
             <li>
-                <u>Files</u> - Katalog z wymaganymi (i nie) plikami Bota 
+                <b>Files</b> - Katalog z wymaganymi (i nie) plikami Bota 
                 <ul>
-                    <li><u>favicon.ico</u> - Ikona tego Manuala</li>
-                    <li><u>updates.txt</u> - Plik z listą ostatnich aktualizacji</li>
-                    <li><u>Logs.txt</u> - Kopia Logów Bota</li>
-                    <li><u>autorun.sh</u> - Po użyciu <a href="#autostart">.mksysctlstart</a></li>
+                    <li><b>favicon.ico</b> - Ikona Manuala</li>
+                    <li><b>updates.txt</b> - Plik z listą ostatnich aktualizacji</li>
+                    <li><b>Logs.txt</b> - Kopia Logów Bota</li>
+                    <li><b>autorun.sh</b> - Po użyciu <a href="#autostart">.mksysctlstart</a></li>
                     <li>Inne Pliki (zdjęcia, nagrania, itp.)</li>
-                    <li><u>setup</u> - Pliki konfiguracyjne</li>
+                    <li><b>setup</b> - Pliki konfiguracyjne</li>
                     <ul>
-                        <li><u>setuplib.sh</u> - Instalacja Bibliotek</li>
-                        <li><u>mkvenv.sh</u> - Utworzenie <a href="#autostart">venv</a></li>
+                        <li><b>setuplib.sh</b> - Instalacja Bibliotek</li>
+                        <li><b>mkvenv.sh</b> - Utworzenie <a href="#autostart">venv</a></li>
                     </ul>
                 </ul>
             </li>
@@ -101,7 +102,7 @@
         <h3 id="start">Pierwsze uruchomienie:</h3>
         <h5>Bot do uruchomienia wymaga:</h5>
         <ul type="square">
-            <li>Python 3.10 lub nowszy</li>
+            <li>Python 3.9 lub nowszy</li>
             <li>Połączenie z internetem</li>
             <li>Zainstalowane wymagane biblioteki pythona (patrz - zawartość setup.sh/setuplib.sh)</li>
             <li>Dodanie do środowiska PATH plików FFmpeg - Tylko Windows (zobacz YT)</li>
@@ -135,7 +136,7 @@
         Przykład: .mksysctl .venv/bin/python <- wykonujesz tą komendę na Discordzie gdy skrypt działa w głównym katalogu Bota<br>
         .venv - > znajduje się w katalogu ServerBot<br>
         UWAGA! Bot (a raczej setup.sh) jest przystosowany do nazwy katalogu z wirtualnym środowiskiem o nazwie ".venv".<br>
-        Jeśli wprowadzisz inną wartość, bot może się nie uruchomić!<br>
+        Jeśli wprowadzisz inną wartość (po utworzeniu .venv poprzez setup.sh), bot może się nie uruchomić!<br>
         Zalecane jest użycie opcji 4 z setup.sh -> Bez problemu wszystko zainstaluje i skonfiguruje jak trzeba.<br>
         Aby autostart zadziałał, należy ustawić pliki bota z uprawnieniami odczytu/zapisu/wykonania na 777 (dla wszystkich). Rekomenduję przenieść pliki Bota do katalogu /ServerBot (żeby nie był w innych katalogach)<br><br>
 
@@ -155,15 +156,19 @@
         <img align="right" src="Files/setupSB.png" width="35%" height="35%">
 
         <h3 id="token">Tokeny</h3>
-        Bot korzysta z tokenów: Discorda API, ApenAI oraz z ID użytkowników.<br>
+        Bot korzysta z tokenów: Discorda API, OpenAI oraz z ID użytkowników.<br>
         Aby bot się uruchomił należy wypełnić odpowiednimi danymi plik <b>.env</b><br><br>
         Schemat:<br>
         TOKEN="twój token"<br>
         OpenAI="twój token"<br>
-        admin_usr = ['twoje ID']<br><br>
+        admin_usr = ['twoje ID']<br>
+        mod_usr = ['twoje ID']<br><br>
         <h4>ID użytkownika</h4>
-        Niektóre komendy wymagają uprawnień administratora do uruchomienia<br>
-        Aby je wykonać, należy podać w <b>admin_usr</b> ID uprawnionuch użytkowników do wykonywania tych komend.<br>
+        Niektóre komendy korzystają z funkcji i danych związanych z twoim systemem operacyjnym,<br>
+        więc wymagają uprawnień administratora do uruchomienia - chyba nie chcesz żeby ktoś ci usunął system!<br>
+        Aby te komendy wykonać, należy podać w <b>admin_usr</b> ID uprawnionych użytkowników do wykonywania tych komend - to muszą być zaufane osoby, a najlepiej tylko ty!<br>
+        Należy też podać <b>mod_usr</b> - pozwala na wykonywanie komend ingerujących w serwer itp.<br>
+        To mogą być zaufani moderatorzy Serwera.
 
 
 
@@ -179,40 +184,34 @@
                 </td>
 
                 <td>
-                    ====Utility_and_Diagnostics====<br>
-                    testos {os}<br>
-                    test<br>
-                    bytes<br>
-                    delete<br>
-                    cleaner<br>
+                    =========Converter=========<br>
                     binary {dec. number}<br>
                     hexa {dec. number}<br>
                     convert<br>
-                    rebuild<br>
-                    bash<br>
                 </td>
 
                 <td>
-                    =======Fun=======<br>
+                    ========Fun========<br>
                     random<br>
                     banner<br>
+                    botbanner<br>
                     blankthing<br>
                     apple<br>
+                    gpt<br>
+                    badge<br>
                 </td>
 
                 <td>
                     =====Admin=====<br>
                     ShutDown<br>
                     copylog<br>
-                    addbot<br>
-                    testbot<br>
-                    gpt<br>
-                    kick<br>
-                    ban<br>
-                    unban<br>
+                    bash<br>
+                    rebuild<br>
                     mkshortcut<br>
                     mksysctlstart<br>
                     service<br>
+                    webreq<br>
+                    pingip<br>
                 </td>
             </tr>
             <tr valign="top" align="center">
@@ -222,7 +221,9 @@
                     credits<br>
                     time<br>
                     ping<br>
-                    pingip {IPv4 address}<br>
+                    release<br>
+                    next_update<br>
+                    issues<br>
                 </td>
 
                 <td>
@@ -238,6 +239,7 @@
                     join<br>
                     leave<br>
                     play<br>
+                    ytplay<br>
                     stop<br>
                     waiting<br>
                     micspam<br>
@@ -245,9 +247,15 @@
                 </td>
 
                 <td>
-                    ====UpdateInfo====<br>
-                    newest_update<br>
-                    next_update<br>
+                    ====ModOnly====<br>
+                    testbot<br>
+                    testos<br>
+                    disks<br>
+                    delete<br>
+                    cleaner<br>
+                    kick<br>
+                    ban<br>
+                    unban<br>
                 </td>
             </tr>
         </table>

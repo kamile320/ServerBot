@@ -44,9 +44,9 @@
 
         <a href="https://github.com/kamile320/ServerBot">ServerBot</a> - Discord Bot developed by <b><u>Kamile320</u></b> enabling:<br>
         <ul>
-            <li>Listening to local music from the host</li>
-            <li>Creating threads</li>
+            <li>Listening music from local files and YouTube URL's</li>
             <li>Server Administration</li>
+            <li>Creating threads</li>
             <li>Host Computer Management (+ Diagnosis)</li>
             <li>File and Directory Management</li>
             <li>And more</li>
@@ -68,26 +68,27 @@
         <h3 id="dirs">List of Files and Directories:</h3>
 
         <ol>
-            <li><u>ServerBot.py</u> - Main script file</li>
-            <li><u>setup.bat</u> - File that installs required python libraries (Windows)</li>
-            <li><u>setup.sh</u> - Operation menu: starting the bot, installing required libraries, etc. (requires installation of the "dialog" command)</li>
-            <li><u>Logs.txt</u> - File with the bot event log on the server</li>
-            <li><u>manual.html</u> - Bot Manual</li>
-            <li><u>Media</u> - Directory with Default Music/Sounds</li>
-            <li><u>sctl</u> - Directory with service entries (After using .service prepare)</li>
-            <li><u>.env</u> - Special file for Bot Tokens</li>
+            <li><b>ServerBot.py</b> - Main script file</li>
+            <li><b>setup.bat</b> - File that installs required python libraries (Windows)</li>
+            <li><b>setup.sh</b> - Operation menu: starting the bot, installing required libraries, etc. (requires installation of the "dialog" command)</li>
+            <li><b>Logs.txt</b> - File with the bot event log on the server</li>
+            <li><b>manual.html</b> - Bot Manual</li>
+            <li><b>Media</b> - Directory with Default Music/Sounds</li>
+            <li><b>sctl</b> - Directory with service entries (After using .service prepare)</li>
+            <li><b>.env</b> - Special file for Bot Tokens</li>
+            <li><b>.venv</b> - Python Virtual Environment (After using setup.sh - option 4)</li>
             <li>
-                <u>Files</u> - Directory with required (and not) Bot files
+                <b>Files</b> - Directory with required (and not) Bot files
                 <ul>
-                    <li><u>favicon.ico</u> - Manuala icon</li>
-                    <li><u>updates.txt</u> - List of recent updates</li>
-                    <li><u>Logs.txt</u> - Copy of Bot Logs</li>
-                    <li><u>autorun.sh</u> - After using <a href="#autostart">.mksysctlstart</a></li>
+                    <li><b>favicon.ico</b> - Manual icon</li>
+                    <li><b>updates.txt</b> - List of recent updates</li>
+                    <li><b>Logs.txt</b> - Copy of Bot Logs</li>
+                    <li><b>autorun.sh</b> - After using <a href="#autostart">.mksysctlstart</a></li>
                     <li>Other Files (photos, videos, etc.)</li>
-                    <li><u>setup</u> - Config Files</li>
+                    <li><b>setup</b> - Config Files</li>
                     <ul>
-                        <li><u>setuplib.sh</u> - Installer of pip3 Libraries</li>
-                        <li><u>mkvenv.sh</u> - Creates <a href="#autostart">venv</a></li>
+                        <li><b>setuplib.sh</b> - Installer of pip3 Libraries</li>
+                        <li><b>mkvenv.sh</b> - Creates <a href="#autostart">venv</a></li>
                     </ul>
                 </ul>
             </li>
@@ -101,7 +102,7 @@
         <h3 id="start">First run:</h3>
         <h5>The Bot requires:</h5>
         <ul type="square">
-            <li>Python 3.10 or later</li>
+            <li>Python 3.9 or later</li>
             <li>Internet connection</li>
             <li>Required python libraries installed (see setup.sh/setuplib.sh contents)</li>
             <li>Adding FFmpeg files to the PATH environment - Windows only (see YT)</li>
@@ -135,7 +136,7 @@
         Example: .mksysctl .venv/bin/python <- executing command on Discord; script of the Bot runs in main directory [ServerBot]<br>
         .venv -> located in the ServerBot directory<br>
         NOTE! The bot (or rather setup.sh) is adapted to the name of a directory with a virtual environment called ".venv".<br>
-        If you enter a different value, the bot may not start!<br>
+        If you enter a different value (after creating .venv by using setup.sh), the bot may not start!<br>
         It is recommended to use option 4 from setup.sh -> It will easily install and configure everything as needed.<br>
         For the autostart to work, you need to set the Bot files with read/write/execute permissions to 777 (for everyone). I recommend moving the Bot files to the /ServerBot directory (so that it is not in other directories)<br><br>
 
@@ -155,18 +156,18 @@
         <img align="right" src="Files/setupSB.png" width="35%" height="35%">
 
         <h3 id="token">Tokens</h3>
-        The bot uses tokens: Discord API, ApenAI and user IDs.<br>
+        The Bot uses tokens: Discord API, OpenAI and user IDs.<br>
         In order for the bot to run, you need to fill in the <b>.env</b> file with the appropriate data.<br><br>
         Scheme:<br>
         TOKEN="your bot token"<br>
         OpenAI="your token (API key)"<br>
-        admin_usr = ['your discord user ID']<br><br>
-
-        
+        admin_usr = ['your discord user ID']<br>
+        mod_usr = ['your discord user ID']<br><br>
         <h4>User ID</h4>
-        Some commands require administrator privileges to run.<br>
-        To execute them, you must provide the ID of authorized users to execute these commands in <b>admin_usr</b>.<br>
-
+        Some commands uses Operating System data and functions,<br>
+        so it requires administrator privileges to run - you don't want to have removed system by unauthorized user, right?<br>
+        To execute them, you must provide the ID of trusted and authorized users that can execute these commands in <b>admin_usr</b>. You should be the only one who has rights to execute them.<br>
+        You also need to fill <b>mod_usr</b> with your trusted Discord Server Moderators - allows you to execute commands that interfere with the Discord Server
 
         <h3 id="comma">Basic Commands:</h3>
         <table border>
@@ -180,40 +181,34 @@
                 </td>
 
                 <td>
-                    ====Utility_and_Diagnostics====<br>
-                    testos {os}<br>
-                    test<br>
-                    bytes<br>
-                    delete<br>
-                    cleaner<br>
+                    =========Converter=========<br>
                     binary {dec. number}<br>
                     hexa {dec. number}<br>
                     convert<br>
-                    rebuild<br>
-                    bash<br>
                 </td>
 
                 <td>
-                    =======Fun=======<br>
+                    ========Fun========<br>
                     random<br>
                     banner<br>
+                    botbanner<br>
                     blankthing<br>
                     apple<br>
+                    gpt<br>
+                    badge<br>
                 </td>
 
                 <td>
                     =====Admin=====<br>
                     ShutDown<br>
                     copylog<br>
-                    addbot<br>
-                    testbot<br>
-                    gpt<br>
-                    kick<br>
-                    ban<br>
-                    unban<br>
+                    bash<br>
+                    rebuild<br>
                     mkshortcut<br>
                     mksysctlstart<br>
                     service<br>
+                    webreq<br>
+                    pingip<br>
                 </td>
             </tr>
             <tr valign="top" align="center">
@@ -223,7 +218,9 @@
                     credits<br>
                     time<br>
                     ping<br>
-                    pingip {IPv4 address}<br>
+                    release<br>
+                    next_update<br>
+                    issues<br>
                 </td>
 
                 <td>
@@ -239,6 +236,7 @@
                     join<br>
                     leave<br>
                     play<br>
+                    ytplay<br>
                     stop<br>
                     waiting<br>
                     micspam<br>
@@ -246,12 +244,18 @@
                 </td>
 
                 <td>
-                    ====UpdateInfo====<br>
-                    newest_update<br>
-                    next_update<br>
+                    ====ModOnly====<br>
+                    testbot<br>
+                    testos<br>
+                    disks<br>
+                    delete<br>
+                    cleaner<br>
+                    kick<br>
+                    ban<br>
+                    unban<br>
                 </td>
             </tr>
-        </table>       
+        </table>
     </div>
 </body>
 </html>
