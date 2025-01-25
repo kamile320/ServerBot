@@ -72,7 +72,17 @@ on text in .testbot while running Bot on ARM devices
 - More things uses .env file for better value input
 - Added mod_usr for commands that should be used 
   by moderators and admins, not regular users
-- Updated .request command and more
+- Updated .webreq command and more
 - Updated setup.sh
 - renamed .next_update -> .release
 - updated HTML Manuals
+
+
+[ServerBot v1.5.1]
+    Changelog:
+- Renamed '.request' to correct '.webreq' 
+  in updates.txt
+- Updated setuplib.sh
+- Updated .manual .credits commands
+- Moved .webreq to commands for mod_usr
+- Updated HTML manuals (and hosted on Kamile320.github.io/manualEN.html)
