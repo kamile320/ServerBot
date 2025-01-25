@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-ver = "1.5"
+ver = "1.5.1"
 
 def os_selector():
     print(f"====ServerBot v{ver} Recovery Menu====")
@@ -221,12 +221,17 @@ async def badge(ctx, member: discord.Member):
 
         #BotInfo
 #1
-@client.command(name='manual', help='Sends HTML manual ')
-async def manual(ctx):
+@client.command(name='manual', help="Sends HTML manual\n'web' - for showing manual in browser\n'local' to download HTML manual from Discord")
+async def manual(ctx, type):
     try:
-        await ctx.send(file=discord.File(f'{maindir}/manual.html'))
+        if type == 'web':
+            await ctx.send("ServerBot user [Manual](https://Kamile320.github.io/manualEN.html)")
+        elif type == 'local':
+            await ctx.send(file=discord.File(f'{maindir}/manualEN.html'))
+        else:
+            await ctx.send("Wrong type.\nChoose 'web' for showing manual in browser\nor 'local' to download .html from Discord")
     except:
-        await ctx.send(f"Can't open manual.html")
+        await ctx.send(f"Can't open manualEN.html")
 
 #2
 @client.command(name='credits', help='Shows Credits')
@@ -241,6 +246,8 @@ Thanks to:
 - <@632682413776175107> for some retranslations
 
 Source: ```https://github.com/kamile320/ServerBot```
+Discord Server: [Here](https://discord.gg/UMtYGAx5ac)
+
 Used Sounds:
     WinXP/98 sounds -> files from OG OS by Microsoft
     Omegatronic Bot Micspam: ```https://www.youtube.com/watch?v=BNJxlSpBR5A```
@@ -264,17 +271,12 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Big code changes 
-- Removed .bytes command
-- Updated SB recovery menu
-- More things uses .env file for better value input
-- Added mod_usr for commands that should be used 
-  by moderators and admins, not regular users
-- Updated .request command and more
-- Updated setup.sh
-- renamed .next_update -> .release
-- updated HTML Manuals
-
+- Renamed '.request' to correct '.webreq' 
+  in updates.txt
+- Updated setuplib.sh
+- Updated .manual .credits commands
+- Moved .webreq to commands for mod_usr
+- Updated HTML manuals (and hosted on Kamile320.github.io/manualEN.html)
 To see older releases, find 'updates.txt' in folder 'Files' 
 """)
 
@@ -288,6 +290,8 @@ Ideas for Future Updates
 - More slash commands
 - Better .dir list
 - .service command that uses .env file
+- better .mksysctlstart command (and port it as .sh script)
+You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac)
 """)
     
 #7
@@ -549,30 +553,6 @@ async def service(ctx, mode):
         await ctx.send(not_allowed)
 
 #8
-@client.command(name="webreq", help="Sends website request codes and headers\n.webreq {get/getheader} {website}")
-async def webreq(ctx, mode, *, web):
-    if str(ctx.message.author.id) in admin_usr:
-        try:
-            if mode == 'get':
-                try:
-                    rq = requests.get(web)
-                    await ctx.reply(f"Response: {rq.status_code}")
-                except:
-                    await ctx.reply(badsite)
-            elif mode == 'getheader':
-                try:
-                    rq = requests.get(web)
-                    await ctx.reply(f"Website Header:\n{rq.headers}")
-                except:
-                    await ctx.reply(badsite)
-            else:
-                await ctx.reply('')
-        except:
-            await ctx.reply("Wrong mode.")
-    else:
-        await ctx.reply(not_allowed)
-
-#9
 @client.command(name='pingip', help='Pings selected IPv4 address.')
 async def pingip(ctx, ip):
     if str(ctx.message.author.id) in admin_usr:
@@ -669,7 +649,31 @@ async def cleaner(ctx):
     else:
         await ctx.reply(not_allowed)
 
-#8
+#6
+@client.command(name="webreq", help="Sends website request codes and headers\n.webreq {get/getheader} {website}")
+async def webreq(ctx, mode, *, web):
+    if str(ctx.message.author.id) in mod_usr:
+        try:
+            if mode == 'get':
+                try:
+                    rq = requests.get(web)
+                    await ctx.reply(f"Response: {rq.status_code}")
+                except:
+                    await ctx.reply(badsite)
+            elif mode == 'getheader':
+                try:
+                    rq = requests.get(web)
+                    await ctx.reply(f"Website Header:\n{rq.headers}")
+                except:
+                    await ctx.reply(badsite)
+            else:
+                await ctx.reply('')
+        except:
+            await ctx.reply("Wrong mode.")
+    else:
+        await ctx.reply(not_allowed)
+
+#7
 @client.command(name='kick', help='Kicks Members')
 async def kick(ctx, member: discord.Member, *, reason=None):
     kicked = f'Information[Server/Members]: Kicked {member}. Reason: {reason}\n'
@@ -683,7 +687,7 @@ async def kick(ctx, member: discord.Member, *, reason=None):
     else:
         await ctx.reply(not_allowed)
 
-#9
+#8
 @client.command(name='ban', help='Bans Members')
 async def ban(ctx, member: discord.Member, *, reason=None):
     banned = f'Information[Server/Members]: Banned {member}. Reason: {reason}\n'
@@ -697,7 +701,7 @@ async def ban(ctx, member: discord.Member, *, reason=None):
     else:
         await ctx.reply(not_allowed)
 
-#10
+#9
 @client.command(name='unban', help='Unbans Members')
 async def unban(ctx, member: discord.Member, *, reason=None):
     unbanned = f'Information[Server/Members]: Unbanned {member}. Reason: {reason}\n'
