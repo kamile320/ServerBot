@@ -17,7 +17,7 @@ You can use a bot like a ssh connection - detect service failures/status, run sh
 Great for lazy game server admins! Because why you should open terminal, connect to the server, check something, log out...  
 ...when you can do everything in your Discord chat.
 
-More information and instructions you can find in manual.html or manualEN.html.
+More information and instructions you can find in *ServerBot Manual* [[PL]](https://kamile320.github.io/ServerBot/manual.html) [[EN]](https://kamile320.github.io/ServerBot/manualEN.html)
 
 ServerBot is an open project - that means you can make your own version of bot, or help me with making ServerBot way better - better english translations/text, code improvements, bug report etc.
 
