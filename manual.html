@@ -127,15 +127,14 @@
         Aby to łatwo umożliwić istnieje komenda .mksysctlstart<br>
         Po wpisaniu komendy trzeba podać dodatkową wartość:<br><br>
         
-        <b>none</b> -> tworzy zwykły plik autorun.sh w katalogu <a href="#dirs">Files</a>. Działa głównie na systemach opartych na Ubuntu <b>22.04</b><br><br>
+        <b>def</b> -> tworzy domyślny plik autorun.sh w katalogu <a href="#dirs">Files</a>. Działa głównie na systemach opartych na Ubuntu <b>22.04</b> (Nie korzysta z utworzonego venv)<br><br>
 
-        <b>inna wartość</b> -> czasem przy instalacji modułów za pomocą pip3 może wyskoczyć błąd <i>externally managed pip</i>.<br>
-        W tym przypadku zamiast <i>none</i> należy wpisać katalog w którym znajduje się Wirtualne Środowisko Pythona (Virtual Environment/Venv)<br>
-        Jeśli jeszcze go nie utworzyłeś - rekomendowane jest utworzenie go w głównym katalogu Bota (ServerBot)<br><br>
-        Przykład: .mksysctl .venv/bin/python <- wykonujesz tą komendę na Discordzie gdy skrypt działa w głównym katalogu Bota<br>
-        .venv - > znajduje się w katalogu ServerBot<br>
+        <b>venv</b> -> czasem przy instalacji modułów za pomocą pip3 może wyskoczyć błąd <i>externally managed pip</i>.<br>
+        W tym przypadku należy utworzyć Wirtualne Środowisko Pythona (Virtual Environment/Venv)<br>
+        Jeśli jeszcze go nie utworzyłeś - rekomendowane jest utworzenie go w głównym katalogu Bota (ServerBot).<br><br>
+        Przykład: .mksysctl venv <- wykonujesz tą komendę na Discordzie gdy skrypt działa w głównym katalogu Bota.<br>
         UWAGA! Bot (a raczej setup.sh) jest przystosowany do nazwy katalogu z wirtualnym środowiskiem o nazwie ".venv".<br>
-        Jeśli wprowadzisz inną wartość (po utworzeniu .venv poprzez setup.sh), bot może się nie uruchomić!<br>
+        Jeśli utworzyłeś ręcznie venv z inną nazwą katalogu, bot może się nie uruchomić!<br>
         Zalecane jest użycie opcji 4 z setup.sh -> Bez problemu wszystko zainstaluje i skonfiguruje jak trzeba.<br>
         Aby autostart zadziałał, należy ustawić pliki bota z uprawnieniami odczytu/zapisu/wykonania na 777 (dla wszystkich). Rekomenduję przenieść pliki Bota do katalogu /ServerBot (żeby nie był w innych katalogach)<br><br>
 

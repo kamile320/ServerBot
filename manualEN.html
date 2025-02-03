@@ -127,15 +127,14 @@
         To easily enable this, there is the .mksysctlstart command.<br>
         After entering the command, you must provide an additional value:<br><br>
         
-        <b>none</b> -> creates a regular autorun.sh file in the <a href="#dirs">Files</a> directory. Works on systems based on Ubuntu <b>22.04</b><br><br>
+        <b>def</b> -> creates default autorun.sh file in the <a href="#dirs">Files</a> directory. Works on systems based on Ubuntu <b>22.04</b> (doesn't use venv)<br><br>
 
-        <b>other value</b> -> sometimes when installing modules using pip3 an <i>externally managed pip</i> error may appear .<br>
-        In this case, instead of <i>none</i>, enter the directory where the Python Virtual Environment/Venv is located.<br>
+        <b>venv</b> -> sometimes when installing modules using pip3 an <i>externally managed pip</i> error may appear .<br>
+        In this case, you should create a Python Virtual Environment/Venv.<br>
         If you have not created it yet, it is recommended to create it in the main Bot directory (ServerBot).<br><br>
-        Example: .mksysctl .venv/bin/python <- executing command on Discord; script of the Bot runs in main directory [ServerBot]<br>
-        .venv -> located in the ServerBot directory<br>
+        Example: .mksysctl venv <- executing command on Discord; script of the Bot runs in main directory.<br>
         NOTE! The bot (or rather setup.sh) is adapted to the name of a directory with a virtual environment called ".venv".<br>
-        If you enter a different value (after creating .venv by using setup.sh), the bot may not start!<br>
+        If you manually created venv with different directory name, the bot may not start!<br>
         It is recommended to use option 4 from setup.sh -> It will easily install and configure everything as needed.<br>
         For the autostart to work, you need to set the Bot files with read/write/execute permissions to 777 (for everyone). I recommend moving the Bot files to the /ServerBot directory (so that it is not in other directories)<br><br>
 
