@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-ver = "1.5.1"
+ver = "1.6"
 
 def os_selector():
     print(f"====ServerBot v{ver} Recovery Menu====")
@@ -271,12 +271,10 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Renamed '.request' to correct '.webreq' 
-  in updates.txt
-- Updated setuplib.sh
-- Updated .manual .credits commands
-- Moved .webreq to commands for mod_usr
-- Updated HTML manuals (and hosted on Kamile320.github.io/manualEN.html)
+- Updated .service command - now it uses .env file for service entries
+- Updated setup.sh, .env
+- Updated .mksysctlstart
+- Created .ytsearch command - for searching YouTube videos
 To see older releases, find 'updates.txt' in folder 'Files' 
 """)
 
@@ -434,11 +432,11 @@ async def shrtct(ctx, desk):
         await ctx.send(not_allowed)
 
 #6
-@client.command(name="mksysctlstart", help="Adds ServerBot to systemctl to start with system startup (Bot needs to be running as root)\nMode:\n'none' -> creates default autorun entry (python3)\n'your entry' -> you need enter pwd of your python virtual environment (eg. .venv/bin/python)\n.venv file in this example hides in ServerBot main directory)\nIt's recommended to save bot files into main (root) directory (/ServerBot) with full permissions (chmod 777 recursive). Without full permissions to bot files systemctl startup will not work.")
+@client.command(name="mksysctlstart", help="Adds ServerBot to systemctl to start with system startup (Bot needs to be running as root)\nMode:\n'def' -> creates default autorun entry (python3)\n'venv' -> creates outorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv hides in ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with full permissions (chmod 777 recursive). Without full permissions to bot files, systemctl startup will not work.")
 async def mksysctlstart(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         try:
-            if mode == 'none':
+            if mode == 'def':
                 try:
                     await ctx.send("Making autorun.sh file..")
                     try:
@@ -469,12 +467,12 @@ async def mksysctlstart(ctx, mode):
                         await ctx.send("Can't create service file!\nAre you root?")
                 except:
                     await ctx.send('Got 1 error (or more) while creating systemctl entry.')
-            else:
+            elif mode == 'venv':
                 try:
                     await ctx.send('Making autorun.sh file..')
                     try:
                         auto = open('Files/autorun.sh', 'w')
-                        auto.write(f'#!/bin/bash\ncd {maindir}\n{mode} ServerBot.py')
+                        auto.write(f'#!/bin/bash\ncd {maindir}\n.venv/bin/python3 ServerBot.py')
                         auto.close()
                         await ctx.send('Done.')
 
@@ -506,45 +504,40 @@ async def mksysctlstart(ctx, mode):
         await ctx.send(not_allowed)
 
 #7
-@client.command(name='service', help="Lists active/inactive services. To add service entry, create empty file in directory 'sctl'\nUses systemctl\n\nlist -> lists created entries in 'sctl' directory\nstatus -> lists service entries and checks if they're active\nprepare -> creates 'sctl' directory for service entries")
+@client.command(name='service', help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active")
 async def service(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         try:
             if mode == 'list':
                 try:
-                    listdir = os.listdir(f"{maindir}/sctl")
-                    await ctx.send(f'Service Entries:')
+                    listdir_env = os.getenv('service_list')
+                    listdir = [item.strip() for item in listdir_env.split(',')]
+                    await ctx.send(f'**Service Entries:**')
                     for file in listdir:
                         await ctx.send(file)
                 except:
                     await ctx.send(sctlerr)
+
             elif mode == 'status':
                 try:
+                    listdir_env = os.getenv('service_list')
+                    listdir = [item.strip() for item in listdir_env.split(',')]
                     await ctx.send("**Service Activity:**")
-                    listdir = os.listdir(f"{maindir}/sctl")
                     for file in listdir:
                         await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl is-active {file}'])}```")
                 except:
                     await ctx.send(sctlerr)
+
             elif mode == 'status-detailed':
                 try:
+                    listdir_env = os.getenv('service_list')
+                    listdir = [item.strip() for item in listdir_env.split(',')]
                     await ctx.send("**Service Activity:**")
-                    listdir = os.listdir(f"{maindir}/sctl")
                     for file in listdir:
                         await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl status {file}'])}```")
                 except:
                     await ctx.send(sctlerr)
-            elif mode == 'prepare':
-                try:
-                    os.makedirs('sctl')
-                    await ctx.send(f"{sctlmade}\nCreate empty files named as systemctl services in this directory to see if they're active/inactive.")
-                
-                    print(f"Information[Files/Directories]: {sctlmade}\n")
-                    logs = open(f'{maindir}/Logs.txt', 'a')
-                    logs.write(f"Information[Files/Directories]: {sctlmade}\n")
-                    logs.close()
-                except:
-                    await ctx.send("Can't create directory.")
+
             else:
                 await ctx.send("Incorrect mode.")
         except:
@@ -884,7 +877,31 @@ async def ytplay(ctx, *, url):
     except:
         await ctx.reply(voice_not_connected_error)
 
-#5 - stop
+#5 - ytsearch
+@client.command(name='ytsearch', help='Searches YouTube Videos by typed phrase')
+async def ytsearch(ctx, *, search):
+    try:
+        ytdl_opts_search = {
+                    'default_search': 'ytsearch',
+                    'quiet': True,
+                    'extract_flat': True,
+                    'verbose': True,
+                    'noplaylist': True,
+                    'http_headers': {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'Referer': 'https://www.youtube.com/'}}
+        ytdl_s = youtube_dl.YoutubeDL(ytdl_opts_search)
+        try:
+            search_results = ytdl_s.extract_info(f"ytsearch:{search}", download=False)
+            for entry in search_results['entries']:
+                output = entry['url']
+                await ctx.send(f"Found: {output}")
+        except Exception as exc:
+                print(f"Can't find video!\n{exc}")
+    except Exception as exc:
+        print(f'Something went wrong.\nPossible cause: {exc}')
+
+#6 - stop
 @client.command(pass_context=True, name='stop', help='Stops playing audio')
 async def stop(ctx):
     voice = ctx.guild.voice_client
@@ -893,7 +910,7 @@ async def stop(ctx):
     else:
         await ctx.reply('Music is not playing right now')
 
-#6
+#7 - pause
 @client.command(pass_context = True, name='pause', help='Pause/Resume command')
 async def pause(ctx):
     voice = ctx.guild.voice_client
@@ -904,7 +921,7 @@ async def pause(ctx):
     else:
         await ctx.reply('Music is not playing on voice channel right now')
 
-#7
+#8 - waiting
 @client.command(name='waiting', help="Say everyone that you're waiting!")
 async def wait(ctx):
     try:
@@ -917,7 +934,7 @@ async def wait(ctx):
     except:
         await ctx.reply(ffmpeg_error)
 
-#8
+#9 - micspam
 @client.command(name='micspam')
 async def micspam(ctx):
     try:
