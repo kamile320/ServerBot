@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.5"
+VERSION="v1.6"
 OPTIONS=(1 "Start Bot"
          2 "Start Bot (not venv)"
          3 "Download pip3 libraries"
@@ -46,6 +46,8 @@ case $select in
             echo "#command_addbot" >> .env
             echo "addstable = 'stable_link'" >> .env
             echo "addtesting = 'testing_link'" >> .env
+            echo "#service_list" >> .env
+            echo "service_list = ','" >> .env
             sleep 1
             ./setup.sh
             ;;
