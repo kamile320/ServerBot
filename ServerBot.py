@@ -52,6 +52,18 @@ print(baner)
 yt_dl_opts = {'format': 'bestaudio/best'}
 ytdl = youtube_dl.YoutubeDL(yt_dl_opts)
 ffmpeg_options = {'options': "-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2"}
+#YT_DLP - search
+ytdl_opts_search = {
+    'default_search': 'ytsearch',
+    'quiet': True,
+    'extract_flat': True,
+    'verbose': False, #True for debug
+    'noplaylist': True,
+    'format': 'bestaudio/best',
+    'http_headers': {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Referer': 'https://www.youtube.com/'}}
+ytdl_search = youtube_dl.YoutubeDL(ytdl_opts_search)
 #Intents
 intents = discord.Intents.default()
 intents.message_content = True
@@ -275,7 +287,7 @@ async def newest_update(ctx):
 - Updated setup.sh, .env
 - Updated .mksysctlstart
 - Created .ytsearch command - for searching YouTube videos
-To see older releases, find 'updates.txt' in folder 'Files' 
+To see older releases, find 'updates.txt' in folder 'Files'
 """)
 
 #6
@@ -871,7 +883,7 @@ async def ytplay(ctx, *, url):
             voice = ctx.guild.voice_client
             player = discord.FFmpegPCMAudio(song, **ffmpeg_options)
             voice.play(player)
-            await ctx.send(f'Playing from source: ```{url}```')
+            await ctx.reply(f'Playing from source...')
         except:
             await ctx.reply("Can't play music.\nSource exist?")
     except:
@@ -881,23 +893,10 @@ async def ytplay(ctx, *, url):
 @client.command(name='ytsearch', help='Searches YouTube Videos by typed phrase')
 async def ytsearch(ctx, *, search):
     try:
-        ytdl_opts_search = {
-                    'default_search': 'ytsearch',
-                    'quiet': True,
-                    'extract_flat': True,
-                    'verbose': True,
-                    'noplaylist': True,
-                    'http_headers': {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                        'Referer': 'https://www.youtube.com/'}}
-        ytdl_s = youtube_dl.YoutubeDL(ytdl_opts_search)
-        try:
-            search_results = ytdl_s.extract_info(f"ytsearch:{search}", download=False)
-            for entry in search_results['entries']:
-                output = entry['url']
-                await ctx.send(f"Found: {output}")
-        except Exception as exc:
-                print(f"Can't find video!\n{exc}")
+        search_results = ytdl_search.extract_info(f"ytsearch:{search}", download=False)
+        for entry in search_results['entries']:
+            output = entry['url']
+            await ctx.reply(f"Found: {output}")
     except Exception as exc:
         print(f'Something went wrong.\nPossible cause: {exc}')
 
@@ -928,7 +927,7 @@ async def wait(ctx):
         voice = ctx.guild.voice_client
         source = FFmpegPCMAudio(f'{maindir}/Media/Team Fortress 2 Upgrade Station.ogg')
         player = voice.play(source)
-        await ctx.send(f"@everyone, {ctx.author.mention} is waiting!")
+        await ctx.reply(f"@everyone, {ctx.author.mention} is waiting!")
     except AttributeError:
         await ctx.reply(voice_not_connected_error)
     except:
