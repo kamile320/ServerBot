@@ -6,13 +6,15 @@ OPTIONS=(1 "Start Bot"
          3 "Download pip3 libraries"
          4 "Create Python3 venv in current dir"
          5 "Create .env file"
-         6 "Install ServerBot from GitHub")
+         6 "Enter to Python3 venv"
+         7 "Manually create systemctl entry"
+         8 "Install ServerBot from GitHub")
 
 select=$(dialog --clear \
 --backtitle "ServerBot ${VERSION}" \
 --title "ServerBot Setup" \
 --menu "Select Operation:" \
-18 52 4 \
+18 52 8 \
 "${OPTIONS[@]}" \
 2>&1 >/dev/tty)
 
@@ -52,6 +54,15 @@ case $select in
             ./setup.sh
             ;;
         6)
+            echo "Entering to Python3 virtual environment..."
+            source .venv/bin/activate
+            bash setup.sh
+            ;;
+        7)
+            echo "Starting sysctladd.py..."
+            python3 Files/sysctladd.py
+            ;;
+        8)
             echo "Install ServerBot from Github..."
             echo "This option is useful when you want to update Bot or fix/rebuild critical files."
             echo "As default, this option will install ServerBot ${VERSION} in a new directory."
