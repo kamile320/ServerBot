@@ -287,6 +287,9 @@ async def newest_update(ctx):
 - Updated setup.sh, .env
 - Updated .mksysctlstart
 - Created .ytsearch command - for searching YouTube videos
+- Created sysctladd.py - to easily and manually create systemd/systemctl entries 
+- Updated manuals
+- Updated pictures in HTML manuals
 To see older releases, find 'updates.txt' in folder 'Files'
 """)
 
@@ -299,8 +302,6 @@ Ideas for Future Updates
 - Better setup.sh
 - More slash commands
 - Better .dir list
-- .service command that uses .env file
-- better .mksysctlstart command (and port it as .sh script)
 You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac)
 """)
     

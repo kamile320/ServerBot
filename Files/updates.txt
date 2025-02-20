@@ -86,3 +86,14 @@ on text in .testbot while running Bot on ARM devices
 - Updated .manual .credits commands
 - Moved .webreq to commands for mod_usr
 - Updated HTML manuals (and hosted on Kamile320.github.io/manualEN.html)
+
+
+[ServerBot v1.6]
+    Changelog:
+- Updated .service command - now it uses .env file for service entries
+- Updated setup.sh, .env
+- Updated .mksysctlstart
+- Created .ytsearch command - for searching YouTube videos
+- Created sysctladd.py - to easily and manually create systemd/systemctl entries 
+- Updated manuals
+- Updated pictures in HTML manuals
