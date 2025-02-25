@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.6"
+VERSION="v1.6.1"
 OPTIONS=(1 "Start Bot"
          2 "Start Bot (not venv)"
          3 "Download pip3 libraries"

@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-ver = "1.6"
+ver = "1.6.1"
 
 def os_selector():
     print(f"====ServerBot v{ver} Recovery Menu====")
@@ -283,13 +283,10 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Updated .service command - now it uses .env file for service entries
-- Updated setup.sh, .env
-- Updated .mksysctlstart
-- Created .ytsearch command - for searching YouTube videos
-- Created sysctladd.py - to easily and manually create systemd/systemctl entries 
-- Updated manuals
+- Updated .ytplay - now you can play music using YT URL or typed phrase
+- Updated .ytsearch
 - Updated pictures in HTML manuals
+- Minor fixes
 To see older releases, find 'updates.txt' in folder 'Files'
 """)
 
@@ -298,8 +295,8 @@ To see older releases, find 'updates.txt' in folder 'Files'
 async def next_update(ctx):
     await ctx.send("""
 Ideas for Future Updates
-- Better Logs
-- Better setup.sh
+- Better Logs (yt_dlp error detecting etc)
+- Better Informations/Errors
 - More slash commands
 - Better .dir list
 You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac)
@@ -437,7 +434,7 @@ async def shrtct(ctx, desk):
             
             print(f"Information: Created desktop shortcut ({home_dir})")
             logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(f"Information: Created desktop shortcut ({home_dir})\n")
+            logs.write(f"Information[mkshortcut]: Created desktop shortcut ({home_dir})\n")
             logs.close()
         except:
             await ctx.send('Something went wrong, please try again.')
@@ -445,7 +442,7 @@ async def shrtct(ctx, desk):
         await ctx.send(not_allowed)
 
 #6
-@client.command(name="mksysctlstart", help="Adds ServerBot to systemctl to start with system startup (Bot needs to be running as root)\nMode:\n'def' -> creates default autorun entry (python3)\n'venv' -> creates outorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv hides in ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with full permissions (chmod 777 recursive). Without full permissions to bot files, systemctl startup will not work.")
+@client.command(name="mksysctlstart", help="Adds ServerBot to systemctl to start with system startup (Bot needs to be running as root)\nMode:\n'def' -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv hides in ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with full permissions (chmod 777 recursive). Without full permissions to bot files, systemctl startup will not work.")
 async def mksysctlstart(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -458,9 +455,9 @@ async def mksysctlstart(ctx, mode):
                         auto.close()
                         await ctx.send('Done.')
 
-                        print(f"Information: Created autorun.sh file (Files/autorun.sh)")
+                        print(f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)")
                         logs = open(f'{maindir}/Logs.txt', 'a')
-                        logs.write(f"Information: Created autorun.sh file (Files/autorun.sh)\n")
+                        logs.write(f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)\n")
                         logs.close()
                     except:
                         await ctx.send("Can't create file!")
@@ -472,9 +469,9 @@ async def mksysctlstart(ctx, mode):
                         await ctx.send("Done!")
                         await ctx.send(SBservice)
 
-                        print(f"Information: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}")
+                        print(f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}")
                         logs = open(f'{maindir}/Logs.txt', 'a')
-                        logs.write(f"Information: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}\n")
+                        logs.write(f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}\n")
                         logs.close()
                     except:
                         await ctx.send("Can't create service file!\nAre you root?")
@@ -489,9 +486,9 @@ async def mksysctlstart(ctx, mode):
                         auto.close()
                         await ctx.send('Done.')
 
-                        print(f"Information: Created autorun.sh file (Files/autorun.sh)")
+                        print(f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)")
                         logs = open(f'{maindir}/Logs.txt', 'a')
-                        logs.write(f"Information: Created autorun.sh file (Files/autorun.sh)\n")
+                        logs.write(f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)\n")
                         logs.close()
                     except:
                         await ctx.send("Can't create file!")
@@ -503,9 +500,9 @@ async def mksysctlstart(ctx, mode):
                         await ctx.send("Done!")
                         await ctx.send(SBservice)
                     
-                        print(f"Information: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}")
+                        print(f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}")
                         logs = open(f'{maindir}/Logs.txt', 'a')
-                        logs.write(f"Information: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}\n")
+                        logs.write(f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}\n")
                         logs.close()
                     except:
                         await ctx.send("Can't create service file!\nAre you root?")
@@ -862,9 +859,10 @@ async def play(ctx, *, name):
         await ctx.reply(voice_not_connected_error)
 
 #4 - ytplay
-@client.command(name='ytplay', help="Play music from YouTube URL\n.ytplay {URL}")
-async def ytplay(ctx, *, url):
+@client.command(name='ytplay', help="Play music from YouTube URL\n.ytplay {url/search} {URL/Title}\nurl - playing from YouTube URL's\nsearch - playing from typed phrase")
+async def ytplay(ctx, type, *, url):
     try:
+        #Joining
         try:
             channel = ctx.message.author.voice.channel
             voice = await channel.connect()
@@ -877,16 +875,46 @@ async def ytplay(ctx, *, url):
             logs = open(f'{maindir}/Logs.txt', 'a')
             logs.write(f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?\n")
             logs.close()
-        try:
-            loop = asyncio.get_event_loop()
-            data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
-            song = data['url']
-            voice = ctx.guild.voice_client
-            player = discord.FFmpegPCMAudio(song, **ffmpeg_options)
-            voice.play(player)
-            await ctx.reply(f'Playing from source...')
-        except:
-            await ctx.reply("Can't play music.\nSource exist?")
+        #URL Playing
+        if type == 'url':
+            try:
+                loop = asyncio.get_event_loop()
+                data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
+                song = data['url']
+                voice = ctx.guild.voice_client
+                player = discord.FFmpegPCMAudio(song, **ffmpeg_options)
+                voice.play(player)
+                await ctx.reply(f'Playing from source...')
+            except:
+                await ctx.reply("Can't play music.\nSource exist?")
+        #Phrase Playing
+        elif type == 'search':
+            try:
+                search_results = ytdl_search.extract_info(f"ytsearch:{url}", download=False)
+                for entry in search_results['entries']:
+                    output = entry['url']
+                    print(f"Information[YouTubePlay-Search]: Found {output}.")
+                    logs = open(f'{maindir}/Logs.txt', 'a')
+                    logs.write(f"Information[YouTubePlay-Search]: Found {output}.\n")
+                    logs.close()
+            except Exception as exc:
+                print(f'Information[YouTubePlay-Search]: Failed to use search function.\nCause: {exc}')
+                await ctx.reply(f"Something went wrong while searching YouTube Video. See 'Logs.txt' for more details")
+                logs = open(f'{maindir}/Logs.txt', 'a')
+                logs.write(f"Information[YouTubePlay-Search]: Failed to use search function.\nCause: {exc}\n")
+                logs.close()
+            try:
+                loop = asyncio.get_event_loop()
+                data = await loop.run_in_executor(None, lambda: ytdl.extract_info(output, download=False))
+                song = data['url']
+                voice = ctx.guild.voice_client
+                player = discord.FFmpegPCMAudio(song, **ffmpeg_options)
+                voice.play(player)
+                await ctx.reply(f'Playing from source...')
+            except:
+                await ctx.reply("Can't play music.\nSource exist?")
+        else:
+            await ctx.send("Wrong mode. Type '.ytplay url/search link/phrase'")
     except:
         await ctx.reply(voice_not_connected_error)
 
@@ -897,9 +925,17 @@ async def ytsearch(ctx, *, search):
         search_results = ytdl_search.extract_info(f"ytsearch:{search}", download=False)
         for entry in search_results['entries']:
             output = entry['url']
-            await ctx.reply(f"Found: {output}")
+            await ctx.reply(f'Found: {output}')
+            print(f"Information[YouTubeSearch]: Found {output}.")
+            logs = open(f'{maindir}/Logs.txt', 'a')
+            logs.write(f"Information[YouTubeSearch]: Found {output}.\n")
+            logs.close()
     except Exception as exc:
-        print(f'Something went wrong.\nPossible cause: {exc}')
+        await ctx.reply(f"Something went wrong while searching YouTube Video. See 'Logs.txt' for more details")
+        print(f'Information[YouTubeSearch]: Failed to use search function.\nCause: {exc}')
+        logs = open(f'{maindir}/Logs.txt', 'a')
+        logs.write(f"Information[YouTubeSearch]: Failed to use search function.\nCause: {exc}\n")
+        logs.close()
 
 #6 - stop
 @client.command(pass_context=True, name='stop', help='Stops playing audio')
