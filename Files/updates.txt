@@ -97,3 +97,11 @@ on text in .testbot while running Bot on ARM devices
 - Created sysctladd.py - to easily and manually create systemd/systemctl entries 
 - Updated manuals
 - Updated pictures in HTML manuals
+
+
+[ServerBot v1.6.1]
+    Changelog:
+- Updated .ytplay - now you can play music using YT URL or typed phrase
+- Updated .ytsearch
+- Updated pictures in HTML manuals
+- Minor fixes
