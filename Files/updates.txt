@@ -105,3 +105,13 @@ on text in .testbot while running Bot on ARM devices
 - Updated .ytsearch
 - Updated pictures in HTML manuals
 - Minor fixes
+
+
+[ServerBot v1.6.2]
+    Changelog:
+- Updated HTML manuals
+- Updated favicon.ico
+- Updated .manual (wrong link to website + added links to two languages)
+- Updated setup.sh
+- Removed empty Files/Logs.txt from repository
+- Updated music commands and added .resume command
