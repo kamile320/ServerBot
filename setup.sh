@@ -1,6 +1,8 @@
 #!/bin/bash
 
-VERSION="v1.6.1"
+VERSION="v1.6.2"
+UPDATEVER="v1.6.2"
+
 OPTIONS=(1 "Start Bot"
          2 "Start Bot (not venv)"
          3 "Download pip3 libraries"
@@ -65,7 +67,7 @@ case $select in
         8)
             echo "Install ServerBot from Github..."
             echo "This option is useful when you want to update Bot or fix/rebuild critical files."
-            echo "As default, this option will install ServerBot ${VERSION} in a new directory."
+            echo "As default, this option will install ServerBot ${UPDATEVER} in a new directory."
             echo "You can change it for other release."
             echo "Installer uses git command. Make sure you have downloaded it."
             read -p "Type anything to continue."
