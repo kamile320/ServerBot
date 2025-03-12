@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-ver = "1.6.1"
+ver = "1.6.2"
 
 def os_selector():
     print(f"====ServerBot v{ver} Recovery Menu====")
@@ -45,9 +45,9 @@ except Exception as exc:
 
 
 #Baner
-baner = pyfiglet.figlet_format("ServerBot")
+banner = pyfiglet.figlet_format("ServerBot")
 bluescreenface = pyfiglet.figlet_format(": (")
-print(baner)
+print(banner)
 #YT_DLP
 yt_dl_opts = {'format': 'bestaudio/best'}
 ytdl = youtube_dl.YoutubeDL(yt_dl_opts)
@@ -180,13 +180,13 @@ async def essa(ctx):
 #3
 @client.command(name='botbanner', help='Shows Bots Banner')
 async def banner(ctx):
-    await ctx.send(f'```{baner}```')
+    await ctx.send(f'```{banner}```')
 
 #4
 @client.command(name='banner', help='Shows your text as Banner')
-async def banner(ctx, *, text):
-    banerr = pyfiglet.figlet_format(text)
-    await ctx.send(f'```{banerr}```')
+async def banner1(ctx, *, text):
+    banner1 = pyfiglet.figlet_format(text)
+    await ctx.send(f'```{banner1}```')
 
 #5
 @client.command(name='blankthing', help='Just blank thing')
@@ -237,7 +237,7 @@ async def badge(ctx, member: discord.Member):
 async def manual(ctx, type):
     try:
         if type == 'web':
-            await ctx.send("ServerBot user [Manual](https://Kamile320.github.io/manualEN.html)")
+            await ctx.send("ServerBot user Manual [PL](https://Kamile320.github.io/ServerBot/manual.html) [EN](https://Kamile320.github.io/ServerBot/manualEN.html)")
         elif type == 'local':
             await ctx.send(file=discord.File(f'{maindir}/manualEN.html'))
         else:
@@ -283,10 +283,13 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Updated .ytplay - now you can play music using YT URL or typed phrase
-- Updated .ytsearch
-- Updated pictures in HTML manuals
-- Minor fixes
+- Updated HTML manuals
+- Updated favicon.ico
+- Updated .manual (wrong link to website + added links to two languages)
+- Updated setup.sh
+- Removed empty Files/Logs.txt from repository
+- Updated music commands and added .resume command
+
 To see older releases, find 'updates.txt' in folder 'Files'
 """)
 
@@ -938,7 +941,7 @@ async def ytsearch(ctx, *, search):
         logs.close()
 
 #6 - stop
-@client.command(pass_context=True, name='stop', help='Stops playing audio')
+@client.command(pass_context=True, name='stop', help='Stop playing audio')
 async def stop(ctx):
     voice = ctx.guild.voice_client
     if voice.is_playing():
@@ -947,7 +950,7 @@ async def stop(ctx):
         await ctx.reply('Music is not playing right now')
 
 #7 - pause
-@client.command(pass_context = True, name='pause', help='Pause/Resume command')
+@client.command(pass_context = True, name='pause', help='Pause/Resume playing audio')
 async def pause(ctx):
     voice = ctx.guild.voice_client
     if voice.is_playing():
@@ -955,9 +958,20 @@ async def pause(ctx):
     elif voice.is_paused():
         voice.resume()
     else:
-        await ctx.reply('Music is not playing on voice channel right now')
+        await ctx.reply('Music is not playing on the voice channel right now')
 
-#8 - waiting
+#8 - resume
+@client.command(pass_context = True, name='resume', help='Resume playing audio')
+async def resume(ctx):
+    voice = ctx.guild.voice_client
+    if voice.is_paused():
+        voice.resume()
+    elif voice.is_playing():
+        await ctx.send("Music is playing right now")
+    else:
+        await ctx.reply('Music is not playing on the voice channel right now')
+
+#9 - waiting
 @client.command(name='waiting', help="Say everyone that you're waiting!")
 async def wait(ctx):
     try:
@@ -970,7 +984,7 @@ async def wait(ctx):
     except:
         await ctx.reply(ffmpeg_error)
 
-#9 - micspam
+#10 - micspam
 @client.command(name='micspam')
 async def micspam(ctx):
     try:
