@@ -21,11 +21,17 @@ More information and instructions you can find in *ServerBot Manual* [[PL]](http
 
 ServerBot is an open project - that means you can make your own version of bot, or help me with making ServerBot way better - better english translations/text, code improvements, bug report etc.
 
-## Commands/Programs that you need to install first (Linux):
+## Programs that you need to install first (Linux):
 - dialog
 - python3 (3.9 or newer)
 - python3-pip
-- Discord Bot user created in [Discord Developer Portal](https://discord.com/developers/docs/intro)
-- ffmpeg files and add it to PATH (If you want to use Music Bot features; Windows only)
+- Discord Bot user (Application) created in [Discord Developer Portal](https://discord.com/developers/docs/intro)
+- The rest will be installed automatically
+
+## Programs that you need to install first (Windows):
+- Python 3 (3.9 or newer; add to PATH + pip)
+- Discord Bot user (Application) created in [Discord Developer Portal](https://discord.com/developers/docs/intro)
+- [Download FFmpeg](https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip) .exe files and add it to PATH (See [setup.bat](https://github.com/kamile320/ServerBot/blob/main/setup.bat) and HTML manuals)
+- The rest will be installed automatically
 
 Every ideas, bug reports or helping in code improvement you can send me on [Discord](https://discord.gg/UMtYGAx5ac)
