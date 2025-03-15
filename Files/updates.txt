@@ -115,3 +115,11 @@ on text in .testbot while running Bot on ARM devices
 - Updated setup.sh
 - Removed empty Files/Logs.txt from repository
 - Updated music commands and added .resume command
+
+
+[ServerBot v1.6.3]
+    Changelog:
+- Updated HTML manuals
+- Updated setup.bat - now it can add FFmpeg to PATH
+  (You need to download FFmpeg .exe files and copy it to 'C:/ffmpeg/bin'; needs restart - see manual)
+- Small updates in music commands

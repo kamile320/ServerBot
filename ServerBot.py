@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-ver = "1.6.2"
+ver = "1.6.3"
 
 def os_selector():
     print(f"====ServerBot v{ver} Recovery Menu====")
@@ -284,11 +284,8 @@ async def newest_update(ctx):
 [ServerBot v{ver}]
     Changelog:
 - Updated HTML manuals
-- Updated favicon.ico
-- Updated .manual (wrong link to website + added links to two languages)
-- Updated setup.sh
-- Removed empty Files/Logs.txt from repository
-- Updated music commands and added .resume command
+- Updated setup.bat - now it can add FFmpeg to PATH\n(You need to download FFmpeg .exe files and copy it to 'C:/ffmpeg/bin'; needs restart - see manual)
+- Small updates in music commands
 
 To see older releases, find 'updates.txt' in folder 'Files'
 """)
@@ -914,8 +911,8 @@ async def ytplay(ctx, type, *, url):
                 player = discord.FFmpegPCMAudio(song, **ffmpeg_options)
                 voice.play(player)
                 await ctx.reply(f'Playing from source...')
-            except:
-                await ctx.reply("Can't play music.\nSource exist?")
+            except Exception as exc:
+                await ctx.reply(f"Can't play music.\nSource exist?\nPossible cause: {exc}")
         else:
             await ctx.send("Wrong mode. Type '.ytplay url/search link/phrase'")
     except:
@@ -985,7 +982,7 @@ async def wait(ctx):
         await ctx.reply(ffmpeg_error)
 
 #10 - micspam
-@client.command(name='micspam')
+@client.command(name='micspam', help='OMEGATRONIC BOT MICSPAM')
 async def micspam(ctx):
     try:
         voice = ctx.guild.voice_client
