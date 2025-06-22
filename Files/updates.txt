@@ -123,3 +123,9 @@ on text in .testbot while running Bot on ARM devices
 - Updated setup.bat - now it can add FFmpeg to PATH
   (You need to download FFmpeg .exe files and copy it to 'C:/ffmpeg/bin'; needs restart - see manual)
 - Small updates in music commands
+
+
+[ServerBot v1.7]
+    Changelog:
+- Added ChannelLog - now you can see every message sent on your Discord Server in Bot console.
+- minor updates to Bot Command Logs
