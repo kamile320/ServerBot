@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-ver = "1.6.3"
+ver = "1.7"
 
 def os_selector():
     print(f"====ServerBot v{ver} Recovery Menu====")
@@ -22,6 +22,9 @@ def os_selector():
         exit()
     else:
         print('Failed to run Script. Aborting Install')
+
+def channelLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
+    print(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}")
 
 try:
     import discord
@@ -48,10 +51,12 @@ except Exception as exc:
 banner = pyfiglet.figlet_format("ServerBot")
 bluescreenface = pyfiglet.figlet_format(": (")
 print(banner)
+
 #YT_DLP
 yt_dl_opts = {'format': 'bestaudio/best'}
 ytdl = youtube_dl.YoutubeDL(yt_dl_opts)
 ffmpeg_options = {'options': "-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2"}
+
 #YT_DLP - search
 ytdl_opts_search = {
     'default_search': 'ytsearch',
@@ -64,6 +69,7 @@ ytdl_opts_search = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Referer': 'https://www.youtube.com/'}}
 ytdl_search = youtube_dl.YoutubeDL(ytdl_opts_search)
+
 #Intents
 intents = discord.Intents.default()
 intents.message_content = True
@@ -128,6 +134,34 @@ async def on_ready():
         print("Can't sync slash commands")
     print('Bot runtime: ', datetime.datetime.now())
     print('=' *40)
+
+@client.event
+async def on_message(message):
+    username = str(message.author).split('#')[0]
+    user_message = str(message.content)
+    #channel
+    try:
+        channel = str(message.channel.name)
+    except AttributeError:
+        channel = str(message.channel)
+    #server
+    try:
+        server = str(message.guild.name)
+    except AttributeError:
+        server = str(message.guild)
+    
+    #ID
+    userid = message.author.id
+    channelid = message.channel.id
+    #server
+    try:
+        serverid = message.guild.id
+    except AttributeError:
+        serverid = "DM"
+
+    channelLog(username, user_message, channel, server, userid, channelid, serverid)
+    await client.process_commands(message)
+
 
 
         #ChatBot
@@ -283,9 +317,8 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Updated HTML manuals
-- Updated setup.bat - now it can add FFmpeg to PATH\n(You need to download FFmpeg .exe files and copy it to 'C:/ffmpeg/bin'; needs restart - see manual)
-- Small updates in music commands
+- Added ChannelLog - now you can see every message sent on your Discord Server in Bot console.
+- minor updates to Bot Command Logs
 
 To see older releases, find 'updates.txt' in folder 'Files'
 """)
@@ -432,7 +465,7 @@ async def shrtct(ctx, desk):
             os.chdir(maindir)
             await ctx.send('Done.')
             
-            print(f"Information: Created desktop shortcut ({home_dir})")
+            print(f"Information[mkshortcut]: Created desktop shortcut ({home_dir})")
             logs = open(f'{maindir}/Logs.txt', 'a')
             logs.write(f"Information[mkshortcut]: Created desktop shortcut ({home_dir})\n")
             logs.close()
@@ -632,9 +665,9 @@ async def delete(ctx, amount: int = 0):
     if str(ctx.message.author.id) in mod_usr:
         deleted = await ctx.channel.purge(limit=amount)
         await ctx.channel.send(f'Deleted {len(deleted)} message(s)')
-        print(f"Information: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}")
+        print(f"Information[delete]: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}")
         logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f"Information: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}\n")
+        logs.write(f"Information[delete]: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}\n")
         logs.close()
     else:
         await ctx.reply(not_allowed)
@@ -645,9 +678,9 @@ async def cleaner(ctx):
     if str(ctx.message.author.id) in mod_usr:
         deleted = await ctx.channel.purge(limit=100)
         await ctx.channel.send(f'[Cleaner] deleted max amount of messages ({len(deleted)})')
-        print(f"Information: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}")
+        print(f"Information[cleaner]: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}")
         logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f"Information: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}\n")
+        logs.write(f"Information[cleaner]: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}\n")
         logs.close()
     else:
         await ctx.reply(not_allowed)
@@ -1069,7 +1102,7 @@ async def makefile(ctx, name, *, content):
         await ctx.send(f'Created file {name}, in directory {directory}.')
         print(created)
         logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f'Information[Files/Directories]: {created}\n')
+        logs.write(f'Information[FileManager]: {created}\n')
         logs.close()
     except:
         await ctx.send(f'Something went wrong while creating file.')
