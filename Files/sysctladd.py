@@ -48,7 +48,7 @@ mdir = os.getcwd()
 
 
 print("""
-S Y S T E M C T L  A D D E R  v1.0  #
+S Y S T E M C T L  A D D E R  v1.1  #
 #####################################
 
 This script will add your python script to system startup (autostart) via systemctl.
@@ -69,7 +69,7 @@ if check == 'Y':
     file_name = input("Enter your file name (without '.py'): ")
     sctlname = input("Enter name for systemctl service: ")
     isvenv = input("Do you use venv? [Y/N]: ")
-    if isvenv == 'Y':
+    if isvenv == 'Y' or isvenv == 'y':
         venv_name = input('Enter Python3 venv directory name: ')
     else:
         print("python3 venv: False")
@@ -87,7 +87,7 @@ if check == 'Y':
     print(f"Main Directory: {mdir}\n")
 
     check2 = input("Are you ready to start? [Y/N]: ")
-    if check2 == 'Y':
+    if check2 == 'Y' or check2 == 'y':
         try:
             if venv_name != 'None':
                 venv(mdir, file_name, venv_name)
@@ -105,5 +105,5 @@ if check == 'Y':
         print('Aborting...')
         exit()
 else:
-    print('Aborting...')
+    print('User canceled. Aborting...')
     exit()
