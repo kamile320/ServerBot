@@ -129,3 +129,10 @@ on text in .testbot while running Bot on ARM devices
     Changelog:
 - Added ChannelLog - now you can see every message sent on your Discord Server in Bot console.
 - minor updates to Bot Command Logs
+
+
+[ServerBot v1.7.1]
+    Changelog:
+- small changes in some commands
+- small update in sysctladd.py
+- updated .testbot (CPU Type)

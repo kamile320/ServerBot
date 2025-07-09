@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-ver = "1.7"
+ver = "1.7.1"
 
 def os_selector():
     print(f"====ServerBot v{ver} Recovery Menu====")
@@ -76,7 +76,7 @@ intents.message_content = True
 status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}']
 choice = random.choice(status)
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
-
+testbot_cpu_type = platform.processor() or "Unknown"
 
 try:
     load_dotenv()
@@ -267,7 +267,7 @@ async def badge(ctx, member: discord.Member):
 
         #BotInfo
 #1
-@client.command(name='manual', help="Sends HTML manual\n'web' - for showing manual in browser\n'local' to download HTML manual from Discord")
+@client.command(name='manual', help="Sends HTML manual\n'web' - see manual in browser\n'local' - download HTML manual from Discord")
 async def manual(ctx, type):
     try:
         if type == 'web':
@@ -275,9 +275,9 @@ async def manual(ctx, type):
         elif type == 'local':
             await ctx.send(file=discord.File(f'{maindir}/manualEN.html'))
         else:
-            await ctx.send("Wrong type.\nChoose 'web' for showing manual in browser\nor 'local' to download .html from Discord")
+            await ctx.send("Wrong type.\nChoose 'web' to read manual in browser\nor 'local' to download .html from Discord")
     except:
-        await ctx.send(f"Can't open manualEN.html")
+        await ctx.send(f"Something went wrong. Try again.")
 
 #2
 @client.command(name='credits', help='Shows Credits')
@@ -317,10 +317,11 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Added ChannelLog - now you can see every message sent on your Discord Server in Bot console.
-- minor updates to Bot Command Logs
+- small changes in some commands
+- small update in sysctladd.py
+- updated .testbot (CPU Type)
 
-To see older releases, find 'updates.txt' in folder 'Files'
+To see older releases, find 'updates.txt' in 'Files' directory.
 """)
 
 #6
@@ -547,7 +548,7 @@ async def mksysctlstart(ctx, mode):
         await ctx.send(not_allowed)
 
 #7
-@client.command(name='service', help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active")
+@client.command(name='service', help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemctl")
 async def service(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -582,9 +583,14 @@ async def service(ctx, mode):
                     await ctx.send(sctlerr)
 
             else:
-                await ctx.send("Incorrect mode.")
-        except:
-            await ctx.send('Something went wrong.')
+                try:
+                    await ctx.send(f"**Service {mode}:**")
+                    await ctx.send(f"```{subprocess.getoutput([f'systemctl status {mode}'])}```")
+                except Exception as err:
+                    await ctx.send(f'Something went wrong.\nPossible cause: {err}')
+        
+        except Exception as err:
+            await ctx.send(f'Something went wrong.\nPossible cause: {err}')
     else:
         await ctx.send(not_allowed)
 
@@ -617,7 +623,7 @@ Bot name: **{client.user}**
 Version: **{ver}**
 CPU Usage: **{psutil.cpu_percent()}** (%)
 CPU Count: **{psutil.cpu_count()}**
-CPU Type: **{platform.processor()}ㅤ**
+CPU Type: **{testbot_cpu_type}**
 RAM Usage: **{psutil.virtual_memory().percent}** (%)
 Ping: **{round(client.latency * 1000)}ms**
 OS Test (Windows): **{psutil.WINDOWS}**
@@ -1230,7 +1236,7 @@ Bot name: **{client.user}**
 Version: **{ver}**
 CPU Usage: **{psutil.cpu_percent()}** (%)
 CPU Count: **{psutil.cpu_count()}**
-CPU Type: **{platform.processor()}ㅤ**
+CPU Type: **{testbot_cpu_type}**
 RAM Usage: **{psutil.virtual_memory().percent}** (%)
 Ping: **{round(client.latency * 1000)}ms**
 OS Test (Windows): **{psutil.WINDOWS}**
@@ -1247,5 +1253,5 @@ Floppy: **{os.path.exists('/dev/fd0')}**
 
 try:
     client.run(os.getenv('TOKEN'))
-except:
-    print("Can't load Bot Token!\nEnter valid Token in '.env' file!")
+except Exception as err:
+    print(f"Can't load Bot Token!\nEnter valid Token in '.env' file!\nPossible cause: {err}")
