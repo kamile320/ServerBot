@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.7.1 User Manual [PL]">
+    <meta name="description" content="ServerBot 1.8 User Manual [PL]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -36,7 +36,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.7.1</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.8</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -61,6 +61,7 @@
             <li><a href="#autostart">Uruchamianie Automatyczne</a></li>
             <li><a href="#token">Tokeny</a></li>
             <li><a href="#ffmpeg">Windows - instalacja FFmpeg</a></li>
+            <li><a href="#modules">Moduły/Rozszerzenia Bota</a></li>
             <li><a href="#comma">Komendy</a></li>
         </ol>
 
@@ -75,7 +76,8 @@
             <li><b>Logs.txt</b> - Plik z Dziennikiem zdarzeń bota na serwerze</li>
             <li><b>manual.html</b> - Manual Bota</li>
             <li><b>Media</b> - Katalog z Domyślnymi Muzykami/Dźwiękami</li>
-            <li><b>.env</b> - Specialny plik do przechowywania Tokenów Bota</li>
+            <li><b>ACL</b> - Dziennik wiadomości użytkowników (po włączeniu <a href="#ACL">ACL</a>)</li>
+            <li><b>.env</b> - Specjalny plik do przechowywania Tokenów Bota</li>
             <li><b>.venv</b> - Wirtualne Środowisko Pythona (Po użyciu setup.sh - opcja 4)</li>
             <li>
                 <b>Files</b> - Katalog z wymaganymi (i nie) plikami Bota 
@@ -165,7 +167,9 @@
         dscserv_link = 'Link do Serwera Discord'<br>
         addstable = 'stable_link of Discord Bot'<br>
         addtesting = 'testing_link of Discord Bot'<br>
-        service_list = 'Lista usług systemctl do monitorowania poprzez Discorda'<br><br>
+        service_list = 'Lista usług systemctl do monitorowania poprzez Discorda'<br>
+        showmodulemessages = 'True/False' - wyświetla informacje o włączonych modułach Bota<br>
+        ACLmodule = 'True/False' - Uruchamia funkcję <a href="#ACL">AdvancedChannelListener</a><br><br>
         <h4>ID użytkownika</h4>
         Niektóre komendy korzystają z funkcji i danych związanych z twoim systemem operacyjnym,<br>
         więc wymagają uprawnień administratora do uruchomienia - chyba nie chcesz żeby ktoś ci usunął system!<br>
@@ -182,6 +186,21 @@
         <a href="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip">linku</a>. Po pobraniu należy wypakować pliki tak, aby 
         pliki .exe znajdowały się w lokalizacji C:\ffmpeg\bin. Jeśli chcesz wypakować w innym miejscu - edytuj skrypt! Po czym (w skrypcie) wciśnij enter, 
         aby ścieżkę z plikami FFmpeg dodać do PATH. Jeśli pojawi się komunikat o udanej operacji, uruchom ponownie system Windows.
+
+        <br>
+
+        <h3 id="modules">Moduły/Rozszerzenia Bota</h3>
+
+        Bot posiada moduły/rozszerzenia rozszerzające funkcje, które można włączyć lub wyłączyć w pliku .env<br>
+        Moduły są także dostępne jako osobne repozytoria (Boty Discord) na GitHubie.<br>
+        Aktualnie dostępny jest jeden moduł:<br>
+        <ul type="square">
+            <li>
+                <a id="ACL" href="https://github.com/kamile320/AdvancedChannelListener"><b>AdvancedChannelListener</b></a> - rejestruje wiadomości użytkowników na serwerze i zapisuje je w pliku ACL/[DiscordUserID].txt oraz wszystkie wiadomości w ACL/default/message.txt<br>
+                Przydatny do monitorowania użytkowników na serwerze i weryfikowania kto jest kim. Może łamać prywatność użytkowników, więc używaj z rozwagą.<br>
+                Jeśli nie zamierzasz używać tego modułu - ustaw w .env ACLmodule = 'False' (ustwaione domyślnie).
+            </li>
+        </ul>
 
         <br>
 

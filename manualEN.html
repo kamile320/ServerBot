@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.7.1 User Manual [EN]">
+    <meta name="description" content="ServerBot 1.8 User Manual [EN]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -36,7 +36,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.7.1</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.8</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -61,6 +61,7 @@
             <li><a href="#autostart">Autostartup</a></li>
             <li><a href="#token">Tokens</a></li>
             <li><a href="#ffmpeg">Windows - FFmpeg installation</a></li>
+            <li><a href="#modules">Bot Modules/Extensions</a></li>
             <li><a href="#comma">Commands</a></li>
         </ol>
 
@@ -75,6 +76,7 @@
             <li><b>Logs.txt</b> - File with the bot event log on the server</li>
             <li><b>manual.html</b> - Bot Manual</li>
             <li><b>Media</b> - Directory with Default Music/Sounds</li>
+            <li><b>ACL</b> - User message log (after enabling <a href="#ACL">ACL</a>)</li>
             <li><b>.env</b> - Special file for Bot Tokens</li>
             <li><b>.venv</b> - Python Virtual Environment (After using setup.sh - option 4)</li>
             <li>
@@ -167,7 +169,9 @@
         dscserv_link = 'Link to your Discord Server'<br>
         addstable = 'stable_link of Discord Bot'<br>
         addtesting = 'testing_link of Discord Bot'<br>
-        service_list = 'List of systemctl services to see via Discord'<br><br>
+        service_list = 'List of systemctl services to see via Discord'<br>
+        showmodulemessages = 'True/False' - shows which Bot modules are enabled<br>
+        ACLmodule = 'True/False' - Enables <a href="#ACL">AdvancedChannelListener</a> module<br><br>
         <h4>User ID</h4>
         Some commands uses Operating System data and functions,<br>
         so it requires administrator privileges to run - you don't want to have removed system by unauthorized user, right?<br>
@@ -184,6 +188,21 @@
         After download, extract files to C:\ffmpeg directory (.exe files must be in C:\ffmpeg\bin directory).
         If you want to extract ffmpeg to other location - edit setup.bat! After that, press enter (in running setup.bat) to add 
         FFmpeg to PATH. If you see "SUCCESS" message, reboot Windows.
+
+        <br>
+
+        <h3 id="modules">Bot Extensions/modules</h3>
+
+        Bot has extensions/modules that extend functions, which can be enabled or disabled in the .env file.<br>
+        Modules are also available as separate repositories (Discord Bots) on GitHub.<br>
+        Currently there's one module available:<br>
+        <ul type="square">
+            <li>
+                <a id="ACL" href="https://github.com/kamile320/AdvancedChannelListener"><b>AdvancedChannelListener</b></a> - shows user messages sent on Discord, saves them in ACL/[DiscordUserID].txt file and all messages in ACL/default/message.txt<br>
+                Useful for monitoring users on the server and verifying who is who. It can break user privacy, so use it wisely.<br>
+                If you don't want to use this - set ACLmodule = 'False' in .env (set as default).
+            </li>
+        </ul>
 
         <br>
 
