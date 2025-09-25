@@ -103,7 +103,7 @@ case $select in
                         bash setup.sh
                         ;;
                     4)
-                        sudo systemctl stop Serverbot
+                        sudo systemctl stop ServerBot
                         bash setup.sh
                         ;;
                     5)
