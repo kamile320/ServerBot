@@ -196,7 +196,7 @@ if os.getenv('showmodulemessages') in accept_value:
 Advanced Channel Listener v{ACLver}: {ACLstatus} ({ACLmode}) 
 \n\n""")
         logs.close()
-logmodule()
+    logmodule()
 
 
 

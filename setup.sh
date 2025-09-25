@@ -99,7 +99,7 @@ case $select in
                         bash setup.sh
                         ;;
                     3)
-                        sudo systemctl start serverBot
+                        sudo systemctl start ServerBot
                         bash setup.sh
                         ;;
                     4)
