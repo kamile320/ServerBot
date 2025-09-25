@@ -1,7 +1,12 @@
 import subprocess
 import os
 
-ver = "1.7.1"
+ver = "1.8"
+displayname='ServerBot'
+
+#ModuleVersion
+ACLver = "2.0"
+ACLmode = 0
 
 def os_selector():
     print(f"====ServerBot v{ver} Recovery Menu====")
@@ -23,8 +28,7 @@ def os_selector():
     else:
         print('Failed to run Script. Aborting Install')
 
-def channelLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
-    print(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}")
+
 
 try:
     import discord
@@ -48,14 +52,16 @@ except Exception as exc:
 
 
 #Baner
-banner = pyfiglet.figlet_format("ServerBot")
+banner = pyfiglet.figlet_format(displayname)
 bluescreenface = pyfiglet.figlet_format(": (")
 print(banner)
+
 
 #YT_DLP
 yt_dl_opts = {'format': 'bestaudio/best'}
 ytdl = youtube_dl.YoutubeDL(yt_dl_opts)
 ffmpeg_options = {'options': "-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2"}
+
 
 #YT_DLP - search
 ytdl_opts_search = {
@@ -70,13 +76,15 @@ ytdl_opts_search = {
         'Referer': 'https://www.youtube.com/'}}
 ytdl_search = youtube_dl.YoutubeDL(ytdl_opts_search)
 
+
 #Intents
 intents = discord.Intents.default()
 intents.message_content = True
-status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}']
+status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}', displayname]
 choice = random.choice(status)
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
 testbot_cpu_type = platform.processor() or "Unknown"
+accept_value = ['True', 'true', 'Enabled', 'enabled']
 
 try:
     load_dotenv()
@@ -119,6 +127,77 @@ SBservice = "Run post installation commands to enable ServerBot.service to start
 sctlerr = "Something went wrong.\n'sctl' directory with service entries exists?"
 sctlmade = "Created 'sctl' directory for systemctl service entry."
 badsite = "Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist? "
+    #A.C.L
+if os.getenv('ACLmodule') == 1:
+    ACLnotfounderr = "User history not found."
+    ACLhistorynotfound = "Default message history does not exist."
+    ACLnopermission = "You don't have permission to use ACL mode. This incident will be reported."
+
+
+
+#AdvancedChannelListener
+def aclcheck():
+    if os.path.exists(f'{maindir}/ACL') == True:
+        print("ACL check OK")
+    else:
+        print("ACL not found.\nCreating...")
+        try:
+            os.makedirs(f'{maindir}/ACL')
+        except:
+            print('Cannot create ACL directory.')
+def userLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
+    if os.path.exists(f'{maindir}/ACL/{usr_id}/message.txt') == True:
+        usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a')
+        usrmessage.write(f'[{srv}({srv_id}) / {chnl}({chnl_id})] {usr}({usr_id}): {usrmsg}\n')
+        usrmessage.close()
+    else:
+        print("[ACL] New user detected. Creating new entry...")
+        os.makedirs(f'{maindir}/ACL/{usr_id}')
+        usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a')
+        usrmessage.write(f'[{srv}({srv_id}) / {chnl}({chnl_id})] {usr}({usr_id}): {usrmsg}\n')
+        usrmessage.close()
+def channelLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
+    print(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}")
+    if os.path.exists(f'{maindir}/ACL/default/message.txt') == True:
+        usrmessage = open(f'{maindir}/ACL/default/message.txt', 'a')
+        usrmessage.write(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
+        usrmessage.close()
+    else:
+        print("[ACL] Default message history not detected. Creating new entry...")
+        os.makedirs(f'{maindir}/ACL/default')
+        usrmessage = open(f'{maindir}/ACL/default/message.txt', 'a')
+        usrmessage.write(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
+        usrmessage.close()
+
+
+
+#LoadModules
+if os.getenv('ACLmodule') in accept_value:
+    ACLmode = 1
+
+
+
+#Module Status [After Load]
+if ACLmode == 1:
+    ACLstatus = 'enabled'
+elif ACLmode == 0:
+    ACLstatus = 'disabled'
+else:
+    ACLstatus = 'Unknown status! Contact Administrator.'
+
+
+
+#LogModuleStatus [After Load-and-Status]
+if os.getenv('showmodulemessages') in accept_value:
+    def logmodule():
+        logs = open('Logs.txt', 'a')
+        logs.write(f"""
+=========={displayname} Built-in modules: ==========
+Advanced Channel Listener v{ACLver}: {ACLstatus} ({ACLmode}) 
+\n\n""")
+        logs.close()
+logmodule()
+
 
 
 #ClientEvent
@@ -130,36 +209,48 @@ async def on_ready():
     try:
         syncd = await client.tree.sync()
         print(f'Synced {len(syncd)} slash command(s)')
+        if os.getenv('showmodulemessages') in accept_value:
+            if os.getenv('ACLmodule') in accept_value:
+                print('Advanced Channel Listener module enabled')
+            else:
+                print('[showmodulemessages] A.C.L. is disabled.')
     except:
         print("Can't sync slash commands")
     print('Bot runtime: ', datetime.datetime.now())
     print('=' *40)
 
+
+
 @client.event
 async def on_message(message):
+    #Username
     username = str(message.author).split('#')[0]
+    #UserMessage
     user_message = str(message.content)
-    #channel
+    #Channel
     try:
         channel = str(message.channel.name)
     except AttributeError:
         channel = str(message.channel)
-    #server
+    #Server
     try:
         server = str(message.guild.name)
     except AttributeError:
         server = str(message.guild)
-    
-    #ID
+    #UserID
     userid = message.author.id
+    #ChannelID
     channelid = message.channel.id
-    #server
+    #ServerID
     try:
         serverid = message.guild.id
     except AttributeError:
         serverid = "DM"
 
-    channelLog(username, user_message, channel, server, userid, channelid, serverid)
+    if ACLmode == 1:
+        channelLog(username, user_message, channel, server, userid, channelid, serverid)
+        userLog(username, user_message, channel, server, userid, channelid, serverid)
+
     await client.process_commands(message)
 
 
@@ -310,16 +401,19 @@ async def time(ctx):
 @client.command(name='ping', help='Pings the Bot')
 async def ping(ctx):
     await ctx.send(f':tennis: Pong! ({round(client.latency * 1000)}ms)')
-        
+
 #5
 @client.command(name='release', help='Shows last changes of Bot functions/Changelog')
 async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- small changes in some commands
-- small update in sysctladd.py
-- updated .testbot (CPU Type)
+- Added Advanced Channel Listener functions as a module/extension that you can turn on/off in .env file
+- Small fixes/changes
+- Enable showmodulemessages to see if modules are enabled when you turn on the Bot
+- Added .module command - to see status of built-in modules
+- Added displayname to easily change visible Discord Bot name in some commands
+- Update in setup.sh - now you can easily manage ServerBot.service in systemctl (systemctl service options)
 
 To see older releases, find 'updates.txt' in 'Files' directory.
 """)
@@ -335,7 +429,7 @@ Ideas for Future Updates
 - Better .dir list
 You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac)
 """)
-    
+
 #7
 @client.command(name='issues', help='Known Issues of Bot')
 async def issues(ctx):
@@ -603,6 +697,29 @@ async def pingip(ctx, ip):
             await ctx.send(f"```{subprocess.getoutput([f'ping {ipaddr} -c 1'])}```")
         except:
             await ctx.send('Something went wrong')
+    else:
+        await ctx.send(not_allowed)
+
+#9
+@client.command(name='module', help='Check what modules are enabled and disabled.\n.module all - see status of all built-in modules')
+async def module(ctx, mode):
+    if str(ctx.message.author.id) in admin_usr:
+        if mode == 'all':
+            #ACL
+            if ACLmode == 1:
+                ACLstatus = 'enabled'
+            elif ACLmode == 0:
+                ACLstatus = 'disabled'
+            else:
+                ACLstatus = 'Unknown status! Contact Administrator.'
+            
+            
+            await ctx.send(f"""
+==========**{displayname} Built-in modules: **==========
+Advanced Channel Listener v{ACLver}: {ACLstatus} ({ACLmode}) 
+""")
+        else:
+            await ctx.send("Wrong mode. See .help module")
     else:
         await ctx.send(not_allowed)
         #AdminOnly-END
@@ -1192,6 +1309,36 @@ async def yt(ctx, YTname):
     else:
         await ctx.send("Wrong name")
         #Links_and_Servers-END
+
+
+
+    ###Built-in Modules###
+        
+        #AdvancedChannelListener
+#1
+if ACLmode == 1:
+    @client.command(name='ACL', help='Manage A.C.L. users messages saved history\ngetusr - shows User history by User ID\nget history - history of all saved messages')
+    async def ACL(ctx, mode, *, value):
+        if str(ctx.message.author.id) in admin_usr:
+            if mode == 'getusr':
+                try:
+                    await ctx.send(file=discord.File(f'{maindir}/ACL/{value}/message.txt'))
+                except:
+                    await ctx.send(ACLnotfounderr)
+            elif mode == 'get' and value == 'history':
+                try:
+                    await ctx.send(file=discord.File(f'{maindir}/ACL/default/message.txt'))
+                except:
+                    await ctx.send(ACLhistorynotfound)
+            else:
+                await ctx.send('Wrong mode.')
+        else:
+            await ctx.send(ACLnopermission)
+            print(f"Information[ACL]: User {ctx.message.author.id} tried to use !ACL command without permission.\nSee {maindir}/ACL/{ctx.message.author.id} for more information.\n")
+            logs = open(f'{maindir}/Logs.txt', 'a')
+            logs.write(f"Information[ACL]: User {ctx.message.author.id} tried to use !ACL command without permission.\nSee {maindir}/ACL/{ctx.message.author.id} for more information.\n")
+            logs.close()
+        #AdvancedChannelListener-END
 
 
 
