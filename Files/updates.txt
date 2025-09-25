@@ -136,3 +136,13 @@ on text in .testbot while running Bot on ARM devices
 - small changes in some commands
 - small update in sysctladd.py
 - updated .testbot (CPU Type)
+
+
+[ServerBot v1.8]
+    Changelog:
+- Added Advanced Channel Listener functions as a module/extension that you can turn on/off in .env file
+- Small fixes/changes
+- Enable showmodulemessages to see if modules are enabled when you turn on the Bot
+- Added .module command - to see status of built-in modules
+- Added displayname to easily change visible Discord Bot name in some commands
+- Update in setup.sh - now you can easily manage ServerBot.service in systemctl (systemctl service options)
