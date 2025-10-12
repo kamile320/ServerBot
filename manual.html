@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.8 User Manual [PL]">
+    <meta name="description" content="ServerBot 1.8.1 User Manual [PL]">
     <meta name="author" content="Kamile320">
 
     <style>
         body {
             background-image: linear-gradient(to right, rgb(141, 205, 226), rgb(62, 62, 255), rgb(3, 165, 3));
+            font-family: Arial;
         } 
 
         h1 {
@@ -36,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.8</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.8.1</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -114,9 +115,12 @@
 
         <br>
         
-        Należy poprzez IDE, terminal albo inny program uruchomić Skrypt,<br>
-        jeżeli coś pójdzie nie tak, Bot powinien dać znać w czym problem<br>
-        i poprosić o zatwierdzenie wykonania korekty albo porzuci uruchomienie/instalację<br>
+        Należy poprzez IDE, terminal albo inny program uruchomić skrypt - python3 lub setup.sh.<br>
+        Jeżeli coś pójdzie nie tak, Bot powinien dać znać w czym problem<br>
+        i poprosić o zatwierdzenie wykonania korekty albo porzuci uruchomienie/instalację.<br>
+        Po uruchomieniu skryptu, Bot powinien się połączyć z Discordem i być gotowy do pracy.<br>
+        [!] Jest możliwość zainstalowania bota poprzez plik .deb - należy pamiętać że bot zainstaluje się w /usr/share/serverbot. 
+        Używaj komendy serverbot z sudo, jeśli chcesz skonfigurować <a href="#autostart">autostart</a>.<br>
 
         <br>
 
@@ -139,7 +143,8 @@
         UWAGA! Bot (a raczej setup.sh) jest przystosowany do nazwy katalogu z wirtualnym środowiskiem o nazwie ".venv".<br>
         Jeśli utworzyłeś ręcznie venv z inną nazwą katalogu, bot może się nie uruchomić!<br>
         Zalecane jest użycie opcji 4 z setup.sh -> Bez problemu wszystko zainstaluje i skonfiguruje jak trzeba.<br>
-        Aby autostart zadziałał, należy ustawić pliki bota z uprawnieniami odczytu/zapisu/wykonania na 777 (dla wszystkich). Rekomenduję przenieść pliki Bota do katalogu /ServerBot (żeby nie był w innych katalogach)<br><br>
+        Aby autostart zadziałał, należy ustawić pliki bota z uprawnieniami odczytu/zapisu/wykonania na 775 (r-x dla wszystkich, rwx dla właściciela i grupy). 
+        Rekomenduję przenieść pliki Bota do katalogu /ServerBot (żeby nie był w innych katalogach). Nie instaluj bota w katalogu domowym jeśli chcesz uruchamiać go wraz z systemem.<br><br>
 
         <b><i>Jak utworzyć venv:</i></b><br>
         <ol>
