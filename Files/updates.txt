@@ -146,3 +146,12 @@ on text in .testbot while running Bot on ARM devices
 - Added .module command - to see status of built-in modules
 - Added displayname to easily change visible Discord Bot name in some commands
 - Update in setup.sh - now you can easily manage ServerBot.service in systemctl (systemctl service options)
+
+
+[ServerBot v1.8.1]
+    Changelog:
+- Updated .module .gpt commands and description in .mksysctlstart 
+- Updated setup.sh - added 'Other options' menu and option to edit .env file
+- Fixed default .env - added missing lines 
+- Updated manual (EN/PL)
+- Minor fixes

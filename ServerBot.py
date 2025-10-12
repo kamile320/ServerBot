@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-ver = "1.8"
+ver = "1.8.1"
 displayname='ServerBot'
 
 #ModuleVersion
@@ -84,7 +84,7 @@ status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {pla
 choice = random.choice(status)
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
 testbot_cpu_type = platform.processor() or "Unknown"
-accept_value = ['True', 'true', 'Enabled', 'enabled']
+accept_value = ['True', 'true', 'Enabled', 'enabled', '1', 'yes', 'Yes']
 
 try:
     load_dotenv()
@@ -209,13 +209,14 @@ async def on_ready():
     try:
         syncd = await client.tree.sync()
         print(f'Synced {len(syncd)} slash command(s)')
-        if os.getenv('showmodulemessages') in accept_value:
+    except:
+        print("Can't sync slash commands")
+    #showmodulemessages
+    if os.getenv('showmodulemessages') in accept_value:
             if os.getenv('ACLmodule') in accept_value:
                 print('Advanced Channel Listener module enabled')
             else:
                 print('[showmodulemessages] A.C.L. is disabled.')
-    except:
-        print("Can't sync slash commands")
     print('Bot runtime: ', datetime.datetime.now())
     print('=' *40)
 
@@ -247,6 +248,7 @@ async def on_message(message):
     except AttributeError:
         serverid = "DM"
 
+    #A.C.L
     if ACLmode == 1:
         channelLog(username, user_message, channel, server, userid, channelid, serverid)
         userLog(username, user_message, channel, server, userid, channelid, serverid)
@@ -334,11 +336,7 @@ async def gpt(ctx, *, question):
         reply_content = completion.choices[0].message.content
         await ctx.reply(reply_content)
     except Exception as error:
-        await ctx.reply("""Something went wrong, possible causes:
-1. Bad Token - contact with admin to type new one
-2. Too long response for Discord
-3. Good Token but expired/not working""")
-        await ctx.send(f"Exception:\n{error}")
+        await ctx.reply(f"""Something went wrong, possible cause:\n{error}""")
         print(error)
         
 #8
@@ -408,12 +406,11 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Added Advanced Channel Listener functions as a module/extension that you can turn on/off in .env file
-- Small fixes/changes
-- Enable showmodulemessages to see if modules are enabled when you turn on the Bot
-- Added .module command - to see status of built-in modules
-- Added displayname to easily change visible Discord Bot name in some commands
-- Update in setup.sh - now you can easily manage ServerBot.service in systemctl (systemctl service options)
+- Updated .module .gpt commands and description in .mksysctlstart 
+- Updated setup.sh - added 'Other options' menu and option to edit .env file
+- Fixed default .env - added missing lines 
+- Updated manual (EN/PL)
+- Minor fixes
 
 To see older releases, find 'updates.txt' in 'Files' directory.
 """)
@@ -570,7 +567,7 @@ async def shrtct(ctx, desk):
         await ctx.send(not_allowed)
 
 #6
-@client.command(name="mksysctlstart", help="Adds ServerBot to systemctl to start with system startup (Bot needs to be running as root)\nMode:\n'def' -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv hides in ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with full permissions (chmod 777 recursive). Without full permissions to bot files, systemctl startup will not work.")
+@client.command(name="mksysctlstart", help="Adds ServerBot to systemctl to start with system startup (Bot needs to be running as root)\nMode:\n'def' -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemctl startup will not work. Do not place bot in your home dir.")
 async def mksysctlstart(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -701,25 +698,22 @@ async def pingip(ctx, ip):
         await ctx.send(not_allowed)
 
 #9
-@client.command(name='module', help='Check what modules are enabled and disabled.\n.module all - see status of all built-in modules')
-async def module(ctx, mode):
+@client.command(name='module', help='Shows status of built-in modules')
+async def module(ctx):
     if str(ctx.message.author.id) in admin_usr:
-        if mode == 'all':
-            #ACL
-            if ACLmode == 1:
-                ACLstatus = 'enabled'
-            elif ACLmode == 0:
-                ACLstatus = 'disabled'
-            else:
-                ACLstatus = 'Unknown status! Contact Administrator.'
-            
-            
-            await ctx.send(f"""
+        #ACL
+        if ACLmode == 1:
+            ACLstatus = 'enabled'
+        elif ACLmode == 0:
+            ACLstatus = 'disabled'
+        else:
+            ACLstatus = 'Unknown status! Contact Administrator.'
+        
+        
+        await ctx.send(f"""
 ==========**{displayname} Built-in modules: **==========
 Advanced Channel Listener v{ACLver}: {ACLstatus} ({ACLmode}) 
 """)
-        else:
-            await ctx.send("Wrong mode. See .help module")
     else:
         await ctx.send(not_allowed)
         #AdminOnly-END

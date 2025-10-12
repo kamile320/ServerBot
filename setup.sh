@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION="v1.8"
-UPDATEVER="v1.8"
+VERSION="v1.8.1"
+UPDATEVER="v1.8.1"
 
 OPTIONS=(1 "Start Bot"
          2 "Start Bot (not venv)"
@@ -11,7 +11,7 @@ OPTIONS=(1 "Start Bot"
          6 "Enter to Python3 venv"
          7 "Manually create systemctl entry"
          8 "Systemctl service options"
-         9 "Install ServerBot from GitHub")
+         9 "Other options")
 
 OPTIONS_sctl=(1 "Enable"
               2 "Disable"
@@ -20,6 +20,10 @@ OPTIONS_sctl=(1 "Enable"
               5 "Status"
               6 "Remove"
               7 "Return")
+
+OPTIONS_other=(1 "Edit .env"
+               2 "Install ServerBot from GitHub"
+               3 "Return")
 
 OPTIONS_YN=(1 "Yes"
             2 "No")
@@ -138,13 +142,34 @@ case $select in
             esac
             ;;
         9)
-            echo "Install ServerBot from Github..."
-            echo "This option is useful when you want to update Bot or fix/rebuild critical files."
-            echo "As default, this option will install ServerBot ${UPDATEVER} in a new directory."
-            echo "You can change it for other release."
-            echo "Installer uses git command. Make sure you have downloaded it."
-            read -p "Type anything to continue."
-            cd ..
-            git clone -b ${VERSION} https://github.com/kamile320/ServerBot SB_Update
+            select_other=$(dialog --clear \
+            --backtitle "ServerBot ${VERSION}" \
+            --title "ServerBot Setup" \
+            --menu "Select Operation:" \
+            18 52 8 \
+            "${OPTIONS_other[@]}" \
+            2>&1 >/dev/tty)
+
+            clear
+            
+            case $select_other in
+                    1)
+                        nano .env
+                        bash setup.sh
+                        ;;
+                    2)
+                        echo "Install ServerBot from Github..."
+                        echo "This option is useful when you want to update Bot or fix/rebuild critical files."
+                        echo "As default, this option will install ServerBot ${UPDATEVER} in a new directory."
+                        echo "You can change it for other release."
+                        echo "Installer uses git command. Make sure you have downloaded it."
+                        read -p "Type anything to continue."
+                        cd ..
+                        git clone -b ${VERSION} https://github.com/kamile320/ServerBot SB_Update
+                        ;;
+                    3)
+                        bash setup.sh
+                        ;;
+            esac
             ;;
 esac
