@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.8.1 User Manual [PL]">
+    <meta name="description" content="ServerBot 1.9 User Manual [PL]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.8.1</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.9</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -63,6 +63,7 @@
             <li><a href="#token">Tokeny</a></li>
             <li><a href="#ffmpeg">Windows - instalacja FFmpeg</a></li>
             <li><a href="#modules">Moduły/Rozszerzenia Bota</a></li>
+            <li><a href="#ai">Komenda .ai</a></li>
             <li><a href="#comma">Komendy</a></li>
         </ol>
 
@@ -209,6 +210,14 @@
 
         <br>
 
+        <h3 id="ai">Komenda .ai</h3>
+        Komenda .ai pozwala na rozmowę ze sztuczną inteligencją. Wykorzystuje api gemini firmy Google.<br>
+        Wystarczy zdobyć token gemini (na stronie <a href="https://ai.google.dev/">Google AI dev</a>) i wpisać go do pliku .env w polu 'AI_token'.<br>
+        W pliku .env możesz ustawić model językowy (domyślnie gemini-2.5-flash) w polu 'aimodel', oraz instrukcje dla modelu w polu 'instructions'.<br>
+        Rekomenduję zostawić domyślną instrukcję ograniczającą limit odpowiedzi do 1500 znaków - długa odpowiedź może nie zostać wysłana na kanał discord i spowodować błąd.<br>
+
+        <br>
+
         <h3 id="comma">Podstawowe Komendy:</h3>
         <table border>
             <tr valign="top" align="center">
@@ -234,7 +243,7 @@
                     botbanner<br>
                     blankthing<br>
                     apple<br>
-                    gpt<br>
+                    ai<br>
                     badge<br>
                 </td>
 
