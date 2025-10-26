@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.8.1 User Manual [EN]">
+    <meta name="description" content="ServerBot 1.9 User Manual [EN]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.8.1</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.9</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -63,6 +63,7 @@
             <li><a href="#token">Tokens</a></li>
             <li><a href="#ffmpeg">Windows - FFmpeg installation</a></li>
             <li><a href="#modules">Bot Modules/Extensions</a></li>
+            <li><a href="#ai">.ai command</a></li>
             <li><a href="#comma">Commands</a></li>
         </ol>
 
@@ -210,6 +211,14 @@
 
         <br>
 
+        <h3 id="ai">.ai command</h3>
+        The .ai command allows you to talk with artificial intelligence. It uses Google's gemini api.<br>
+        Get a gemini token (On the <a href="https://ai.google.dev/">Google AI dev</a> page) and put token in .env file in the 'AI_token' field.<br>
+        In .env file you cen set language model (gemini-2.5-flash as default) in the 'aimodel' field, and instructions for a model in a 'instructions' field.<br>
+        I recommend leaving default instruction that limits response to 1500 characters - longer response may not be send to discord channel and cause an error.<br>
+
+        <br>
+
         <h3 id="comma">Basic Commands:</h3>
         <table border>
             <tr valign="top" align="center">
@@ -235,7 +244,7 @@
                     botbanner<br>
                     blankthing<br>
                     apple<br>
-                    gpt<br>
+                    ai<br>
                     badge<br>
                 </td>
 
