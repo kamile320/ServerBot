@@ -15,9 +15,9 @@ If you're using not-Ubuntu 22.04 based distros you need to create python3 virtua
 This Bot is also good for administrative tasks for your servers - saying servers I mean not only Discord Servers but real Servers.<br>
 You can use a bot like a ssh connection - detect service failures/status, run shellscripts to automate processes or even detect hardware info and free/full space of your mounted volumes.  
 Great for lazy game server admins! Because why you should open terminal, connect to the server, check something, log out...  
-...when you can do everything in your Discord chat.
+...when you can do it in your Discord chat.
 
-More information and instructions you can find in *ServerBot Manual* [[PL]](https://kamile320.github.io/ServerBot/manual.html) [[EN]](https://kamile320.github.io/ServerBot/manualEN.html)
+More information and instructions you can find in *ServerBot Manual* [[PL]](https://kamile320.github.io/ServerBot/manualPL.html) [[EN]](https://kamile320.github.io/ServerBot/manualEN.html)
 
 ServerBot is an open project - that means you can make your own version of bot, or help me with making ServerBot way better - better english translations/text, code improvements, bug report etc.
 

@@ -1,11 +1,11 @@
 import subprocess
 import os
 
-ver = "1.8.1"
+ver = "1.9"
 displayname='ServerBot'
 
 #ModuleVersion
-ACLver = "2.0"
+ACLver = "2.1"
 ACLmode = 0
 
 def os_selector():
@@ -41,10 +41,11 @@ try:
     import asyncio
     import random
     import shutil
-    import openai
     import pyfiglet
     import platform
     import yt_dlp as youtube_dl
+    from google import genai
+    from google.genai import types
     from dotenv import load_dotenv
 except Exception as exc:
     print(f"Error in importing Library's. Trying to install it and update pip3\nException: {exc}\n")
@@ -86,13 +87,16 @@ client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game
 testbot_cpu_type = platform.processor() or "Unknown"
 accept_value = ['True', 'true', 'Enabled', 'enabled', '1', 'yes', 'Yes']
 
+
 try:
     load_dotenv()
-    ####### token/intents/etc ##########
-    openai.api_key = os.getenv('OpenAI')
+    ############# token/intents/etc ################
+    ai_token = os.getenv('AI_token')
     admin_usr = os.getenv('admin_usr')
     mod_usr = os.getenv('mod_usr')
-    ####################################
+    ai_model = f"{os.getenv('aimodel')}"
+    ai_client = genai.Client(api_key=f"{ai_token}")
+    ################################################
 except:
     print("CAN'T LOAD .env FILE!\nCreate .env file using setup.sh")
 
@@ -107,6 +111,17 @@ Info: Remember to shut down bot by .ShutDown command or log will be empty.
 =============================================================================\n\n""")
     logs.close()
 createlogs()
+
+#LogMessage
+def logMessage(info):
+    time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+    logs = open(f'{maindir}/Logs.txt', 'a', encoding='utf-8')
+    logs.write(f'[{time}] {info}\n')
+    logs.close()
+#PrintMessage
+def printMessage(info):
+    time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+    print(f'[{time}] {info}')
 
 
 #Directory
@@ -123,7 +138,7 @@ voice_not_connected_error = "You must be connected to VC first!"
 leave_error = "How can I left, when I'm not in VC?"
 thread_error = "Something Happened. Try to type:\n.thread {NameWithoutSpaces} {Reason}\nIf no reason, type: None"
 not_allowed = "You're not allowed to use this command."
-SBservice = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo chmod 777 -R /BotDirectory/*\nsudo systemctl enable ServerBot <== Enables automatic startup\nsudo systemctl start ServerBot <== Optional (turns on Service)\nsudo systemctl daemon-reload <== if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
+SBservice = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo chmod 775 -R /BotDirectory/*\nsudo systemctl enable ServerBot <== Enables automatic startup\nsudo systemctl start ServerBot <== Optional (turns on Service)\nsudo systemctl daemon-reload <== if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
 sctlerr = "Something went wrong.\n'sctl' directory with service entries exists?"
 sctlmade = "Created 'sctl' directory for systemctl service entry."
 badsite = "Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist? "
@@ -145,27 +160,31 @@ def aclcheck():
             os.makedirs(f'{maindir}/ACL')
         except:
             print('Cannot create ACL directory.')
+
+
 def userLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
     if os.path.exists(f'{maindir}/ACL/{usr_id}/message.txt') == True:
-        usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a')
+        usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a', encoding='utf-8')
         usrmessage.write(f'[{srv}({srv_id}) / {chnl}({chnl_id})] {usr}({usr_id}): {usrmsg}\n')
         usrmessage.close()
     else:
         print("[ACL] New user detected. Creating new entry...")
         os.makedirs(f'{maindir}/ACL/{usr_id}')
-        usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a')
+        usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a', encoding='utf-8')
         usrmessage.write(f'[{srv}({srv_id}) / {chnl}({chnl_id})] {usr}({usr_id}): {usrmsg}\n')
         usrmessage.close()
+
+
 def channelLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
     print(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}")
     if os.path.exists(f'{maindir}/ACL/default/message.txt') == True:
-        usrmessage = open(f'{maindir}/ACL/default/message.txt', 'a')
+        usrmessage = open(f'{maindir}/ACL/default/message.txt', 'a', encoding='utf-8')
         usrmessage.write(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
         usrmessage.close()
     else:
         print("[ACL] Default message history not detected. Creating new entry...")
         os.makedirs(f'{maindir}/ACL/default')
-        usrmessage = open(f'{maindir}/ACL/default/message.txt', 'a')
+        usrmessage = open(f'{maindir}/ACL/default/message.txt', 'a', encoding='utf-8')
         usrmessage.write(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
         usrmessage.close()
 
@@ -176,7 +195,6 @@ if os.getenv('ACLmodule') in accept_value:
     ACLmode = 1
 
 
-
 #Module Status [After Load]
 if ACLmode == 1:
     ACLstatus = 'enabled'
@@ -184,7 +202,6 @@ elif ACLmode == 0:
     ACLstatus = 'disabled'
 else:
     ACLstatus = 'Unknown status! Contact Administrator.'
-
 
 
 #LogModuleStatus [After Load-and-Status]
@@ -215,6 +232,7 @@ async def on_ready():
     if os.getenv('showmodulemessages') in accept_value:
             if os.getenv('ACLmodule') in accept_value:
                 print('Advanced Channel Listener module enabled')
+                aclcheck()
             else:
                 print('[showmodulemessages] A.C.L. is disabled.')
     print('Bot runtime: ', datetime.datetime.now())
@@ -299,10 +317,9 @@ async def essa(ctx):
     import random
     losessa = random.randrange(101)
     await ctx.send(f'Twój dzisiejszy poziom essy: {losessa}%')
-    print(f'Information[Random/Fun]: Someone has {losessa}% of essa')
-    logs = open(f'{maindir}/Logs.txt', 'a')
-    logs.write(f'Information[Random/Fun]: Someone has {losessa}% of essa\n')
-    logs.close()
+    message = f'Information[Random/Fun]: Someone has {losessa}% of essa'
+    printMessage(message)
+    logMessage(message)
 
 #3
 @client.command(name='botbanner', help='Shows Bots Banner')
@@ -326,25 +343,27 @@ async def blank(ctx):
     await ctx.send('')
 
 #7
-@client.command(name='gpt', help='Talk with ChatGPT.\nUses GPT 3.5 turbo by OpenAI')
+@client.command(name='ai', help=f'Talk with AI.\nUses {ai_model} model.\n.ai [question]')
 async def gpt(ctx, *, question):
     try:
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": question}]
+        response = ai_client.models.generate_content(
+            model=f"{ai_model}", contents=question, config=types.GenerateContentConfig(
+                system_instruction=[f'{os.getenv("instructions")}',f'You are a {displayname} v{ver} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).']
+            )
         )
-        reply_content = completion.choices[0].message.content
-        await ctx.reply(reply_content)
+        await ctx.reply(response.text)
     except Exception as error:
-        await ctx.reply(f"""Something went wrong, possible cause:\n{error}""")
-        print(error)
-        
+        await ctx.reply(f"Something went wrong, possible cause:\n{error}")
+        error_message = f"DiscordCommandException[AI]: {error}"
+        printMessage(error_message)
+        logMessage(error_message)
+
 #8
 @client.command(name='GNU+Linux', help='Richard Stallman.')
 async def gnu(ctx):
     await ctx.send("I’d just like to interject for a moment. What you’re refering to as Linux, is in fact, GNU/Linux, or as I’ve recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX.  Many computer users run a modified version of the GNU system every day, without realizing it. Through a peculiar turn of events, the version of GNU which is widely used today is often called Linux, and many of its users are not aware that it is basically the GNU system, developed by the GNU Project.  There really is a Linux, and these people are using it, but it is just a part of the system they use. Linux is the kernel: the program in the system that allocates the machine’s resources to the other programs that you run. The kernel is an essential part of an operating system, but useless by itself; it can only function in the context of a complete operating system. Linux is normally used in combination with the GNU operating system: the whole system is basically GNU with Linux added, or GNU/Linux. All the so-called Linux distributions are really distributions of GNU/Linux!")
 
-#9
+#10
 @client.command(name='badge')
 async def badge(ctx, member: discord.Member):
     user_flags = member.public_flags.all()
@@ -360,11 +379,11 @@ async def badge(ctx, member: discord.Member):
 async def manual(ctx, type):
     try:
         if type == 'web':
-            await ctx.send("ServerBot user Manual [PL](https://Kamile320.github.io/ServerBot/manual.html) [EN](https://Kamile320.github.io/ServerBot/manualEN.html)")
+            await ctx.send("ServerBot user Manual [PL](https://Kamile320.github.io/ServerBot/manualPL.html) [EN](https://Kamile320.github.io/ServerBot/manualEN.html)")
         elif type == 'local':
             await ctx.send(file=discord.File(f'{maindir}/manualEN.html'))
         else:
-            await ctx.send("Wrong type.\nChoose 'web' to read manual in browser\nor 'local' to download .html from Discord")
+            await ctx.send("Wrong type.\nChoose 'web' to read manual in browser or 'local' to download .html from Discord")
     except:
         await ctx.send(f"Something went wrong. Try again.")
 
@@ -406,11 +425,16 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Updated .module .gpt commands and description in .mksysctlstart 
-- Updated setup.sh - added 'Other options' menu and option to edit .env file
-- Fixed default .env - added missing lines 
-- Updated manual (EN/PL)
-- Minor fixes
+- Removed .gpt command which used OpenAI (replaced by .ai)
+- Added .ai command which uses Google Gemini API (genai)
+- Updated .env file (added AI_token, aimodel, instructions for AI)
+- Updated .testbot (and slash command version)
+- Removed openai from import and installation (updated setup.sh, setuplib.sh and setup.bat)
+- Fixes/improvements in code/commands
+- Updated A.C.L. module to v2.1
+- Renamed manual.html to manualPL.html
+- Updated .dir command
+- Updated logging system
 
 To see older releases, find 'updates.txt' in 'Files' directory.
 """)
@@ -420,10 +444,8 @@ To see older releases, find 'updates.txt' in 'Files' directory.
 async def next_update(ctx):
     await ctx.send("""
 Ideas for Future Updates
-- Better Logs (yt_dlp error detecting etc)
 - Better Informations/Errors
 - More slash commands
-- Better .dir list
 You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac)
 """)
 
@@ -557,10 +579,9 @@ async def shrtct(ctx, desk):
             os.chdir(maindir)
             await ctx.send('Done.')
             
-            print(f"Information[mkshortcut]: Created desktop shortcut ({home_dir})")
-            logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(f"Information[mkshortcut]: Created desktop shortcut ({home_dir})\n")
-            logs.close()
+            message = f"Information[mkshortcut]: Created desktop shortcut ({home_dir})"
+            printMessage(message)
+            logMessage(message)
         except:
             await ctx.send('Something went wrong, please try again.')
     else:
@@ -732,6 +753,7 @@ async def testbot(ctx):
 Time: **{teraz.strftime('%d.%m.%Y, %H:%M:%S')}**
 Bot name: **{client.user}**
 Version: **{ver}**
+DisplayName: **{displayname}**
 CPU Usage: **{psutil.cpu_percent()}** (%)
 CPU Count: **{psutil.cpu_count()}**
 CPU Type: **{testbot_cpu_type}**
@@ -782,10 +804,9 @@ async def delete(ctx, amount: int = 0):
     if str(ctx.message.author.id) in mod_usr:
         deleted = await ctx.channel.purge(limit=amount)
         await ctx.channel.send(f'Deleted {len(deleted)} message(s)')
-        print(f"Information[delete]: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}")
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f"Information[delete]: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}\n")
-        logs.close()
+        message = f"Information[delete]: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}"
+        printMessage(message)
+        logMessage(message)
     else:
         await ctx.reply(not_allowed)
 
@@ -795,10 +816,9 @@ async def cleaner(ctx):
     if str(ctx.message.author.id) in mod_usr:
         deleted = await ctx.channel.purge(limit=100)
         await ctx.channel.send(f'[Cleaner] deleted max amount of messages ({len(deleted)})')
-        print(f"Information[cleaner]: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}")
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f"Information[cleaner]: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}\n")
-        logs.close()
+        message = f"Information[cleaner]: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}"
+        printMessage(message)
+        logMessage(message)
     else:
         await ctx.reply(not_allowed)
 
@@ -833,10 +853,8 @@ async def kick(ctx, member: discord.Member, *, reason=None):
     if str(ctx.message.author.id) in mod_usr:
         await member.kick(reason=reason)
         await ctx.send(f'Kicked **{member}**')
-        print(kicked)
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(kicked)
-        logs.close()
+        printMessage(kicked)
+        logMessage(kicked)
     else:
         await ctx.reply(not_allowed)
 
@@ -847,10 +865,8 @@ async def ban(ctx, member: discord.Member, *, reason=None):
     if str(ctx.message.author.id) in mod_usr:
         await member.ban(reason=reason)
         await ctx.send(f'Banned **{member}**')
-        print(banned)
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(banned)
-        logs.close()
+        printMessage(banned)
+        logMessage(banned)
     else:
         await ctx.reply(not_allowed)
 
@@ -861,10 +877,8 @@ async def unban(ctx, member: discord.Member, *, reason=None):
     if str(ctx.message.author.id) in mod_usr:
         await member.unban(reason=reason)
         await ctx.send(f'Unbanned **{member}**')
-        print(unbanned)
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(unbanned)
-        logs.close()
+        printMessage(unbanned)
+        logMessage(unbanned)
     else:
         await ctx.reply(not_allowed)
         #ModeratorOnly-END
@@ -925,20 +939,18 @@ async def multiconv(ctx, type, number):
 async def binary(ctx, number):
     binn = bin(int(number))
     await ctx.send(f'{number} in binary: {binn}')
-    print(f'Information[Command]: Converted {number} to {binn} using .binary')
-    logs = open(f'{maindir}/Logs.txt', 'a')
-    logs.write(f'Information[Command]: Converted {number} to {binn} using .binary\n')
-    logs.close()
+    message = f'Information[Command]: Converted {number} to {binn} using .binary'
+    printMessage(message)
+    logMessage(message)
 
 #3
 @client.command(name='hexa', help="Converts decimal number to hexadecimal. \n .hexa <dec number>; eg. hexa 2007")
 async def hexadecimal(ctx, number):
     hexa = hex(int(number))
     await ctx.send(f'{number} in hexadecimal: {hexa}')
-    print(f'Information[Command]: Converted {number} to {hexa} using .hexa')
-    logs = open(f'{maindir}/Logs.txt', 'a')
-    logs.write(f'Information[Command]: Converted {number} to {hexa} using .hexa\n')
-    logs.close()
+    message = f'Information[Command]: Converted {number} to {hexa} using .hexa'
+    printMessage(message)
+    logMessage(message)
         #Converters-END
 
 
@@ -951,12 +963,11 @@ async def connect(ctx):
         channel = ctx.message.author.voice.channel
         voice = await channel.connect()
         source = FFmpegPCMAudio(f'{maindir}/Media/Windows XP - Autostart.wav')
-        player = voice.play(source)
+        voice.play(source)
         await ctx.reply(f'Connected to {channel.name}')
-        print(f'Information[VoiceChat]: Joined to {channel.name}')
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f'Information[VoiceChat]: Joined to {channel.name}\n')
-        logs.close()
+        message = f'Information[VoiceChat]: Joined to {channel.name}'
+        printMessage(message)
+        logMessage(message)
     else:
         await ctx.reply(voice_not_connected_error)
 
@@ -967,14 +978,13 @@ async def disconnect(ctx):
         channel = ctx.message.author.voice.channel
         voice = ctx.guild.voice_client
         source = FFmpegPCMAudio(f'{maindir}/Media/Windows XP - Zamkniecie.wav')
-        player = voice.play(source)
+        voice.play(source)
         await asyncio.sleep(3)
         await ctx.guild.voice_client.disconnect()
         await ctx.reply("Left from VC")
-        print(f'Information[VoiceChat]: User forced bot to leave from: {channel.name}')
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f'Information[VoiceChat]: User forced bot to leave from: {channel.name}\n')
-        logs.close()
+        message = f'Information[VoiceChat]: User forced bot to leave from: {channel.name}'
+        printMessage(message)
+        logMessage(message)
     else:
         await ctx.reply(leave_error)
 
@@ -985,21 +995,19 @@ async def play(ctx, *, name):
         try:
             channel = ctx.message.author.voice.channel
             voice = await channel.connect()
-            print(f'Information[VoiceChat]: Joined to {channel.name}')
-            logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(f'Information[VoiceChat]: Joined to {channel.name}\n')
-            logs.close()
+            message = f'Information[VoiceChat]: Joined to {channel.name}'
+            printMessage(message)
+            logMessage(message)
         except:
-            print(f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?")
-            logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?\n")
-            logs.close()
+            message = f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?"
+            print(message)
+            logMessage(message)
         try:
             exist = os.path.exists(name)
             if exist == True:
                 voice = ctx.guild.voice_client
                 source = FFmpegPCMAudio(name)
-                player = voice.play(source)
+                voice.play(source)
                 await ctx.reply(f'Playing music...\nSource: {name}')
             else:
                 await ctx.reply("Can't find source file.")
@@ -1016,15 +1024,13 @@ async def ytplay(ctx, type, *, url):
         try:
             channel = ctx.message.author.voice.channel
             voice = await channel.connect()
-            print(f'Information[VoiceChat]: Joined to {channel.name}')
-            logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(f'Information[VoiceChat]: Joined to {channel.name}\n')
-            logs.close()
+            message = f'Information[VoiceChat]: Joined to {channel.name}'
+            printMessage(message)
+            logMessage(message)
         except:
-            print(f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?")
-            logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?\n")
-            logs.close()
+            message = f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?"
+            printMessage(message)
+            logMessage(message)
         #URL Playing
         if type == 'url':
             try:
@@ -1043,16 +1049,14 @@ async def ytplay(ctx, type, *, url):
                 search_results = ytdl_search.extract_info(f"ytsearch:{url}", download=False)
                 for entry in search_results['entries']:
                     output = entry['url']
-                    print(f"Information[YouTubePlay-Search]: Found {output}.")
-                    logs = open(f'{maindir}/Logs.txt', 'a')
-                    logs.write(f"Information[YouTubePlay-Search]: Found {output}.\n")
-                    logs.close()
+                    message = f"Information[YouTubePlay-Search]: Found {output}."
+                    printMessage(message)
+                    logMessage(message)
             except Exception as exc:
-                print(f'Information[YouTubePlay-Search]: Failed to use search function.\nCause: {exc}')
+                message = f"Information[YouTubePlay-Search]: Failed to use search function.\nCause: {exc}"
+                printMessage(message)
+                logMessage(message)
                 await ctx.reply(f"Something went wrong while searching YouTube Video. See 'Logs.txt' for more details")
-                logs = open(f'{maindir}/Logs.txt', 'a')
-                logs.write(f"Information[YouTubePlay-Search]: Failed to use search function.\nCause: {exc}\n")
-                logs.close()
             try:
                 loop = asyncio.get_event_loop()
                 data = await loop.run_in_executor(None, lambda: ytdl.extract_info(output, download=False))
@@ -1076,16 +1080,14 @@ async def ytsearch(ctx, *, search):
         for entry in search_results['entries']:
             output = entry['url']
             await ctx.reply(f'Found: {output}')
-            print(f"Information[YouTubeSearch]: Found {output}.")
-            logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(f"Information[YouTubeSearch]: Found {output}.\n")
-            logs.close()
+            message = f"Information[YouTubeSearch]: Found {output}."
+            printMessage(message)
+            logMessage(message)
     except Exception as exc:
         await ctx.reply(f"Something went wrong while searching YouTube Video. See 'Logs.txt' for more details")
-        print(f'Information[YouTubeSearch]: Failed to use search function.\nCause: {exc}')
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f"Information[YouTubeSearch]: Failed to use search function.\nCause: {exc}\n")
-        logs.close()
+        message = f'Information[YouTubeSearch]: Failed to use search function.\nCause: {exc}'
+        printMessage(message)
+        logMessage(message)
 
 #6 - stop
 @client.command(pass_context=True, name='stop', help='Stop playing audio')
@@ -1124,7 +1126,7 @@ async def wait(ctx):
     try:
         voice = ctx.guild.voice_client
         source = FFmpegPCMAudio(f'{maindir}/Media/Team Fortress 2 Upgrade Station.ogg')
-        player = voice.play(source)
+        voice.play(source)
         await ctx.reply(f"@everyone, {ctx.author.mention} is waiting!")
     except AttributeError:
         await ctx.reply(voice_not_connected_error)
@@ -1137,7 +1139,7 @@ async def micspam(ctx):
     try:
         voice = ctx.guild.voice_client
         source = FFmpegPCMAudio(f'{maindir}/Media/OMEGATRONIC BOT MICSPAM.mp3')
-        player = voice.play(source)
+        voice.play(source)
     except AttributeError:
         await ctx.reply(voice_not_connected_error)
     except:
@@ -1168,41 +1170,46 @@ async def dir(ctx, *, mode):
 
     elif mode == 'list':#
         listdir = os.listdir()
-        await ctx.send(f'Files in this directory:\n{listdir}')
+        await ctx.send(f'Files in **{os.getcwd()}**:\n{", ".join(listdir)}')
 
     elif mode == 'listall':#
         listdir = os.listdir()
-        await ctx.send(f'Files in this directory:')
-        for file in listdir:
-            await ctx.send(file)
+        files_dir = '\n'.join(listdir)
+        await ctx.send(f'Files in **{os.getcwd()}**:\n{files_dir}')
 
 #3      
 @client.command(name='file', help='Commands for file/directory creating, deleting etc.\n.file <mode> <filename> \n    mode:\nopen -> opens file (REMEMBER to add extension (.py/.png/etc))\nmakedir -> creates directory (folder)\nchksize -> checks the size of selected file')
 async def file(ctx, mode, *,filename):
-    if mode == 'open':#
+        #open
+    if mode == 'open':
         try:
             await ctx.send(file=discord.File(filename))
         except:
             await ctx.send(fileerror)
-    elif mode == 'mkdir':#
+        #mkdir
+    elif mode == 'mkdir':
         try:
             os.makedirs(filename)
             await ctx.send("Created new directory. Use '.dir list' to check this")
         except:
             await ctx.send("Can't create directory.")
-    elif mode == 'size':#
+            print()
+        #size
+    elif mode == 'size':
         try:
             size = os.path.getsize(filename)
             await ctx.send(f'Size of {filename} is {size} bytes')
         except:
             await ctx.send('Error')
-    elif mode == 'create':#
+        #create
+    elif mode == 'create':
         try:
             mkfile = open(filename, 'wt')
             mkfile.close()
             await ctx.send("Created new empty file. Use '.dir list' to check this")
         except:
             await ctx.send("Can't create file.")
+        #else
     else:
         await ctx.send('Incorrect mode/filename')
 
@@ -1215,12 +1222,10 @@ async def makefile(ctx, name, *, content):
         mkfile.write(content)
         mkfile.close()
 
-        created = f'Created file {name}, in directory {directory}.\nContent: {content}'
         await ctx.send(f'Created file {name}, in directory {directory}.')
-        print(created)
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f'Information[FileManager]: {created}\n')
-        logs.close()
+        message = f'Information[FileManager]: Created file {name}, in directory {directory}.\nContent: {content}'
+        printMessage(message)
+        logMessage(message)
     except:
         await ctx.send(f'Something went wrong while creating file.')
         #FileManager/Directory-END
@@ -1233,12 +1238,11 @@ async def makefile(ctx, name, *, content):
 async def thread(ctx, name, *, reason):
     try:
         channel = ctx.channel
-        thread = await channel.create_thread(name=name, auto_archive_duration=60, slowmode_delay=None, reason=reason)
+        await channel.create_thread(name=name, auto_archive_duration=60, slowmode_delay=None, reason=reason)
         await ctx.send(f"Created new thread [{name}]")
-        print(f"Information[Threads]: Created new thread [{name}] on {channel}. Reason: {reason}")
-        logs = open(f'{maindir}/Logs.txt', 'a')
-        logs.write(f"Information[Threads]: Created new thread [{name}] on {channel}. Reason: {reason}\n")
-        logs.close()
+        message = f"Information[Threads]: Created new thread [{name}] on {channel}. Reason: {reason}"
+        printMessage(message)
+        logMessage(message)
     except:
         await ctx.send(thread_error)
 
@@ -1368,28 +1372,32 @@ async def ping(interaction):
 #3
 @client.tree.command(name='testbot', description='Tests some functions of Bot')
 async def testbot(interaction):
-    teraz = datetime.datetime.now()
-    await interaction.response.send_message(f"""
-***S e r v e r  B o t***  *test*:
-====================================================
-Time: **{teraz.strftime('%d.%m.%Y, %H:%M:%S')}**
-Bot name: **{client.user}**
-Version: **{ver}**
-CPU Usage: **{psutil.cpu_percent()}** (%)
-CPU Count: **{psutil.cpu_count()}**
-CPU Type: **{testbot_cpu_type}**
-RAM Usage: **{psutil.virtual_memory().percent}** (%)
-Ping: **{round(client.latency * 1000)}ms**
-OS Test (Windows): **{psutil.WINDOWS}**
-OS Test (MacOS): **{psutil.MACOS}**
-OS Test (Linux): **{psutil.LINUX}**
-OS Version: **{platform.version()}**
-OS Kernel: **{platform.system()} {platform.release()}**
-Bot Current Dir: **{os.getcwd()}**
-Bot Main Dir: **{maindir}**
-File size: **{os.path.getsize(f'{maindir}/ServerBot.py')}**
-Floppy: **{os.path.exists('/dev/fd0')}**
-====================================================""")
+    if str(interaction.user.id) in mod_usr:
+        teraz = datetime.datetime.now()
+        await interaction.response.send_message(f"""
+    ***S e r v e r  B o t***  *test*:
+    ====================================================
+    Time: **{teraz.strftime('%d.%m.%Y, %H:%M:%S')}**
+    Bot name: **{client.user}**
+    Version: **{ver}**
+    DisplayName: **{displayname}**
+    CPU Usage: **{psutil.cpu_percent()}** (%)
+    CPU Count: **{psutil.cpu_count()}**
+    CPU Type: **{testbot_cpu_type}**
+    RAM Usage: **{psutil.virtual_memory().percent}** (%)
+    Ping: **{round(client.latency * 1000)}ms**
+    OS Test (Windows): **{psutil.WINDOWS}**
+    OS Test (MacOS): **{psutil.MACOS}**
+    OS Test (Linux): **{psutil.LINUX}**
+    OS Version: **{platform.version()}**
+    OS Kernel: **{platform.system()} {platform.release()}**
+    Bot Current Dir: **{os.getcwd()}**
+    Bot Main Dir: **{maindir}**
+    File size: **{os.path.getsize(f'{maindir}/ServerBot.py')}**
+    Floppy: **{os.path.exists('/dev/fd0')}**
+    ====================================================""")
+    else:
+        await interaction.response.send_message(not_allowed)
 ################################################ S L A S H   C O M M A N D S  - E N D #######################################################################################
 
 try:

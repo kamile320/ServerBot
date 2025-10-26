@@ -155,3 +155,17 @@ on text in .testbot while running Bot on ARM devices
 - Fixed default .env - added missing lines 
 - Updated manual (EN/PL)
 - Minor fixes
+
+
+[ServerBot v1.9]
+    Changelog:
+- Removed .gpt command which used OpenAI (replaced by .ai)
+- Added .ai command which uses Google Gemini API (genai)
+- Updated .env file (added AI_token, aimodel, instructions for AI)
+- Updated .testbot (and slash command version)
+- Removed openai from import and installation (updated setup.sh, setuplib.sh and setup.bat)
+- Fixes/improvements in code/commands
+- Updated A.C.L. module to v2.1
+- Renamed manual.html to manualPL.html
+- Updated .dir command
+- Updated logging system
