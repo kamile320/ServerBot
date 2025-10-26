@@ -168,7 +168,7 @@
         In order for the bot to run, you need to fill in the <b>.env</b> file with the appropriate data.<br><br>
         Scheme:<br>
         TOKEN="your bot token"<br>
-        OpenAI="your token (API key)"<br>
+        AI_token="your token (API key)"<br>
         admin_usr = ['your discord user ID']<br>
         mod_usr = ['your discord user ID']<br>
         dscserv_link = 'Link to your Discord Server'<br>
@@ -176,7 +176,9 @@
         addtesting = 'testing_link of Discord Bot'<br>
         service_list = 'List of systemctl services to see via Discord'<br>
         showmodulemessages = 'True/False' - shows which Bot modules are enabled<br>
-        ACLmodule = 'True/False' - Enables <a href="#ACL">AdvancedChannelListener</a> module<br><br>
+        ACLmodule = 'True/False' - Enables <a href="#ACL">AdvancedChannelListener</a> module<br>
+        aimodel = 'gemini-2.5-flash' - selected gemini's language model<br>
+        instructions = ['Instructions for language model']<br><br>
         <h4>User ID</h4>
         Some commands uses Operating System data and functions,<br>
         so it requires administrator privileges to run - you don't want to have removed system by unauthorized user, right?<br>
