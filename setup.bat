@@ -11,7 +11,7 @@ pip install pyfiglet
 pip install datetime
 pip install psutil
 pip install asyncio
-pip install openai==0.28.1
+pip install google-genai
 pip install ffmpeg
 pip install python-dotenv
 pip install requests

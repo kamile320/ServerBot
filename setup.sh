@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION="v1.8.1"
-UPDATEVER="v1.8.1"
+VERSION="v1.9"
+UPDATEVER="v1.9"
 
 OPTIONS=(1 "Start Bot"
          2 "Start Bot (not venv)"
@@ -23,7 +23,8 @@ OPTIONS_sctl=(1 "Enable"
 
 OPTIONS_other=(1 "Edit .env"
                2 "Install ServerBot from GitHub"
-               3 "Return")
+               3 "Manual"
+               4 "Return")
 
 OPTIONS_YN=(1 "Yes"
             2 "No")
@@ -58,7 +59,7 @@ case $select in
         5)  
             echo "Creating .env file..."
             echo "TOKEN=''" >> .env
-            echo "OpenAI=''" >> .env
+            echo "AI_token=''" >> .env
             echo "admin_usr = ['']" >> .env
             echo "mod_usr = ['']" >> .env
             echo "#command_dscserv" >> .env
@@ -68,10 +69,14 @@ case $select in
             echo "addtesting = 'testing_link'" >> .env
             echo "#service_list" >> .env
             echo "service_list = ','" >> .env
+            echo "#modules" >> .env
             echo "showmodulemessages = 'False'" >> .env
             echo "ACLmodule = 'False'" >> .env
+            echo "#ai" >> .env
+            echo "aimodel = 'gemini-2.5-flash'" >> .env
+            echo "instructions = ['Answer with max 1500 characters','Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']" >> .env
             sleep 1
-            ./setup.sh
+            bash setup.sh
             ;;
         6)
             echo "Entering to Python3 virtual environment..."
@@ -168,6 +173,12 @@ case $select in
                         git clone -b ${VERSION} https://github.com/kamile320/ServerBot SB_Update
                         ;;
                     3)
+                        clear
+                        echo "To see manual, open 'manualEN.html' / 'manualPL.html' or visit https://kamile320.github.io/serverbot/manualEN.html"
+                        read -p "Type anything to continue."
+                        bash setup.sh
+                        ;;
+                    4)
                         bash setup.sh
                         ;;
             esac

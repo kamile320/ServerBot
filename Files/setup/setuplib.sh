@@ -19,7 +19,7 @@ pip3 install discord.py[voice]
 pip3 install datetime
 pip3 install psutil
 pip3 install asyncio
-pip3 install openai==0.28.1
+pip3 install google-genai
 pip3 install ffmpeg
 pip3 install python-dotenv
 pip3 install requests
