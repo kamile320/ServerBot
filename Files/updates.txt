@@ -169,3 +169,13 @@ on text in .testbot while running Bot on ARM devices
 - Renamed manual.html to manualPL.html
 - Updated .dir command
 - Updated logging system
+
+
+[ServerBot v1.9.1]
+    Changelog:
+- Code fixes and improvements
+- Updated .service command
+- Removed unused .service messages
+- File/Directory commands are now only available for admins
+- Updated ACL module to v2.2
+- Added extendedErrMess variable for detailed error messages

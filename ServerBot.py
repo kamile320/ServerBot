@@ -1,11 +1,12 @@
 import subprocess
 import os
 
-ver = "1.9"
+ver = "1.9.1"
 displayname='ServerBot'
+extendedErrMess = False
 
 #ModuleVersion
-ACLver = "2.1"
+ACLver = "2.2"
 ACLmode = 0
 
 def os_selector():
@@ -16,9 +17,9 @@ def os_selector():
 3 - Setup.sh
 4 - Exit
 """)
-    sel = int(input(">>> "))
+    sel = int(input('>>> '))
     if sel == 1:
-        subprocess.run(["bash", 'Files/setup/setuplib.sh'])
+        subprocess.run(['bash', 'Files/setup/setuplib.sh'])
     elif sel == 2:
         subprocess.run(['setup.bat'], shell=True)
     elif sel == 3:
@@ -26,7 +27,8 @@ def os_selector():
     elif sel == 4:
         exit()
     else:
-        print('Failed to run Script. Aborting Install')
+        print('Failed to run Script. Aborting Install...')
+        exit()
 
 
 
@@ -52,16 +54,19 @@ except Exception as exc:
     os_selector()
 
 
+
 #Baner
 banner = pyfiglet.figlet_format(displayname)
 bluescreenface = pyfiglet.figlet_format(": (")
 print(banner)
 
 
+
 #YT_DLP
-yt_dl_opts = {'format': 'bestaudio/best'}
+yt_dl_opts = {"format": "bestaudio/best"}
 ytdl = youtube_dl.YoutubeDL(yt_dl_opts)
-ffmpeg_options = {'options': "-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2"}
+ffmpeg_options = {"options": "-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2"}
+
 
 
 #YT_DLP - search
@@ -78,14 +83,16 @@ ytdl_opts_search = {
 ytdl_search = youtube_dl.YoutubeDL(ytdl_opts_search)
 
 
+
 #Intents
 intents = discord.Intents.default()
 intents.message_content = True
 status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}', displayname]
 choice = random.choice(status)
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
-testbot_cpu_type = platform.processor() or "Unknown"
-accept_value = ['True', 'true', 'Enabled', 'enabled', '1', 'yes', 'Yes']
+testbot_cpu_type = platform.processor() or 'Unknown'
+accept_value = ['True', 'true', 'Enabled', 'enabled', '1', 'yes', 'Yes', 'YES', True]
+
 
 
 try:
@@ -99,6 +106,7 @@ try:
     ################################################
 except:
     print("CAN'T LOAD .env FILE!\nCreate .env file using setup.sh")
+
 
 
 #Log_File
@@ -124,9 +132,11 @@ def printMessage(info):
     print(f'[{time}] {info}')
 
 
+
 #Directory
 maindir = os.getcwd()
 SBbytes = os.path.getsize('ServerBot.py')
+
 
 
 #Information/Errors
@@ -139,14 +149,16 @@ leave_error = "How can I left, when I'm not in VC?"
 thread_error = "Something Happened. Try to type:\n.thread {NameWithoutSpaces} {Reason}\nIf no reason, type: None"
 not_allowed = "You're not allowed to use this command."
 SBservice = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo chmod 775 -R /BotDirectory/*\nsudo systemctl enable ServerBot <== Enables automatic startup\nsudo systemctl start ServerBot <== Optional (turns on Service)\nsudo systemctl daemon-reload <== if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
-sctlerr = "Something went wrong.\n'sctl' directory with service entries exists?"
-sctlmade = "Created 'sctl' directory for systemctl service entry."
+service_err = "Something went wrong.\nHave you added the service entries to the .env file?"
 badsite = "Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist? "
     #A.C.L
-if os.getenv('ACLmodule') == 1:
-    ACLnotfounderr = "User history not found."
-    ACLhistorynotfound = "Default message history does not exist."
-    ACLnopermission = "You don't have permission to use ACL mode. This incident will be reported."
+if os.getenv('ACLmodule') in accept_value:
+    ACL_notfounderr = "User history not found."
+    ACL_historynotfound = "Default message history does not exist."
+    ACL_nopermission = "You don't have permission to use ACL mode. This incident will be reported."
+    ACL_rm_all_success = "Cleared all saved message history."
+    ACL_rm_all_fail = "Can't clear all message history."
+    ACL_rm_user_fail = "Can't clear message history of the selected user. Does it even exist?"
 
 
 
@@ -162,6 +174,7 @@ def aclcheck():
             print('Cannot create ACL directory.')
 
 
+#MessageLogging
 def userLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
     if os.path.exists(f'{maindir}/ACL/{usr_id}/message.txt') == True:
         usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a', encoding='utf-8')
@@ -317,6 +330,7 @@ async def essa(ctx):
     import random
     losessa = random.randrange(101)
     await ctx.send(f'Twój dzisiejszy poziom essy: {losessa}%')
+    
     message = f'Information[Random/Fun]: Someone has {losessa}% of essa'
     printMessage(message)
     logMessage(message)
@@ -354,6 +368,7 @@ async def gpt(ctx, *, question):
         await ctx.reply(response.text)
     except Exception as error:
         await ctx.reply(f"Something went wrong, possible cause:\n{error}")
+        
         error_message = f"DiscordCommandException[AI]: {error}"
         printMessage(error_message)
         logMessage(error_message)
@@ -425,16 +440,12 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Removed .gpt command which used OpenAI (replaced by .ai)
-- Added .ai command which uses Google Gemini API (genai)
-- Updated .env file (added AI_token, aimodel, instructions for AI)
-- Updated .testbot (and slash command version)
-- Removed openai from import and installation (updated setup.sh, setuplib.sh and setup.bat)
-- Fixes/improvements in code/commands
-- Updated A.C.L. module to v2.1
-- Renamed manual.html to manualPL.html
-- Updated .dir command
-- Updated logging system
+- Code fixes and improvements
+- Updated .service command
+- Removed unused .service messages
+- File/Directory commands are now only available for admins
+- Updated ACL module to v2.2
+- Added extendedErrMess variable for detailed error messages
 
 To see older releases, find 'updates.txt' in 'Files' directory.
 """)
@@ -446,6 +457,7 @@ async def next_update(ctx):
 Ideas for Future Updates
 - Better Informations/Errors
 - More slash commands
+- Database support for leveling system (sqlite3)
 You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac)
 """)
 
@@ -530,11 +542,11 @@ async def copylog(ctx, mode):
         await ctx.reply(not_allowed)
 
 #3
-@client.command(name="bash", help="Runs Bash like scripts on hosting computer (Linux only)\nUses .sh extensions\nBest to work with .touch command")
+@client.command(name='bash', help='Runs Bash like scripts on hosting computer (Linux only)\nUses .sh extensions\nBest to work with .touch command')
 async def bash(ctx, file):
     if str(ctx.message.author.id) in admin_usr:
         try:
-            subprocess.run(["bash", file])
+            subprocess.run(['bash', file])
         except:
             await ctx.send(f'Failed to run Script')
     else:
@@ -557,7 +569,8 @@ async def rebuild(ctx):
             logs2 = open('Logs.txt', 'w')
             logs2.close()
             
-            os.makedirs(f'{maindir}/setup')
+            os.makedirs(f'{maindir}/Files/setup')
+            os.makedirs(f'{maindir}/Media')
             os.chdir(maindir)
             await ctx.send("Success.\nRebuilded Files with no content")
         except:
@@ -601,10 +614,9 @@ async def mksysctlstart(ctx, mode):
                         auto.close()
                         await ctx.send('Done.')
 
-                        print(f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)")
-                        logs = open(f'{maindir}/Logs.txt', 'a')
-                        logs.write(f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)\n")
-                        logs.close()
+                        message = f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)"
+                        logMessage(message)
+                        printMessage(message)
                     except:
                         await ctx.send("Can't create file!")
 
@@ -612,17 +624,17 @@ async def mksysctlstart(ctx, mode):
                     try:
                         sys = open('/etc/systemd/system/ServerBot.service', 'w')
                         sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
-                        await ctx.send("Done!")
+                        sys.close()
+                        await ctx.send('Done!')
                         await ctx.send(SBservice)
 
-                        print(f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}")
-                        logs = open(f'{maindir}/Logs.txt', 'a')
-                        logs.write(f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}\n")
-                        logs.close()
+                        message = f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}"
+                        logMessage(message)
+                        printMessage(message)
                     except:
                         await ctx.send("Can't create service file!\nAre you root?")
-                except:
-                    await ctx.send('Got 1 error (or more) while creating systemctl entry.')
+                except Exception as error:
+                    await ctx.send(f'Got 1 error (or more) while creating systemctl entry.\nPossible cause: {error}')
             elif mode == 'venv':
                 try:
                     await ctx.send('Making autorun.sh file..')
@@ -632,10 +644,9 @@ async def mksysctlstart(ctx, mode):
                         auto.close()
                         await ctx.send('Done.')
 
-                        print(f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)")
-                        logs = open(f'{maindir}/Logs.txt', 'a')
-                        logs.write(f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)\n")
-                        logs.close()
+                        message = f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)"
+                        logMessage(message)
+                        printMessage(message)
                     except:
                         await ctx.send("Can't create file!")
 
@@ -646,33 +657,29 @@ async def mksysctlstart(ctx, mode):
                         await ctx.send("Done!")
                         await ctx.send(SBservice)
                     
-                        print(f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}")
-                        logs = open(f'{maindir}/Logs.txt', 'a')
-                        logs.write(f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}\n")
-                        logs.close()
+                        message = f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}"
+                        logMessage(message)
+                        printMessage(message)
                     except:
                         await ctx.send("Can't create service file!\nAre you root?")
-                except:
-                    await ctx.send('Got 1 error (or more) while creating systemctl entry.')
+                except Exception as error:
+                    await ctx.send(f'Got 1 error (or more) while creating systemctl entry.\nPossible cause: {error}')
         except:
             await ctx.send(f"""```{bluescreenface}``` Unexpected problem ocurred""")
     else:
         await ctx.send(not_allowed)
 
 #7
-@client.command(name='service', help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemctl")
+@client.command(name="service", help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemctl")
 async def service(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         try:
             if mode == 'list':
                 try:
                     listdir_env = os.getenv('service_list')
-                    listdir = [item.strip() for item in listdir_env.split(',')]
-                    await ctx.send(f'**Service Entries:**')
-                    for file in listdir:
-                        await ctx.send(file)
+                    await ctx.send(f'**Service Entries:**\n{listdir_env}')
                 except:
-                    await ctx.send(sctlerr)
+                    await ctx.send(service_err)
 
             elif mode == 'status':
                 try:
@@ -682,7 +689,7 @@ async def service(ctx, mode):
                     for file in listdir:
                         await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl is-active {file}'])}```")
                 except:
-                    await ctx.send(sctlerr)
+                    await ctx.send(service_err)
 
             elif mode == 'status-detailed':
                 try:
@@ -692,7 +699,7 @@ async def service(ctx, mode):
                     for file in listdir:
                         await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl status {file}'])}```")
                 except:
-                    await ctx.send(sctlerr)
+                    await ctx.send(service_err)
 
             else:
                 try:
@@ -804,6 +811,7 @@ async def delete(ctx, amount: int = 0):
     if str(ctx.message.author.id) in mod_usr:
         deleted = await ctx.channel.purge(limit=amount)
         await ctx.channel.send(f'Deleted {len(deleted)} message(s)')
+        
         message = f"Information[delete]: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}"
         printMessage(message)
         logMessage(message)
@@ -816,6 +824,7 @@ async def cleaner(ctx):
     if str(ctx.message.author.id) in mod_usr:
         deleted = await ctx.channel.purge(limit=100)
         await ctx.channel.send(f'[Cleaner] deleted max amount of messages ({len(deleted)})')
+        
         message = f"Information[cleaner]: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}"
         printMessage(message)
         logMessage(message)
@@ -849,10 +858,11 @@ async def webreq(ctx, mode, *, web):
 #7
 @client.command(name='kick', help='Kicks Members')
 async def kick(ctx, member: discord.Member, *, reason=None):
-    kicked = f'Information[Server/Members]: Kicked {member}. Reason: {reason}\n'
     if str(ctx.message.author.id) in mod_usr:
         await member.kick(reason=reason)
         await ctx.send(f'Kicked **{member}**')
+        
+        kicked = f'Information[Server/Members]: Kicked {member}. Reason: {reason}\n'
         printMessage(kicked)
         logMessage(kicked)
     else:
@@ -861,10 +871,11 @@ async def kick(ctx, member: discord.Member, *, reason=None):
 #8
 @client.command(name='ban', help='Bans Members')
 async def ban(ctx, member: discord.Member, *, reason=None):
-    banned = f'Information[Server/Members]: Banned {member}. Reason: {reason}\n'
     if str(ctx.message.author.id) in mod_usr:
         await member.ban(reason=reason)
         await ctx.send(f'Banned **{member}**')
+        
+        banned = f'Information[Server/Members]: Banned {member}. Reason: {reason}\n'
         printMessage(banned)
         logMessage(banned)
     else:
@@ -873,10 +884,11 @@ async def ban(ctx, member: discord.Member, *, reason=None):
 #9
 @client.command(name='unban', help='Unbans Members')
 async def unban(ctx, member: discord.Member, *, reason=None):
-    unbanned = f'Information[Server/Members]: Unbanned {member}. Reason: {reason}\n'
     if str(ctx.message.author.id) in mod_usr:
         await member.unban(reason=reason)
         await ctx.send(f'Unbanned **{member}**')
+        
+        unbanned = f'Information[Server/Members]: Unbanned {member}. Reason: {reason}\n'
         printMessage(unbanned)
         logMessage(unbanned)
     else:
@@ -930,7 +942,7 @@ async def multiconv(ctx, type, number):
             except:
                 await ctx.send(f'Unexpected Error\nPlease try again')
         else:
-            await ctx.send("Wrong value.\nType: .convert binary/octal/decimal/hexa and value for selected number system")
+            await ctx.send('Wrong value.\nType: .convert binary/octal/decimal/hexa and value for selected number system')
     except:
         await ctx.send(f'```{bluescreenface}\nUnexpected error occurred```')
 
@@ -939,6 +951,7 @@ async def multiconv(ctx, type, number):
 async def binary(ctx, number):
     binn = bin(int(number))
     await ctx.send(f'{number} in binary: {binn}')
+    
     message = f'Information[Command]: Converted {number} to {binn} using .binary'
     printMessage(message)
     logMessage(message)
@@ -948,6 +961,7 @@ async def binary(ctx, number):
 async def hexadecimal(ctx, number):
     hexa = hex(int(number))
     await ctx.send(f'{number} in hexadecimal: {hexa}')
+    
     message = f'Information[Command]: Converted {number} to {hexa} using .hexa'
     printMessage(message)
     logMessage(message)
@@ -965,6 +979,7 @@ async def connect(ctx):
         source = FFmpegPCMAudio(f'{maindir}/Media/Windows XP - Autostart.wav')
         voice.play(source)
         await ctx.reply(f'Connected to {channel.name}')
+        
         message = f'Information[VoiceChat]: Joined to {channel.name}'
         printMessage(message)
         logMessage(message)
@@ -982,6 +997,7 @@ async def disconnect(ctx):
         await asyncio.sleep(3)
         await ctx.guild.voice_client.disconnect()
         await ctx.reply("Left from VC")
+        
         message = f'Information[VoiceChat]: User forced bot to leave from: {channel.name}'
         printMessage(message)
         logMessage(message)
@@ -995,6 +1011,7 @@ async def play(ctx, *, name):
         try:
             channel = ctx.message.author.voice.channel
             voice = await channel.connect()
+            
             message = f'Information[VoiceChat]: Joined to {channel.name}'
             printMessage(message)
             logMessage(message)
@@ -1024,6 +1041,7 @@ async def ytplay(ctx, type, *, url):
         try:
             channel = ctx.message.author.voice.channel
             voice = await channel.connect()
+            
             message = f'Information[VoiceChat]: Joined to {channel.name}'
             printMessage(message)
             logMessage(message)
@@ -1049,6 +1067,7 @@ async def ytplay(ctx, type, *, url):
                 search_results = ytdl_search.extract_info(f"ytsearch:{url}", download=False)
                 for entry in search_results['entries']:
                     output = entry['url']
+                    
                     message = f"Information[YouTubePlay-Search]: Found {output}."
                     printMessage(message)
                     logMessage(message)
@@ -1080,11 +1099,13 @@ async def ytsearch(ctx, *, search):
         for entry in search_results['entries']:
             output = entry['url']
             await ctx.reply(f'Found: {output}')
+            
             message = f"Information[YouTubeSearch]: Found {output}."
             printMessage(message)
             logMessage(message)
     except Exception as exc:
         await ctx.reply(f"Something went wrong while searching YouTube Video. See 'Logs.txt' for more details")
+        
         message = f'Information[YouTubeSearch]: Failed to use search function.\nCause: {exc}'
         printMessage(message)
         logMessage(message)
@@ -1148,86 +1169,98 @@ async def micspam(ctx):
 
 
 
-        #FileManager/Directory
+        #FileManager/Directory - only for Admins (and Mods in the future)
 #1
 @client.command(name='cd', help="Changes directory\nYou can go back by .dir <return>")
 async def chdir(ctx, *, directory):
-    try:
-        os.chdir(directory)
-        await ctx.send(f"changed directory to {os.getcwd()}")
-    except:
-        await ctx.send("You can't go to this directory; make it or enter existing one")
+    if str(ctx.message.author.id) in admin_usr:
+        try:
+            os.chdir(directory)
+            await ctx.send(f"changed directory to {os.getcwd()}")
+        except:
+            await ctx.send("You can't go to this directory; make it or enter existing one")
+    else:
+        await ctx.send(not_allowed)
 
 #2
 @client.command(name='dir', help='Directory commands \n.dir <mode> \n   mode: \nreturn -> Goes back to main dir\ncheck -> checks dir that you are in\nlist -> list of files and directories in your dir\nlistall -> same but easier to read')
 async def dir(ctx, *, mode):
-    if mode == 'return':#
-        os.chdir(maindir)
-        await ctx.send(f'Returned to main directory ({maindir})')
+    if str(ctx.message.author.id) in admin_usr:
+        if mode == 'return':#
+            os.chdir(maindir)
+            await ctx.send(f'Returned to main directory ({maindir})')
 
-    elif mode == 'check':#
-        await ctx.send(f'You are here: {os.getcwd()}')
+        elif mode == 'check':#
+            await ctx.send(f'You are here: {os.getcwd()}')
 
-    elif mode == 'list':#
-        listdir = os.listdir()
-        await ctx.send(f'Files in **{os.getcwd()}**:\n{", ".join(listdir)}')
+        elif mode == 'list':#
+            listdir = os.listdir()
+            await ctx.send(f'Files in **{os.getcwd()}**:\n{", ".join(listdir)}')
 
-    elif mode == 'listall':#
-        listdir = os.listdir()
-        files_dir = '\n'.join(listdir)
-        await ctx.send(f'Files in **{os.getcwd()}**:\n{files_dir}')
+        elif mode == 'listall':#
+            listdir = os.listdir()
+            files_dir = '\n'.join(listdir)
+            await ctx.send(f'Files in **{os.getcwd()}**:\n{files_dir}')
+    else:
+        await ctx.send(not_allowed)
 
 #3      
 @client.command(name='file', help='Commands for file/directory creating, deleting etc.\n.file <mode> <filename> \n    mode:\nopen -> opens file (REMEMBER to add extension (.py/.png/etc))\nmakedir -> creates directory (folder)\nchksize -> checks the size of selected file')
 async def file(ctx, mode, *,filename):
-        #open
-    if mode == 'open':
-        try:
-            await ctx.send(file=discord.File(filename))
-        except:
-            await ctx.send(fileerror)
-        #mkdir
-    elif mode == 'mkdir':
-        try:
-            os.makedirs(filename)
-            await ctx.send("Created new directory. Use '.dir list' to check this")
-        except:
-            await ctx.send("Can't create directory.")
-            print()
-        #size
-    elif mode == 'size':
-        try:
-            size = os.path.getsize(filename)
-            await ctx.send(f'Size of {filename} is {size} bytes')
-        except:
-            await ctx.send('Error')
-        #create
-    elif mode == 'create':
-        try:
-            mkfile = open(filename, 'wt')
-            mkfile.close()
-            await ctx.send("Created new empty file. Use '.dir list' to check this")
-        except:
-            await ctx.send("Can't create file.")
-        #else
+    if str(ctx.message.author.id) in admin_usr:
+        if mode == 'open':#open
+            try:
+                await ctx.send(file=discord.File(filename))
+            except:
+                await ctx.send(fileerror)
+            
+        elif mode == 'mkdir':#mkdir
+            try:
+                os.makedirs(filename)
+                await ctx.send("Created new directory. Use '.dir list' to check this")
+            except:
+                await ctx.send("Can't create directory.")
+                print()
+            
+        elif mode == 'size':#size
+            try:
+                size = os.path.getsize(filename)
+                await ctx.send(f'Size of {filename} is {size} bytes')
+            except:
+                await ctx.send('Error')
+            
+        elif mode == 'create':#create
+            try:
+                mkfile = open(filename, 'wt')
+                mkfile.close()
+                await ctx.send("Created new empty file. Use '.dir list' to check this")
+            except:
+                await ctx.send("Can't create file.")
+            
+        else:#else
+            await ctx.send('Incorrect mode/filename')
     else:
-        await ctx.send('Incorrect mode/filename')
+        await ctx.send(not_allowed)
 
 #4
 @client.command(name='touch', help='Creates files with selected extension and content.\nGo to selected directory and use .touch command')
 async def makefile(ctx, name, *, content):
-    try:
-        directory = os.getcwd()
-        mkfile = open(name, 'wt')
-        mkfile.write(content)
-        mkfile.close()
+    if str(ctx.message.author.id) in admin_usr:
+        try:
+            directory = os.getcwd()
+            mkfile = open(name, 'wt')
+            mkfile.write(content)
+            mkfile.close()
 
-        await ctx.send(f'Created file {name}, in directory {directory}.')
-        message = f'Information[FileManager]: Created file {name}, in directory {directory}.\nContent: {content}'
-        printMessage(message)
-        logMessage(message)
-    except:
-        await ctx.send(f'Something went wrong while creating file.')
+            await ctx.send(f'Created file {name}, in directory {directory}.')
+            
+            message = f'Information[FileManager]: Created file {name}, in directory {directory}.\nContent: {content}'
+            printMessage(message)
+            logMessage(message)
+        except:
+            await ctx.send(f'Something went wrong while creating file.')
+    else:
+        await ctx.send(not_allowed)
         #FileManager/Directory-END
 
 
@@ -1240,6 +1273,7 @@ async def thread(ctx, name, *, reason):
         channel = ctx.channel
         await channel.create_thread(name=name, auto_archive_duration=60, slowmode_delay=None, reason=reason)
         await ctx.send(f"Created new thread [{name}]")
+        
         message = f"Information[Threads]: Created new thread [{name}] on {channel}. Reason: {reason}"
         printMessage(message)
         logMessage(message)
@@ -1315,26 +1349,67 @@ async def yt(ctx, YTname):
         #AdvancedChannelListener
 #1
 if ACLmode == 1:
-    @client.command(name='ACL', help='Manage A.C.L. users messages saved history\ngetusr - shows User history by User ID\nget history - history of all saved messages')
+    @client.command(name='ACL', help='Manage A.C.L. users messages saved history\ngetusr - shows User history by User ID\nget history - history of all saved messages\nclear [all/user_id] - removes all saved messages or only messages of selected user')
     async def ACL(ctx, mode, *, value):
         if str(ctx.message.author.id) in admin_usr:
             if mode == 'getusr':
                 try:
                     await ctx.send(file=discord.File(f'{maindir}/ACL/{value}/message.txt'))
                 except:
-                    await ctx.send(ACLnotfounderr)
+                    await ctx.send(ACL_notfounderr)
             elif mode == 'get' and value == 'history':
                 try:
                     await ctx.send(file=discord.File(f'{maindir}/ACL/default/message.txt'))
                 except:
-                    await ctx.send(ACLhistorynotfound)
+                    await ctx.send(ACL_historynotfound)
+            elif mode == 'clear':
+                if value == 'all':
+                    try:
+                        shutil.rmtree(f'{maindir}/ACL/')
+                        await ctx.send(ACL_rm_all_success)
+
+                        message = f"Information[ACL]: {ACL_rm_all_success} Command executed by: {ctx.author.id}\n"
+                        print(message)
+                        log = open(f'{maindir}/Logs.txt', 'a')
+                        log.write(message)
+                        log.close()
+                    except Exception as exc:
+                        if extendedErrMess:
+                            await ctx.send(f"{ACL_rm_all_fail} \nException: {exc}")
+                        else:
+                            await ctx.send(ACL_rm_all_fail)
+
+                        message = f"Information[ACL]: User {ctx.message.author.id} tried to clear all message history but failed. \nException: \n{exc}\n"
+                        print(message)
+                        log = open(f'{maindir}/Logs.txt', 'a')
+                        log.write(message)
+                        log.close()
+                else:
+                    try:
+                        shutil.rmtree(f'{maindir}/ACL/{value}')
+                        await ctx.send(f"Cleared message history of <@{value}>.")
+                        log = open(f'{maindir}/Logs.txt', 'a')
+                        log.write(f"Information[ACL]: User {ctx.message.author.id} cleared message history of {value}.\n")
+                        log.close()
+                    except Exception as exc:
+                        if extendedErrMess:
+                            await ctx.send(f"{ACL_rm_user_fail} \nException: {exc}")
+                        else:
+                            await ctx.send(ACL_rm_user_fail)
+
+                        message = f"Information[ACL]: User {ctx.message.author.id} tried to clear message history of {value} but failed. \nException: \n{exc}\n"
+                        print(message)
+                        log = open(f'{maindir}/Logs.txt', 'a')
+                        log.write(message)
+                        log.close()
             else:
-                await ctx.send('Wrong mode.')
+                await ctx.send("Wrong mode. See '.help ACL' for more info")
         else:
-            await ctx.send(ACLnopermission)
-            print(f"Information[ACL]: User {ctx.message.author.id} tried to use !ACL command without permission.\nSee {maindir}/ACL/{ctx.message.author.id} for more information.\n")
+            await ctx.send(ACL_nopermission)
+            message = f"Information[ACL]: User {ctx.message.author.id} tried to use .ACL command without permission.\nSee {maindir}/ACL/{ctx.message.author.id} for more information.\n"
+            print(message)
             logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(f"Information[ACL]: User {ctx.message.author.id} tried to use !ACL command without permission.\nSee {maindir}/ACL/{ctx.message.author.id} for more information.\n")
+            logs.write(message)
             logs.close()
         #AdvancedChannelListener-END
 
