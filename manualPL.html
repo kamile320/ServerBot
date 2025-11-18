@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.9.1 User Manual [PL]">
+    <meta name="description" content="ServerBot 1.9.2 User Manual [PL]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.9.1</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.9.2</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -173,6 +173,7 @@
         dscserv_link = 'Link do Serwera Discord'<br>
         addstable = 'stable_link of Discord Bot'<br>
         addtesting = 'testing_link of Discord Bot'<br>
+        service_monitor = 'True/False' - włącza komendę .service<br>
         service_list = 'Lista usług systemctl do monitorowania poprzez Discorda'<br>
         showmodulemessages = 'True/False' - wyświetla informacje o włączonych modułach Bota<br>
         ACLmodule = 'True/False' - Uruchamia funkcję <a href="#ACL">AdvancedChannelListener</a><br>
@@ -201,12 +202,14 @@
 
         Bot posiada moduły/rozszerzenia rozszerzające funkcje, które można włączyć lub wyłączyć w pliku .env<br>
         Moduły są także dostępne jako osobne repozytoria (Boty Discord) na GitHubie.<br>
-        Aktualnie dostępny jest jeden moduł:<br>
         <ul type="square">
             <li>
                 <a id="ACL" href="https://github.com/kamile320/AdvancedChannelListener"><b>AdvancedChannelListener</b></a> - rejestruje wiadomości użytkowników na serwerze i zapisuje je w pliku ACL/[DiscordUserID].txt oraz wszystkie wiadomości w ACL/default/message.txt<br>
                 Przydatny do monitorowania użytkowników na serwerze i weryfikowania kto jest kim. Może łamać prywatność użytkowników, więc używaj z rozwagą.<br>
                 Jeśli nie zamierzasz używać tego modułu - ustaw w .env ACLmodule = 'False' (ustwaione domyślnie).
+            </li>
+            <li>
+                <b>.service</b> - komenda pozwalająca na podgląd statusu usług systemctl na serwerze hostującym bota. Włącz ją w pliku .env ustawiając service_monitor = True oraz wpisując listę usług do service_list.
             </li>
         </ul>
 

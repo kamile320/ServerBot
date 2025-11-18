@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.9.1 User Manual [EN]">
+    <meta name="description" content="ServerBot 1.9.2 User Manual [EN]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.9.1</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.9.2</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -174,6 +174,7 @@
         dscserv_link = 'Link to your Discord Server'<br>
         addstable = 'stable_link of Discord Bot'<br>
         addtesting = 'testing_link of Discord Bot'<br>
+        service_monitor = 'True/False' - enables .service command<br>
         service_list = 'List of systemctl services to see via Discord'<br>
         showmodulemessages = 'True/False' - shows which Bot modules are enabled<br>
         ACLmodule = 'True/False' - Enables <a href="#ACL">AdvancedChannelListener</a> module<br>
@@ -202,12 +203,14 @@
 
         Bot has extensions/modules that extend functions, which can be enabled or disabled in the .env file.<br>
         Modules are also available as separate repositories (Discord Bots) on GitHub.<br>
-        Currently there's one module available:<br>
         <ul type="square">
             <li>
                 <a id="ACL" href="https://github.com/kamile320/AdvancedChannelListener"><b>AdvancedChannelListener</b></a> - shows user messages sent on Discord, saves them in ACL/[DiscordUserID].txt file and all messages in ACL/default/message.txt<br>
                 Useful for monitoring users on the server and verifying who is who. It can break user privacy, so use it wisely.<br>
                 If you don't want to use this - set ACLmodule = 'False' in .env (set as default).
+            </li>
+            <li>
+                <b>.service</b> - command that allows to check status of systemctl services running on your host server. Enable service_monitor and provide a list of services in service_list in .env file. 
             </li>
         </ul>
 
