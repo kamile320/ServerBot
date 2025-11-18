@@ -179,3 +179,11 @@ on text in .testbot while running Bot on ARM devices
 - File/Directory commands are now only available for admins
 - Updated ACL module to v2.2
 - Added extendedErrMess variable for detailed error messages
+
+
+[ServerBot v1.9.2]
+    Changelog:
+- Updated .badge command
+- Small code improvements
+- Updated .service command - now you need to enable this command
+  in .env file (service_monitor = True) to use it

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION="v1.9.1"
-UPDATEVER="v1.9.1"
+VERSION="v1.9.2"
+UPDATEVER="v1.9.2"
 
 OPTIONS=(1 "Start Bot"
          2 "Start Bot (not venv)"
@@ -68,10 +68,11 @@ case $select in
             echo "addstable = 'stable_link'" >> .env
             echo "addtesting = 'testing_link'" >> .env
             echo "#service_list" >> .env
+            echo "service_monitor = False" >> .env
             echo "service_list = ','" >> .env
             echo "#modules" >> .env
-            echo "showmodulemessages = 'False'" >> .env
-            echo "ACLmodule = 'False'" >> .env
+            echo "showmodulemessages = False" >> .env
+            echo "ACLmodule = False" >> .env
             echo "#ai" >> .env
             echo "aimodel = 'gemini-2.5-flash'" >> .env
             echo "instructions = ['Answer with max 1500 characters','Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']" >> .env

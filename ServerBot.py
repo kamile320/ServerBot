@@ -1,13 +1,12 @@
 import subprocess
 import os
 
-ver = "1.9.1"
+ver = "1.9.2"
 displayname='ServerBot'
 extendedErrMess = False
 
 #ModuleVersion
 ACLver = "2.2"
-ACLmode = 0
 
 def os_selector():
     print(f"====ServerBot v{ver} Recovery Menu====")
@@ -203,27 +202,25 @@ def channelLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
 
 
 
-#LoadModules
+#Module Status
 if os.getenv('ACLmodule') in accept_value:
-    ACLmode = 1
-
-
-#Module Status [After Load]
-if ACLmode == 1:
     ACLstatus = 'enabled'
-elif ACLmode == 0:
-    ACLstatus = 'disabled'
 else:
-    ACLstatus = 'Unknown status! Contact Administrator.'
+    ACLstatus = 'disabled'
 
+if os.getenv('service_monitor') in accept_value:
+    service_status = 'enabled'
+else:
+    service_status = 'disabled'
 
-#LogModuleStatus [After Load-and-Status]
+#LogModuleStatus [After Status]
 if os.getenv('showmodulemessages') in accept_value:
     def logmodule():
         logs = open('Logs.txt', 'a')
         logs.write(f"""
 =========={displayname} Built-in modules: ==========
-Advanced Channel Listener v{ACLver}: {ACLstatus} ({ACLmode}) 
+Advanced Channel Listener v{ACLver}: {ACLstatus} 
+Service command: {service_status}
 \n\n""")
         logs.close()
     logmodule()
@@ -280,7 +277,7 @@ async def on_message(message):
         serverid = "DM"
 
     #A.C.L
-    if ACLmode == 1:
+    if os.getenv('ACLmodule') in accept_value:
         channelLog(username, user_message, channel, server, userid, channelid, serverid)
         userLog(username, user_message, channel, server, userid, channelid, serverid)
 
@@ -378,12 +375,15 @@ async def gpt(ctx, *, question):
 async def gnu(ctx):
     await ctx.send("I’d just like to interject for a moment. What you’re refering to as Linux, is in fact, GNU/Linux, or as I’ve recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX.  Many computer users run a modified version of the GNU system every day, without realizing it. Through a peculiar turn of events, the version of GNU which is widely used today is often called Linux, and many of its users are not aware that it is basically the GNU system, developed by the GNU Project.  There really is a Linux, and these people are using it, but it is just a part of the system they use. Linux is the kernel: the program in the system that allocates the machine’s resources to the other programs that you run. The kernel is an essential part of an operating system, but useless by itself; it can only function in the context of a complete operating system. Linux is normally used in combination with the GNU operating system: the whole system is basically GNU with Linux added, or GNU/Linux. All the so-called Linux distributions are really distributions of GNU/Linux!")
 
-#10
+#9
 @client.command(name='badge')
 async def badge(ctx, member: discord.Member):
-    user_flags = member.public_flags.all()
-    badges = [flag.name for flag in user_flags]
-    await ctx.send(f'{member} has the following badges: {", ".join(badges)}')
+    try:
+        user_flags = member.public_flags.all()
+        badges = [flag.name for flag in user_flags]
+        await ctx.send(f'{member} has the following badges: {", ".join(badges)}')
+    except:
+        await ctx.reply("Incorrect user or incomplete command. Use .badge @user")
         #Random/Fun-END
 
 
@@ -440,12 +440,10 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Code fixes and improvements
-- Updated .service command
-- Removed unused .service messages
-- File/Directory commands are now only available for admins
-- Updated ACL module to v2.2
-- Added extendedErrMess variable for detailed error messages
+- Updated .badge command
+- Small code improvements
+- Updated .service command - now you need to enable this command
+  in .env file (service_monitor = True) to use it
 
 To see older releases, find 'updates.txt' in 'Files' directory.
 """)
@@ -670,48 +668,49 @@ async def mksysctlstart(ctx, mode):
         await ctx.send(not_allowed)
 
 #7
-@client.command(name="service", help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemctl")
-async def service(ctx, mode):
-    if str(ctx.message.author.id) in admin_usr:
-        try:
-            if mode == 'list':
-                try:
-                    listdir_env = os.getenv('service_list')
-                    await ctx.send(f'**Service Entries:**\n{listdir_env}')
-                except:
-                    await ctx.send(service_err)
+if os.getenv('service_monitor') in accept_value:
+    @client.command(name="service", help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemctl")
+    async def service(ctx, mode):
+        if str(ctx.message.author.id) in admin_usr:
+            try:
+                if mode == 'list':
+                    try:
+                        listdir_env = os.getenv('service_list')
+                        await ctx.send(f'**Service Entries:**\n{listdir_env}')
+                    except:
+                        await ctx.send(service_err)
 
-            elif mode == 'status':
-                try:
-                    listdir_env = os.getenv('service_list')
-                    listdir = [item.strip() for item in listdir_env.split(',')]
-                    await ctx.send("**Service Activity:**")
-                    for file in listdir:
-                        await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl is-active {file}'])}```")
-                except:
-                    await ctx.send(service_err)
+                elif mode == 'status':
+                    try:
+                        listdir_env = os.getenv('service_list')
+                        listdir = [item.strip() for item in listdir_env.split(',')]
+                        await ctx.send("**Service Activity:**")
+                        for file in listdir:
+                            await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl is-active {file}'])}```")
+                    except:
+                        await ctx.send(service_err)
 
-            elif mode == 'status-detailed':
-                try:
-                    listdir_env = os.getenv('service_list')
-                    listdir = [item.strip() for item in listdir_env.split(',')]
-                    await ctx.send("**Service Activity:**")
-                    for file in listdir:
-                        await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl status {file}'])}```")
-                except:
-                    await ctx.send(service_err)
+                elif mode == 'status-detailed':
+                    try:
+                        listdir_env = os.getenv('service_list')
+                        listdir = [item.strip() for item in listdir_env.split(',')]
+                        await ctx.send("**Service Activity:**")
+                        for file in listdir:
+                            await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl status {file}'])}```")
+                    except:
+                        await ctx.send(service_err)
 
-            else:
-                try:
-                    await ctx.send(f"**Service {mode}:**")
-                    await ctx.send(f"```{subprocess.getoutput([f'systemctl status {mode}'])}```")
-                except Exception as err:
-                    await ctx.send(f'Something went wrong.\nPossible cause: {err}')
-        
-        except Exception as err:
-            await ctx.send(f'Something went wrong.\nPossible cause: {err}')
-    else:
-        await ctx.send(not_allowed)
+                else:
+                    try:
+                        await ctx.send(f"**Service {mode}:**")
+                        await ctx.send(f"```{subprocess.getoutput([f'systemctl status {mode}'])}```")
+                    except Exception as err:
+                        await ctx.send(f'Something went wrong.\nPossible cause: {err}')
+
+            except Exception as err:
+                await ctx.send(f'Something went wrong.\nPossible cause: {err}')
+        else:
+            await ctx.send(not_allowed)
 
 #8
 @client.command(name='pingip', help='Pings selected IPv4 address.')
@@ -730,17 +729,20 @@ async def pingip(ctx, ip):
 async def module(ctx):
     if str(ctx.message.author.id) in admin_usr:
         #ACL
-        if ACLmode == 1:
+        if os.getenv('ACLmodule') in accept_value:
             ACLstatus = 'enabled'
-        elif ACLmode == 0:
-            ACLstatus = 'disabled'
         else:
-            ACLstatus = 'Unknown status! Contact Administrator.'
-        
+            ACLstatus = 'disabled'
+        #Service
+        if os.getenv('service_monitor') in accept_value:
+            service_status = 'enabled'
+        else:
+            service_status = 'disabled'
         
         await ctx.send(f"""
 ==========**{displayname} Built-in modules: **==========
-Advanced Channel Listener v{ACLver}: {ACLstatus} ({ACLmode}) 
+Advanced Channel Listener v{ACLver}: {ACLstatus} 
+Service command:  {service_status}
 """)
     else:
         await ctx.send(not_allowed)
@@ -1348,7 +1350,7 @@ async def yt(ctx, YTname):
         
         #AdvancedChannelListener
 #1
-if ACLmode == 1:
+if os.getenv('ACLmodule') in accept_value:
     @client.command(name='ACL', help='Manage A.C.L. users messages saved history\ngetusr - shows User history by User ID\nget history - history of all saved messages\nclear [all/user_id] - removes all saved messages or only messages of selected user')
     async def ACL(ctx, mode, *, value):
         if str(ctx.message.author.id) in admin_usr:
