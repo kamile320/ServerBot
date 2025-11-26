@@ -187,3 +187,10 @@ on text in .testbot while running Bot on ARM devices
 - Small code improvements
 - Updated .service command - now you need to enable this command
   in .env file (service_monitor = True) to use it
+
+
+[ServerBot v1.9.3]
+    Changelog:
+- Updated .ai command (added internet search support)
+- Added /ai command (slash version of .ai)
+- Updated /random command (old version renamed to /random_old)

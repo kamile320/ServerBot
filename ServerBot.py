@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-ver = "1.9.2"
+ver = "1.9.3"
 displayname='ServerBot'
 extendedErrMess = False
 
@@ -149,7 +149,8 @@ thread_error = "Something Happened. Try to type:\n.thread {NameWithoutSpaces} {R
 not_allowed = "You're not allowed to use this command."
 SBservice = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo chmod 775 -R /BotDirectory/*\nsudo systemctl enable ServerBot <== Enables automatic startup\nsudo systemctl start ServerBot <== Optional (turns on Service)\nsudo systemctl daemon-reload <== if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
 service_err = "Something went wrong.\nHave you added the service entries to the .env file?"
-badsite = "Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist? "
+badsite = "Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist?"
+random_err = 'Something went wrong. Have you typed correct min/max values?'
     #A.C.L
 if os.getenv('ACLmodule') in accept_value:
     ACL_notfounderr = "User history not found."
@@ -318,8 +319,11 @@ async def random_num(ctx, min = int(), max = int()):
     try:
         randomn = random.randrange(min, max)
         await ctx.reply(f'This is your random number: {randomn}')
-    except:
-        await ctx.reply(f'Something went wrong. Did you typed correct min/max values?')
+    except Exception as error:
+        if extendedErrMess:
+            await ctx.reply(f'{random_err}\nPossible cause: {error}')
+        else:
+            await ctx.reply(random_err)
 
 #2
 @client.command(name='essa', help='Check your "essa"')
@@ -355,11 +359,18 @@ async def blank(ctx):
 
 #7
 @client.command(name='ai', help=f'Talk with AI.\nUses {ai_model} model.\n.ai [question]')
-async def gpt(ctx, *, question):
+async def ai(ctx, *, question):
     try:
         response = ai_client.models.generate_content(
-            model=f"{ai_model}", contents=question, config=types.GenerateContentConfig(
-                system_instruction=[f'{os.getenv("instructions")}',f'You are a {displayname} v{ver} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).']
+            model=f"{ai_model}", 
+            contents=question, 
+            config=types.GenerateContentConfig(
+                system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} v{ver} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
+                tools=[
+                    types.Tool(
+                        google_search=types.GoogleSearch()
+                    )
+                ]
             )
         )
         await ctx.reply(response.text)
@@ -440,10 +451,9 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Updated .badge command
-- Small code improvements
-- Updated .service command - now you need to enable this command
-  in .env file (service_monitor = True) to use it
+- Updated .ai command (added internet search support)
+- Added /ai command (slash version of .ai)
+- Updated /random command (old version renamed to /random_old)
 
 To see older releases, find 'updates.txt' in 'Files' directory.
 """)
@@ -1435,11 +1445,18 @@ async def test(ctx):
 
 ################################################ S L A S H   C O M M A N D S ###########################################################################################
 #1
-@client.tree.command(name='random', description='Shows your random number')
-async def random(interaction):
+@client.tree.command(name='random', description='Shows your random number. Type .random [min] [max]')
+@app_commands.describe(min="Minimum value", max="Maximum value")
+async def random_slash(interaction: discord.Interaction, min: int, max: int):
     import random
-    randomn = random.randrange(-1, 999999)
-    await interaction.response.send_message(f'This is your random number: {randomn}')
+    try:
+        randomn = random.randrange(min, max)
+        await interaction.response.send_message(f'This is your random number: {randomn}')
+    except Exception as error:
+        if extendedErrMess:
+            await interaction.response.send_message(f'{random_err}\nPossible cause: {error}')
+        else:
+            await interaction.response.send_message(random_err)
 
 #2
 @client.tree.command(name='ping', description='Pings the Bot')
@@ -1475,6 +1492,39 @@ async def testbot(interaction):
     ====================================================""")
     else:
         await interaction.response.send_message(not_allowed)
+
+#4
+@client.tree.command(name='ai', description=f'Talk with AI. Uses {ai_model} model.')
+@app_commands.describe(question="prompt/question for AI")
+async def ai(interaction: discord.Interaction, question: str):
+    await interaction.response.defer(thinking=True)
+    try:
+        response = ai_client.models.generate_content(
+            model=f"{ai_model}", 
+            contents=question, 
+            config=types.GenerateContentConfig(
+                system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} v{ver} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
+                tools=[
+                    types.Tool(
+                        google_search=types.GoogleSearch()
+                    )
+                ]
+            )
+        )
+        await interaction.followup.send(response.text)
+    except Exception as error:
+        await interaction.followup.send(f"Something went wrong, possible cause:\n{error}")
+        
+        error_message = f"DiscordCommandException[AI]: {error}"
+        printMessage(error_message)
+        logMessage(error_message)
+
+#5
+@client.tree.command(name='random_old', description='Shows your random number [Old version]')
+async def random_old(interaction):
+    import random
+    randomn = random.randrange(-1, 999999)
+    await interaction.response.send_message(f'This is your random number: {randomn}')
 ################################################ S L A S H   C O M M A N D S  - E N D #######################################################################################
 
 try:
