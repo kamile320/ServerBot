@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION="v1.9.2"
-UPDATEVER="v1.9.2"
+VERSION="v1.9.3"
+UPDATEVER="v1.9.3"
 
 OPTIONS=(1 "Start Bot"
          2 "Start Bot (not venv)"
