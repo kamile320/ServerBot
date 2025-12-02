@@ -1,5 +1,14 @@
-# ServerBot
-Ready Discord Bot
+# ServerBot 
+
+<a href="https://github.com/kamile320/ServerBot/releases">![GitHub Release](https://img.shields.io/github/v/release/kamile320/serverbot)</a>
+<a href="https://github.com/kamile320/ServerBot/blob/main/LICENSE">![GitHub License](https://img.shields.io/github/license/kamile320/serverbot)</a>
+<a href="">![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/kamile320/serverbot/total)</a>
+<a href="">![GitHub commits since latest release](https://img.shields.io/github/commits-since/kamile320/serverbot/latest)</a>
+
+<a href="https://github.com/kamile320/ServerBot/stargazers">![GitHub Repo stars](https://img.shields.io/github/stars/kamile320/serverbot)</a>  
+<a href="https://github.com/kamile320/ServerBot/forks">![GitHub forks](https://img.shields.io/github/forks/kamile320/serverbot)</a>
+
+<!--Ready Discord Bot-->
 
 ServerBot is a free project that shares ready code for Discord Bots.  
 The goal is to create a great Discord Bot base that anyone can use, modify, install with ease and host for your own.  
