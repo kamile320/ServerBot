@@ -22,7 +22,7 @@ pause
 @echo To use music commands you need to add FFmpeg files to PATH. You can download it here: 
 @echo https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip
 @echo Extract files, rename folder to 'ffmpeg' and copy it to C:\ffmpeg
-@echo Now script will automatically add this files to local user PATH (C:\ffmpeg\bin). In the 'bin' folder must be .exe files of FFmpeg. Add /M to add FFmpeg files to PATH for all users
+@echo Now script will automatically add this files to local user PATH (C:\ffmpeg\bin). You should place '.exe' files of FFmpeg in the 'bin' folder. Add /M to add FFmpeg files to PATH for all users
 
 pause
 
