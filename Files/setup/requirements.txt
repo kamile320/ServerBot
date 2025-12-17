@@ -1,0 +1,12 @@
+discord
+discord.py[voice]
+datetime
+psutil
+asyncio
+sqlite3
+google-genai
+ffmpeg
+python-dotenv
+requests
+pyfiglet
+yt_dlp
