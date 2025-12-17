@@ -3,6 +3,7 @@
 .venv
 Logs.txt
 __pycache__/
-/ACL
+/ACL*
 Files/autorun.sh
 *.db
+tempDB.txt
