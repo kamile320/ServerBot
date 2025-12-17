@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION="v1.9.3"
-UPDATEVER="v1.9.3"
+VERSION="v1.10.0"
+UPDATEVER="v1.10.0"
 
 OPTIONS=(1 "Start Bot"
          2 "Start Bot (not venv)"
@@ -42,11 +42,11 @@ clear
 case $select in
         1)
             echo "Starting ServerBot.py ..."
-            ./.venv/bin/python ServerBot.py
+            ./.venv/bin/python ServerBot.py $*
             ;;
         2)
             echo "Starting ServerBot.py..."
-            python3 ServerBot.py
+            python3 ServerBot.py $*
             ;;
         3)  
             echo "Running installation script..."
@@ -61,7 +61,6 @@ case $select in
             echo "TOKEN=''" >> .env
             echo "AI_token=''" >> .env
             echo "admin_usr = ['']" >> .env
-            echo "mod_usr = ['']" >> .env
             echo "#command_dscserv" >> .env
             echo "dscserv_link = 'https://discord.gg/UMtYGAx5ac'" >> .env
             echo "#command_addbot" >> .env
@@ -76,6 +75,8 @@ case $select in
             echo "#ai" >> .env
             echo "aimodel = 'gemini-2.5-flash'" >> .env
             echo "instructions = ['Answer with max 1500 characters','Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']" >> .env
+            echo "#extendedErrMess" >> .env
+            echo "extendedErrMess = False" >> .env
             sleep 1
             bash setup.sh
             ;;
