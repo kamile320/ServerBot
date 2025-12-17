@@ -11,20 +11,9 @@ sleep 1
 read -p "Type anything to continue. (Need root privileges)"
 
 sudo apt update -y
-sudo apt install -y python3-pip ffmpeg
-sudo apt install -y  python3-venv git
+sudo apt install -y python3-pip ffmpeg python3-venv git
 
-pip3 install discord
-pip3 install discord.py[voice]
-pip3 install datetime
-pip3 install psutil
-pip3 install asyncio
-pip3 install google-genai
-pip3 install ffmpeg
-pip3 install python-dotenv
-pip3 install requests
-pip3 install pyfiglet
-pip3 install yt_dlp
+pip3 install -r Files/setup/requirements.txt
 
 echo "'Externally managed' error? Run 'mkvenv.sh' script from 'Files/setup' directory to easily create one."
 sleep 1
