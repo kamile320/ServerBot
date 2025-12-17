@@ -1,13 +1,34 @@
 import subprocess
 import os
+import sys
 
-ver = "1.9.3"
+ver = "1.10.0-test"
 displayname='ServerBot'
-extendedErrMess = False
+flags = sys.argv
+db_dir = 'Files/serverbot.db'
 
 #ModuleVersion
-ACLver = "2.2"
+ACLver = "3.1"
 
+
+#Check flags
+if '--help' in flags:
+    print(f"""ServerBot v{ver} made by Kamile320\n\n
+          Project: https://github.com/kamile320/serverbot\n
+
+          --help                Shows this message\n
+          --ignore-pip          Doesn't abort bot startup if an error occur 
+                                while loading pip libraries\n
+          --version             Shows version information\n
+    """)
+    exit()
+
+if '--version' in flags:
+    print(f"ServerBot v{ver}\nA.C.L. v{ACLver}")
+    exit()
+
+
+#Loading PIP Libraries
 def os_selector():
     print(f"====ServerBot v{ver} Recovery Menu====")
     print("""Select Method: 
@@ -29,8 +50,6 @@ def os_selector():
         print('Failed to run Script. Aborting Install...')
         exit()
 
-
-
 try:
     import discord
     from discord.ext import commands
@@ -42,6 +61,7 @@ try:
     import asyncio
     import random
     import shutil
+    import sqlite3
     import pyfiglet
     import platform
     import yt_dlp as youtube_dl
@@ -49,8 +69,12 @@ try:
     from google.genai import types
     from dotenv import load_dotenv
 except Exception as exc:
-    print(f"Error in importing Library's. Trying to install it and update pip3\nException: {exc}\n")
-    os_selector()
+    if '--ignore-pip' in flags:
+        print(f"Error while importing libraries: {exc}\nIgnoring.. Expect unstable experience.")
+    else:
+        print(f"Error while importing libraries. Trying to install it and update pip3\nException: {exc}\n")
+        os_selector()
+        exit()
 
 
 
@@ -65,8 +89,6 @@ print(banner)
 yt_dl_opts = {"format": "bestaudio/best"}
 ytdl = youtube_dl.YoutubeDL(yt_dl_opts)
 ffmpeg_options = {"options": "-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2"}
-
-
 
 #YT_DLP - search
 ytdl_opts_search = {
@@ -99,9 +121,11 @@ try:
     ############# token/intents/etc ################
     ai_token = os.getenv('AI_token')
     admin_usr = os.getenv('admin_usr')
+        #To remove
     mod_usr = os.getenv('mod_usr')
     ai_model = f"{os.getenv('aimodel')}"
     ai_client = genai.Client(api_key=f"{ai_token}")
+    extendedErrMess = os.getenv('extendedErrMess')
     ################################################
 except:
     print("CAN'T LOAD .env FILE!\nCreate .env file using setup.sh")
@@ -135,6 +159,37 @@ def printMessage(info):
 #Directory
 maindir = os.getcwd()
 SBbytes = os.path.getsize('ServerBot.py')
+
+
+
+#Database - create or load
+def load_db():
+    if os.path.exists(db_dir) == True:
+        if extendedErrMess in accept_value:
+            print("Database found.")
+    else:
+        print("Database not found. Creating new database...")
+        db = sqlite3.connect(db_dir)
+        cur = db.cursor()
+        cur.execute("""CREATE TABLE IF NOT EXISTS users(
+                    id integer not null primary key AUTOINCREMENT, 
+                    discord_id integer unique not null, 
+                    username text, 
+                    SBrole text default None, 
+                    exp_points integer default 0, 
+                    level integer default 0)""")
+        db.commit()
+
+#User registration
+def register_user(id, name):
+    db = sqlite3.connect('Files/serverbot.db')
+    cur = db.cursor()
+    #SELECT
+    cur.execute('SELECT 1 FROM users WHERE discord_id=?', (id,))
+    if cur.fetchone() is None:
+        #INSERT
+        cur.execute(f"INSERT INTO users (discord_id, username) VALUES (?, ?) ON CONFLICT(discord_id) DO NOTHING", (id, f"{name}"))
+        db.commit()
 
 
 
@@ -176,29 +231,32 @@ def aclcheck():
 
 #MessageLogging
 def userLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
+    time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
     if os.path.exists(f'{maindir}/ACL/{usr_id}/message.txt') == True:
         usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a', encoding='utf-8')
-        usrmessage.write(f'[{srv}({srv_id}) / {chnl}({chnl_id})] {usr}({usr_id}): {usrmsg}\n')
+        usrmessage.write(f'[{time}] [{srv}({srv_id}) / {chnl}({chnl_id})] {usr}: {usrmsg}\n')
         usrmessage.close()
     else:
         print("[ACL] New user detected. Creating new entry...")
         os.makedirs(f'{maindir}/ACL/{usr_id}')
         usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a', encoding='utf-8')
-        usrmessage.write(f'[{srv}({srv_id}) / {chnl}({chnl_id})] {usr}({usr_id}): {usrmsg}\n')
+        usrmessage.write(f'{displayname} user message log\nUsername: {usr}\nUserID: {usr_id}\n##############################\n\n')
+        usrmessage.write(f'[{time}] [{srv}({srv_id}) / {chnl}({chnl_id})] {usr}: {usrmsg}\n')
         usrmessage.close()
 
 
 def channelLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
-    print(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}")
+    time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+    print(f"[{time}] [Message//{srv}/{chnl}] {usr}: {usrmsg}")
     if os.path.exists(f'{maindir}/ACL/default/message.txt') == True:
         usrmessage = open(f'{maindir}/ACL/default/message.txt', 'a', encoding='utf-8')
-        usrmessage.write(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
+        usrmessage.write(f"[{time}] [Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
         usrmessage.close()
     else:
         print("[ACL] Default message history not detected. Creating new entry...")
         os.makedirs(f'{maindir}/ACL/default')
         usrmessage = open(f'{maindir}/ACL/default/message.txt', 'a', encoding='utf-8')
-        usrmessage.write(f"[Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
+        usrmessage.write(f"[{time}] [Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
         usrmessage.close()
 
 
@@ -217,7 +275,7 @@ else:
 #LogModuleStatus [After Status]
 if os.getenv('showmodulemessages') in accept_value:
     def logmodule():
-        logs = open('Logs.txt', 'a')
+        logs = open('Logs.txt', 'a', encoding='utf-8')
         logs.write(f"""
 =========={displayname} Built-in modules: ==========
 Advanced Channel Listener v{ACLver}: {ACLstatus} 
@@ -233,6 +291,8 @@ Service command: {service_status}
 async def on_ready():
     print(f'Logged as {client.user}')
     print(f'Welcome in ServerBot v{ver}')
+    #Load Database
+    load_db()
     #slash_command_sync
     try:
         syncd = await client.tree.sync()
@@ -282,6 +342,8 @@ async def on_message(message):
         channelLog(username, user_message, channel, server, userid, channelid, serverid)
         userLog(username, user_message, channel, server, userid, channelid, serverid)
 
+    register_user(userid, username)
+
     await client.process_commands(message)
 
 
@@ -319,9 +381,9 @@ async def random_num(ctx, min = int(), max = int()):
     try:
         randomn = random.randrange(min, max)
         await ctx.reply(f'This is your random number: {randomn}')
-    except Exception as error:
+    except Exception as err:
         if extendedErrMess:
-            await ctx.reply(f'{random_err}\nPossible cause: {error}')
+            await ctx.reply(f'{random_err}\nPossible cause: {err}')
         else:
             await ctx.reply(random_err)
 
@@ -374,10 +436,10 @@ async def ai(ctx, *, question):
             )
         )
         await ctx.reply(response.text)
-    except Exception as error:
-        await ctx.reply(f"Something went wrong, possible cause:\n{error}")
+    except Exception as err:
+        await ctx.reply(f"Something went wrong, possible cause:\n{err}")
         
-        error_message = f"DiscordCommandException[AI]: {error}"
+        error_message = f"DiscordCommandException[AI]: {err}"
         printMessage(error_message)
         logMessage(error_message)
 
@@ -451,9 +513,22 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Updated .ai command (added internet search support)
-- Added /ai command (slash version of .ai)
-- Updated /random command (old version renamed to /random_old)
+- Added database support (sqlite3)
+- Bot moderators now must be defined in the database
+- Updated ACL module to v3.1
+- Removed .issues command (use GitHub Issues page)
+- Pip installers now use requirements.txt file
+- Small change in version naming - now each version has a scheme X.Y.Z(-tag)
+  instead of X.Y or X.Y.Z
+  X -> Major changes incompatible with older versions
+  Y -> Normal updates, new functions
+  Z -> Bugfixes, small changes
+  (-tag) -> marks versions (like X.Y.Z-test as unfinished version; 
+  these versions will not have a release on GitHub)
+- Moved extendedErrMess variable to the .env file
+- Added .db .showdb commands
+- Updates in .gitignore
+- Minor fixes and improvements
 
 To see older releases, find 'updates.txt' in 'Files' directory.
 """)
@@ -468,15 +543,6 @@ Ideas for Future Updates
 - Database support for leveling system (sqlite3)
 You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac)
 """)
-
-#7
-@client.command(name='issues', help='Known Issues of Bot')
-async def issues(ctx):
-    await ctx.send("""
-**Known Issues:**
-**1.** '.unban' command doesn't work.
-    **Why:** Can't find banned user
-    **How Fixed:** Waits for fix.""")
         #BotInfo-END
 
 
@@ -488,7 +554,7 @@ async def ShutDown(ctx):
     if str(ctx.message.author.id) in admin_usr:
         print("Information[ShutDown]: Started turning off the Bot")
         try:
-            print("Information[ShutDown]: Saving Logs.txt...")
+            print("Saving Logs.txt...")
             src = open(f'{maindir}/Logs.txt', 'r')
             logs = open(f'{maindir}/Files/Logs.txt', 'a')
             append = f"\n\n{src.read()}"
@@ -498,6 +564,13 @@ async def ShutDown(ctx):
             print("Logs.txt saved successfully.")
         except:
             print("Error occurred while saving log.")
+        try:
+            print("Closing database...")
+            db = sqlite3.connect('Files/serverbot.db')
+            db.close()
+        except:
+            print("Failed to close databse.")
+
         print("Information[ShutDown]: Shutting Down...")
         await ctx.send(f'ClosingBot.')
         await asyncio.sleep(1)
@@ -757,6 +830,82 @@ Service command:  {service_status}
     else:
         await ctx.send(not_allowed)
         #AdminOnly-END
+
+
+
+        #Database
+#1
+@client.command(name='db', help='Database commands\n.db register {userID} - manually registers user in database\n.db remove {userID} - removes user from database\n.db op {userID} - gives Moderator role to user (Discord bot mod)\n.db deop {userID} - removes Mod role from user')
+async def db(ctx, mode, value1, *, value2=None):
+    if str(ctx.message.author.id) in admin_usr:
+        db = sqlite3.connect(db_dir)
+        cur = db.cursor()
+        if mode == 'register':
+            if value2 is None:
+                value2 = "No nickname"
+            try:
+                #INSERT
+                cur.execute(f"INSERT INTO users (discord_id, username) VALUES (?, ?)", (value1, value2,))
+                db.commit()
+                #SELECT
+                res = cur.execute(f'SELECT * FROM users WHERE discord_id=?', (value1,))
+
+                await ctx.reply(f"Result: {res.fetchall()}")
+            except Exception as err:
+                await ctx.reply(f'Error: {err}')
+        
+        elif mode == 'remove':
+            try:
+                #DELETE
+                cur.execute(f"DELETE FROM users WHERE discord_id = ?", (value1,))
+                db.commit()
+                #SELECT
+                res = cur.execute(f'SELECT * FROM users WHERE discord_id=?', (value1,))
+
+                await ctx.reply(f"Result: {res.fetchall()}")
+            except Exception as err:
+                await ctx.reply(f'Error: {err}')
+
+        elif mode == 'op':
+            try:
+                #UPDATE
+                cur.execute(f"UPDATE users SET SBrole='mod' WHERE discord_id=?", (value1,))
+                db.commit()
+
+                await ctx.reply(f"Opped <@{value1}>.")
+            except Exception as err:
+                await ctx.reply(f'Error: {err}')
+
+        elif mode == 'deop':
+            try:
+                #UPDATE
+                cur.execute(f"UPDATE users SET SBrole='None' WHERE discord_id=?", (value1,))
+                db.commit()
+
+                await ctx.reply(f"Deopped <@{value1}>.")
+            except Exception as err:
+                await ctx.reply(f'Error: {err}')
+    else:
+        await ctx.reply(not_allowed)
+
+#2
+@client.command(name='showdb', help='Shows database content in .txt file')
+async def showdb(ctx):
+    if str(ctx.message.author.id) in admin_usr:
+        db = sqlite3.connect(db_dir)
+        cur = db.cursor()
+        #SELECT
+        result = cur.execute('SELECT * FROM users')
+        #SAVE
+        save = open('tempDB.txt', 'w', encoding='utf-8')
+        save.write(str(result.fetchall()))
+        save.close()
+
+        await ctx.reply("Database content saved in tempDB.txt file.")
+        await ctx.send(file=discord.File('tempDB.txt'))
+    else:
+        await ctx.reply(not_allowed)
+        #Database-END
 
 
 
@@ -1181,7 +1330,7 @@ async def micspam(ctx):
 
 
 
-        #FileManager/Directory - only for Admins (and Mods in the future)
+        #FileManager/Directory
 #1
 @client.command(name='cd', help="Changes directory\nYou can go back by .dir <return>")
 async def chdir(ctx, *, directory):
@@ -1260,7 +1409,7 @@ async def makefile(ctx, name, *, content):
     if str(ctx.message.author.id) in admin_usr:
         try:
             directory = os.getcwd()
-            mkfile = open(name, 'wt')
+            mkfile = open(name, 'wt', encoding='utf-8')
             mkfile.write(content)
             mkfile.close()
 
@@ -1379,66 +1528,55 @@ if os.getenv('ACLmodule') in accept_value:
                     try:
                         shutil.rmtree(f'{maindir}/ACL/')
                         await ctx.send(ACL_rm_all_success)
-
                         message = f"Information[ACL]: {ACL_rm_all_success} Command executed by: {ctx.author.id}\n"
-                        print(message)
-                        log = open(f'{maindir}/Logs.txt', 'a')
-                        log.write(message)
-                        log.close()
+                        printMessage(message)
+                        logMessage(message)
                     except Exception as exc:
                         if extendedErrMess:
                             await ctx.send(f"{ACL_rm_all_fail} \nException: {exc}")
                         else:
                             await ctx.send(ACL_rm_all_fail)
-
                         message = f"Information[ACL]: User {ctx.message.author.id} tried to clear all message history but failed. \nException: \n{exc}\n"
-                        print(message)
-                        log = open(f'{maindir}/Logs.txt', 'a')
-                        log.write(message)
-                        log.close()
+                        printMessage(message)
+                        logMessage(message)
                 else:
                     try:
                         shutil.rmtree(f'{maindir}/ACL/{value}')
                         await ctx.send(f"Cleared message history of <@{value}>.")
-                        log = open(f'{maindir}/Logs.txt', 'a')
-                        log.write(f"Information[ACL]: User {ctx.message.author.id} cleared message history of {value}.\n")
-                        log.close()
+                        message = f"Information[ACL]: User {ctx.message.author.id} cleared message history of {value}.\n"
+                        printMessage(message)
+                        logMessage(message)
                     except Exception as exc:
                         if extendedErrMess:
                             await ctx.send(f"{ACL_rm_user_fail} \nException: {exc}")
                         else:
                             await ctx.send(ACL_rm_user_fail)
-
                         message = f"Information[ACL]: User {ctx.message.author.id} tried to clear message history of {value} but failed. \nException: \n{exc}\n"
-                        print(message)
-                        log = open(f'{maindir}/Logs.txt', 'a')
-                        log.write(message)
-                        log.close()
+                        printMessage(message)
+                        logMessage(message)
             else:
                 await ctx.send("Wrong mode. See '.help ACL' for more info")
         else:
             await ctx.send(ACL_nopermission)
             message = f"Information[ACL]: User {ctx.message.author.id} tried to use .ACL command without permission.\nSee {maindir}/ACL/{ctx.message.author.id} for more information.\n"
-            print(message)
-            logs = open(f'{maindir}/Logs.txt', 'a')
-            logs.write(message)
-            logs.close()
+            printMessage(message)
+            logMessage(message)
         #AdvancedChannelListener-END
 
 
 
         #Test_Commands
 #1
-@client.command(name='test', help='test', tts=True)
-async def test(ctx):
-    await ctx.send(f'test {ctx.author.mention}')
+#@client.command(name='test', help='test', tts=True)
+#async def test(ctx):
+#    await ctx.send(f'test {ctx.author.mention}')
 
 #2
 #@client.command(name='ServerKiller', help="Don't use this")
 #async def kill(ctx):
 #    while True:
 #        await ctx.send('@everyone')
-#
+
         #Test_Commands-END
 
 
