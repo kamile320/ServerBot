@@ -5,17 +5,7 @@
 
 pause
 
-pip install discord
-pip install discord.py[voice]
-pip install pyfiglet
-pip install datetime
-pip install psutil
-pip install asyncio
-pip install google-genai
-pip install ffmpeg
-pip install python-dotenv
-pip install requests
-pip install yt_dlp
+pip install -r Files\setup\requirements.txt
 
 pause
 
