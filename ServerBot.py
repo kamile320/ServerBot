@@ -4,7 +4,6 @@ import sys
 
 ver = "1.10.0-test"
 displayname='ServerBot'
-flags = sys.argv
 db_dir = 'Files/serverbot.db'
 
 #ModuleVersion
@@ -12,7 +11,7 @@ ACLver = "3.1"
 
 
 #Check flags
-if '--help' in flags:
+if '--help' in sys.argv:
     print(f"""ServerBot v{ver} made by Kamile320\n\n
           Project: https://github.com/kamile320/serverbot\n
 
@@ -23,7 +22,7 @@ if '--help' in flags:
     """)
     exit()
 
-if '--version' in flags:
+if '--version' in sys.argv:
     print(f"ServerBot v{ver}\nA.C.L. v{ACLver}")
     exit()
 
@@ -69,7 +68,7 @@ try:
     from google.genai import types
     from dotenv import load_dotenv
 except Exception as exc:
-    if '--ignore-pip' in flags:
+    if '--ignore-pip' in sys.argv:
         print(f"Error while importing libraries: {exc}\nIgnoring.. Expect unstable experience.")
     else:
         print(f"Error while importing libraries. Trying to install it and update pip3\nException: {exc}\n")
