@@ -4,7 +4,6 @@ import sys
 
 ver = "1.10.0-test"
 displayname='ServerBot'
-db_dir = 'Files/serverbot.db'
 
 #ModuleVersion
 ACLver = "3.1"
@@ -120,8 +119,6 @@ try:
     ############# token/intents/etc ################
     ai_token = os.getenv('AI_token')
     admin_usr = os.getenv('admin_usr')
-        #To remove
-    mod_usr = os.getenv('mod_usr')
     ai_model = f"{os.getenv('aimodel')}"
     ai_client = genai.Client(api_key=f"{ai_token}")
     extendedErrMess = os.getenv('extendedErrMess')
@@ -163,12 +160,12 @@ SBbytes = os.path.getsize('ServerBot.py')
 
 #Database - create or load
 def load_db():
-    if os.path.exists(db_dir) == True:
+    if os.path.exists(f"{maindir}/Files/serverbot.db") == True:
         if extendedErrMess in accept_value:
             print("Database found.")
     else:
         print("Database not found. Creating new database...")
-        db = sqlite3.connect(db_dir)
+        db = sqlite3.connect(f"{maindir}/Files/serverbot.db")
         cur = db.cursor()
         cur.execute("""CREATE TABLE IF NOT EXISTS users(
                     id integer not null primary key AUTOINCREMENT, 
@@ -181,7 +178,7 @@ def load_db():
 
 #User registration
 def register_user(id, name):
-    db = sqlite3.connect('Files/serverbot.db')
+    db = sqlite3.connect(f"{maindir}/Files/serverbot.db")
     cur = db.cursor()
     #SELECT
     cur.execute('SELECT 1 FROM users WHERE discord_id=?', (id,))
@@ -190,11 +187,23 @@ def register_user(id, name):
         cur.execute(f"INSERT INTO users (discord_id, username) VALUES (?, ?) ON CONFLICT(discord_id) DO NOTHING", (id, f"{name}"))
         db.commit()
 
+#Check if mod
+def is_mod(id):
+    db = sqlite3.connect(f"{maindir}/Files/serverbot.db")
+    cur = db.cursor()
+    cur.execute("SELECT 1 FROM users WHERE discord_id=? AND SBrole='mod'", (id,))
+    if cur.fetchone() is not None:
+        return True
+
 
 
 #Information/Errors
-fileerror = "Error: File not found or don't exist"
+fileerror = "Error: File not found"
 filelarge = "Error: File too large"
+direrror = "Error: Directory not found"
+cannotcreatedir = "Error: Can't create directory."
+cannotcreatefile = "Error: Can't create file."
+chksize_error = "Error occurred while checking file size."
 copiedlog = f"Information[ServerLog]: Copied Log to {maindir}/Files"
 ffmpeg_error = "FFmpeg is not installed or File not found"
 voice_not_connected_error = "You must be connected to VC first!"
@@ -387,38 +396,27 @@ async def random_num(ctx, min = int(), max = int()):
             await ctx.reply(random_err)
 
 #2
-@client.command(name='essa', help='Check your "essa"')
-async def essa(ctx):
-    import random
-    losessa = random.randrange(101)
-    await ctx.send(f'Twój dzisiejszy poziom essy: {losessa}%')
-    
-    message = f'Information[Random/Fun]: Someone has {losessa}% of essa'
-    printMessage(message)
-    logMessage(message)
-
-#3
 @client.command(name='botbanner', help='Shows Bots Banner')
 async def banner(ctx):
     await ctx.send(f'```{banner}```')
 
-#4
+#3
 @client.command(name='banner', help='Shows your text as Banner')
 async def banner1(ctx, *, text):
     banner1 = pyfiglet.figlet_format(text)
     await ctx.send(f'```{banner1}```')
 
-#5
+#4
 @client.command(name='blankthing', help='Just blank thing')
 async def blank(ctx):
     await ctx.send('ㅤ')
 
-#6
+#5
 @client.command(name='apple', help='Test for be an Apple')
 async def blank(ctx):
     await ctx.send('')
 
-#7
+#6
 @client.command(name='ai', help=f'Talk with AI.\nUses {ai_model} model.\n.ai [question]')
 async def ai(ctx, *, question):
     try:
@@ -426,7 +424,7 @@ async def ai(ctx, *, question):
             model=f"{ai_model}", 
             contents=question, 
             config=types.GenerateContentConfig(
-                system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} v{ver} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
+                system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
                 tools=[
                     types.Tool(
                         google_search=types.GoogleSearch()
@@ -442,12 +440,12 @@ async def ai(ctx, *, question):
         printMessage(error_message)
         logMessage(error_message)
 
-#8
+#7
 @client.command(name='GNU+Linux', help='Richard Stallman.')
 async def gnu(ctx):
     await ctx.send("I’d just like to interject for a moment. What you’re refering to as Linux, is in fact, GNU/Linux, or as I’ve recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX.  Many computer users run a modified version of the GNU system every day, without realizing it. Through a peculiar turn of events, the version of GNU which is widely used today is often called Linux, and many of its users are not aware that it is basically the GNU system, developed by the GNU Project.  There really is a Linux, and these people are using it, but it is just a part of the system they use. Linux is the kernel: the program in the system that allocates the machine’s resources to the other programs that you run. The kernel is an essential part of an operating system, but useless by itself; it can only function in the context of a complete operating system. Linux is normally used in combination with the GNU operating system: the whole system is basically GNU with Linux added, or GNU/Linux. All the so-called Linux distributions are really distributions of GNU/Linux!")
 
-#9
+#8
 @client.command(name='badge')
 async def badge(ctx, member: discord.Member):
     try:
@@ -516,17 +514,19 @@ async def newest_update(ctx):
 - Bot moderators now must be defined in the database
 - Updated ACL module to v3.1
 - Removed .issues command (use GitHub Issues page)
+- Removed other unused commands
 - Pip installers now use requirements.txt file
 - Small change in version naming - now each version has a scheme X.Y.Z(-tag)
   instead of X.Y or X.Y.Z
   X -> Major changes incompatible with older versions
   Y -> Normal updates, new functions
   Z -> Bugfixes, small changes
-  (-tag) -> marks versions (like X.Y.Z-test as unfinished version; 
+   (-tag) -> marks versions (like X.Y.Z-test as unfinished version; 
   these versions will not have a release on GitHub)
 - Moved extendedErrMess variable to the .env file
 - Added .db .showdb commands
 - Updates in .gitignore
+- Updated .file .touch .dir commands
 - Minor fixes and improvements
 
 To see older releases, find 'updates.txt' in 'Files' directory.
@@ -834,24 +834,25 @@ Service command:  {service_status}
 
         #Database
 #1
-@client.command(name='db', help='Database commands\n.db register {userID} - manually registers user in database\n.db remove {userID} - removes user from database\n.db op {userID} - gives Moderator role to user (Discord bot mod)\n.db deop {userID} - removes Mod role from user')
+@client.command(name='db', help='Database commands\n.db register {userID} {nickname} - manually registers user in database. Nickname is optional\n.db remove {userID} - removes user from database.\n.db op {userID} - gives Moderator role to user (Discord bot mod).\n.db deop {userID} - removes Mod role from user.\n.db select {userID} - search user data in database.\n.db setnickname {nickname} {userID} - updates user nickname.')
 async def db(ctx, mode, value1, *, value2=None):
     if str(ctx.message.author.id) in admin_usr:
-        db = sqlite3.connect(db_dir)
+        db = sqlite3.connect(f"{maindir}/Files/serverbot.db")
         cur = db.cursor()
+
         if mode == 'register':
-            if value2 is None:
-                value2 = "No nickname"
             try:
+                if value2 is None:
+                    value2 = "No nickname"
                 #INSERT
                 cur.execute(f"INSERT INTO users (discord_id, username) VALUES (?, ?)", (value1, value2,))
                 db.commit()
                 #SELECT
-                res = cur.execute(f'SELECT * FROM users WHERE discord_id=?', (value1,))
+                res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (value1,))
 
-                await ctx.reply(f"Result: {res.fetchall()}")
+                await ctx.reply(f"Registered user <@{value1}>.\n{res.fetchall()}")
             except Exception as err:
-                await ctx.reply(f'Error: {err}')
+                await ctx.reply(f"Error: {err}")
         
         elif mode == 'remove':
             try:
@@ -859,11 +860,11 @@ async def db(ctx, mode, value1, *, value2=None):
                 cur.execute(f"DELETE FROM users WHERE discord_id = ?", (value1,))
                 db.commit()
                 #SELECT
-                res = cur.execute(f'SELECT * FROM users WHERE discord_id=?', (value1,))
+                res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (value1,))
 
-                await ctx.reply(f"Result: {res.fetchall()}")
+                await ctx.reply(f"Removed user with ID {value1}.")
             except Exception as err:
-                await ctx.reply(f'Error: {err}')
+                await ctx.reply(f"Error: {err}")
 
         elif mode == 'op':
             try:
@@ -871,9 +872,12 @@ async def db(ctx, mode, value1, *, value2=None):
                 cur.execute(f"UPDATE users SET SBrole='mod' WHERE discord_id=?", (value1,))
                 db.commit()
 
-                await ctx.reply(f"Opped <@{value1}>.")
+                gained = f"User <@{value1}> gained Moderator privileges."
+                await ctx.reply(gained)
+                logMessage(gained)
+                printMessage(gained)
             except Exception as err:
-                await ctx.reply(f'Error: {err}')
+                await ctx.reply(f"Error: {err}")
 
         elif mode == 'deop':
             try:
@@ -881,9 +885,39 @@ async def db(ctx, mode, value1, *, value2=None):
                 cur.execute(f"UPDATE users SET SBrole='None' WHERE discord_id=?", (value1,))
                 db.commit()
 
-                await ctx.reply(f"Deopped <@{value1}>.")
+                revoked = f"Revoked Moderator privileges from <@{value1}>"
+                await ctx.reply(revoked)
+                logMessage(revoked)
+                printMessage(revoked)
             except Exception as err:
-                await ctx.reply(f'Error: {err}')
+                await ctx.reply(f"Error: {err}")
+
+        elif mode == 'select':
+            try:
+                #SELECT
+                res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (value1,))
+
+                await ctx.reply(f"Data of user <@{value1}>:\n{res.fetchall()}")
+            except Exception as err:
+                await ctx.reply(f"Error: {err}")
+
+        elif mode == 'setnickname':
+            try:
+                if value2 is None:
+                    value2 = ctx.message.author.id
+                #UPDATE
+                cur.execute(f"UPDATE users SET username=? WHERE discord_id=?", (value1, value2,))
+                db.commit()
+
+                #SELECT
+                res = cur.execute(f"SELECT username, discord_id FROM users WHERE discord_id=?", (value2,))
+
+                await ctx.reply(f"Updated nickname of <@{value2}> in the database.\n{res.fetchall()}")
+            except Exception as err:
+                await ctx.reply(f"Error: {err}")
+
+        else:
+            await ctx.reply("Wrong mode selected. Use '.help db' for help.")
     else:
         await ctx.reply(not_allowed)
 
@@ -891,17 +925,17 @@ async def db(ctx, mode, value1, *, value2=None):
 @client.command(name='showdb', help='Shows database content in .txt file')
 async def showdb(ctx):
     if str(ctx.message.author.id) in admin_usr:
-        db = sqlite3.connect(db_dir)
+        db = sqlite3.connect(f"{maindir}/Files/serverbot.db")
         cur = db.cursor()
         #SELECT
-        result = cur.execute('SELECT * FROM users')
+        result = cur.execute("SELECT * FROM users")
         #SAVE
-        save = open('tempDB.txt', 'w', encoding='utf-8')
+        save = open(f"{maindir}/tempDB.txt", 'w', encoding='utf-8')
         save.write(str(result.fetchall()))
         save.close()
 
         await ctx.reply("Database content saved in tempDB.txt file.")
-        await ctx.send(file=discord.File('tempDB.txt'))
+        await ctx.send(file=discord.File(f"{maindir}/tempDB.txt"))
     else:
         await ctx.reply(not_allowed)
         #Database-END
@@ -912,7 +946,7 @@ async def showdb(ctx):
 #1
 @client.command(name='testbot', help='Tests some functions of Host and Bot')
 async def testbot(ctx):
-    if str(ctx.message.author.id) in mod_usr:
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         teraz = datetime.datetime.now()
         await ctx.send(f"""
 ***S e r v e r  B o t***  *test*:
@@ -942,7 +976,7 @@ Floppy: **{os.path.exists('/dev/fd0')}**
 #2
 @client.command(name='testos', help='Check OS of server with running bot. \n .testos <os name> \n eg. .testos linux/windows/macos')
 async def testos(ctx, operatingsys):
-    if str(ctx.message.author.id) in mod_usr:
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         if operatingsys == 'linux':
             await ctx.send(f'Linux: {psutil.LINUX}')
         elif operatingsys == 'windows':
@@ -957,7 +991,7 @@ async def testos(ctx, operatingsys):
 #3
 @client.command(name="disks", help="Shows mounted disks with free disk space")
 async def disk(ctx):
-    if str(ctx.message.author.id) in mod_usr:
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
             await ctx.send(f"```{subprocess.getoutput(['df -h'])}```")
         except:
@@ -968,7 +1002,7 @@ async def disk(ctx):
 #4
 @client.command(name='delete', help='Deletes set amount of messages (eg. .delete 6 => will delete 6 messages)')
 async def delete(ctx, amount: int = 0):
-    if str(ctx.message.author.id) in mod_usr:
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         deleted = await ctx.channel.purge(limit=amount)
         await ctx.channel.send(f'Deleted {len(deleted)} message(s)')
         
@@ -981,7 +1015,7 @@ async def delete(ctx, amount: int = 0):
 #5
 @client.command(name='cleaner', help='Cleans channel from last 100 messages')
 async def cleaner(ctx):
-    if str(ctx.message.author.id) in mod_usr:
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         deleted = await ctx.channel.purge(limit=100)
         await ctx.channel.send(f'[Cleaner] deleted max amount of messages ({len(deleted)})')
         
@@ -994,7 +1028,7 @@ async def cleaner(ctx):
 #6
 @client.command(name="webreq", help="Sends website request codes and headers\n.webreq {get/getheader} {website}")
 async def webreq(ctx, mode, *, web):
-    if str(ctx.message.author.id) in mod_usr:
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
             if mode == 'get':
                 try:
@@ -1018,7 +1052,7 @@ async def webreq(ctx, mode, *, web):
 #7
 @client.command(name='kick', help='Kicks Members')
 async def kick(ctx, member: discord.Member, *, reason=None):
-    if str(ctx.message.author.id) in mod_usr:
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         await member.kick(reason=reason)
         await ctx.send(f'Kicked **{member}**')
         
@@ -1031,7 +1065,7 @@ async def kick(ctx, member: discord.Member, *, reason=None):
 #8
 @client.command(name='ban', help='Bans Members')
 async def ban(ctx, member: discord.Member, *, reason=None):
-    if str(ctx.message.author.id) in mod_usr:
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         await member.ban(reason=reason)
         await ctx.send(f'Banned **{member}**')
         
@@ -1044,7 +1078,7 @@ async def ban(ctx, member: discord.Member, *, reason=None):
 #9
 @client.command(name='unban', help='Unbans Members')
 async def unban(ctx, member: discord.Member, *, reason=None):
-    if str(ctx.message.author.id) in mod_usr:
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         await member.unban(reason=reason)
         await ctx.send(f'Unbanned **{member}**')
         
@@ -1331,7 +1365,7 @@ async def micspam(ctx):
 
         #FileManager/Directory
 #1
-@client.command(name='cd', help="Changes directory\nYou can go back by .dir <return>")
+@client.command(name='cd', help="Changes directory\nYou can go back using '.dir <return>'")
 async def chdir(ctx, *, directory):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -1343,82 +1377,125 @@ async def chdir(ctx, *, directory):
         await ctx.send(not_allowed)
 
 #2
-@client.command(name='dir', help='Directory commands \n.dir <mode> \n   mode: \nreturn -> Goes back to main dir\ncheck -> checks dir that you are in\nlist -> list of files and directories in your dir\nlistall -> same but easier to read')
+@client.command(name='dir', help="Directory commands\n.dir return -> Goes back to main dir\n.dir check -> checks where you are\n.dir list -> list of files and directories in your dir\n.dir listall -> same but easier to read")
 async def dir(ctx, *, mode):
     if str(ctx.message.author.id) in admin_usr:
         if mode == 'return':#
             os.chdir(maindir)
-            await ctx.send(f'Returned to main directory ({maindir})')
+            await ctx.send(f"Returned to main directory ({maindir})")
 
         elif mode == 'check':#
-            await ctx.send(f'You are here: {os.getcwd()}')
+            await ctx.send(f"You are here: {os.getcwd()}")
 
         elif mode == 'list':#
             listdir = os.listdir()
-            await ctx.send(f'Files in **{os.getcwd()}**:\n{", ".join(listdir)}')
+            await ctx.send(f"Files in **{os.getcwd()}**:\n{', '.join(listdir)}")
 
         elif mode == 'listall':#
             listdir = os.listdir()
             files_dir = '\n'.join(listdir)
-            await ctx.send(f'Files in **{os.getcwd()}**:\n{files_dir}')
+            await ctx.send(f"Files in **{os.getcwd()}**:\n{files_dir}")
     else:
         await ctx.send(not_allowed)
 
-#3      
-@client.command(name='file', help='Commands for file/directory creating, deleting etc.\n.file <mode> <filename> \n    mode:\nopen -> opens file (REMEMBER to add extension (.py/.png/etc))\nmakedir -> creates directory (folder)\nchksize -> checks the size of selected file')
-async def file(ctx, mode, *,filename):
+#3
+@client.command(name='file', help='Manage/open/create files and directories\n.file open {filename} -> open file (REMEMBER to add extension (.py/.png/etc))\n.file mkdir {dir_name} -> create directory (folder)\n.file size {filename} -> check size of selected file\n.file create {filename} {content} -> create file with content (like .touch command; content is optional)')
+async def file(ctx, mode, filename, *, value=None):
     if str(ctx.message.author.id) in admin_usr:
         if mode == 'open':#open
             try:
                 await ctx.send(file=discord.File(filename))
-            except:
-                await ctx.send(fileerror)
-            
+            except Exception as err:
+                if extendedErrMess in accept_value:
+                    await ctx.send(f"{fileerror}\nPossible cause: {err}")
+                else:
+                    await ctx.send(fileerror)
+
         elif mode == 'mkdir':#mkdir
             try:
+                directory = os.getcwd()
+                message = f"Information[FileManager]: Created directory {filename}, in directory {directory}."
+                
                 os.makedirs(filename)
-                await ctx.send("Created new directory. Use '.dir list' to check this")
-            except:
-                await ctx.send("Can't create directory.")
-                print()
-            
+                
+                await ctx.send("Created new directory.\nUse '.dir list' to check this")
+                printMessage(message)
+                logMessage(message)
+            except Exception as err:
+                if extendedErrMess in accept_value:
+                    await ctx.send(f"{cannotcreatedir}\nPossible cause: {err}")
+                else:
+                    await ctx.send(cannotcreatedir)
+
         elif mode == 'size':#size
             try:
                 size = os.path.getsize(filename)
-                await ctx.send(f'Size of {filename} is {size} bytes')
-            except:
-                await ctx.send('Error')
-            
+                await ctx.send(f"Size of {filename} is {size} bytes")
+            except Exception as err:
+                if extendedErrMess in accept_value:
+                    await ctx.send(f"{chksize_error}\nPossible cause: {err}")
+                else:
+                    await ctx.send(f"{chksize_error} File exist?")
+
         elif mode == 'create':#create
             try:
-                mkfile = open(filename, 'wt')
-                mkfile.close()
-                await ctx.send("Created new empty file. Use '.dir list' to check this")
-            except:
-                await ctx.send("Can't create file.")
-            
+                directory = os.getcwd()
+                response = f"Created '{filename}'.\nUse '.file open {filename}' to see content."
+                response_empty = "Created new empty file.\nUse '.dir list' to check this"
+                message = f"Information[FileManager]: Created file {filename}, in directory {directory}.\nContent: {value}"
+
+                if value is None:    
+                    mkfile = open(filename, 'wt')
+                    mkfile.close()
+
+                    await ctx.send(response_empty)
+                    printMessage(message)
+                    logMessage(message)
+                else:
+                    mkfile = open(filename, 'wt')
+                    mkfile.write(value)
+                    mkfile.close()
+
+                    await ctx.send(response)
+                    printMessage(message)
+                    logMessage(message)
+            except Exception as err:
+                if extendedErrMess in accept_value:
+                    await ctx.send(f"{cannotcreatefile}\nPossible cause: {err}")
+                else:
+                    await ctx.send(cannotcreatefile)
+
         else:#else
-            await ctx.send('Incorrect mode/filename')
+            await ctx.send("Incorrect mode selected.\nSee '.help file' for help.")
     else:
         await ctx.send(not_allowed)
 
 #4
-@client.command(name='touch', help='Creates files with selected extension and content.\nGo to selected directory and use .touch command')
-async def makefile(ctx, name, *, content):
+@client.command(name='touch', help='Create files with selected extension and content.\n.touch {filename} {content} - content is optional')
+async def makefile(ctx, name, *, content=None):
     if str(ctx.message.author.id) in admin_usr:
         try:
             directory = os.getcwd()
-            mkfile = open(name, 'wt', encoding='utf-8')
-            mkfile.write(content)
-            mkfile.close()
-
-            await ctx.send(f'Created file {name}, in directory {directory}.')
+            response = f"Created file {name}, in directory {directory}."
+            message = f"Information[FileManager]: Created file {name}, in directory {directory}.\nContent: {content}"
             
-            message = f'Information[FileManager]: Created file {name}, in directory {directory}.\nContent: {content}'
-            printMessage(message)
-            logMessage(message)
-        except:
-            await ctx.send(f'Something went wrong while creating file.')
+            if content is not None:
+                mkfile = open(name, 'wt', encoding='utf-8')
+                mkfile.write(content)
+                mkfile.close()
+
+                await ctx.send(response)
+                printMessage(message)
+                logMessage(message)
+            else:
+                mkfile = open(name, 'wt', encoding='utf-8')
+                mkfile.close()
+
+                await ctx.send(response)
+                printMessage(message)
+                logMessage(message)
+        except Exception as err:
+            await ctx.send(f"Something went wrong while creating file.\nException: {err}")
     else:
         await ctx.send(not_allowed)
         #FileManager/Directory-END
@@ -1603,7 +1680,7 @@ async def ping(interaction):
 #3
 @client.tree.command(name='testbot', description='Tests some functions of Bot')
 async def testbot(interaction):
-    if str(interaction.user.id) in mod_usr:
+    if str(interaction.user.id) in admin_usr or is_mod(interaction.user.id):
         teraz = datetime.datetime.now()
         await interaction.response.send_message(f"""
     ***S e r v e r  B o t***  *test*:
