@@ -305,8 +305,9 @@ async def on_ready():
     try:
         syncd = await client.tree.sync()
         print(f'Synced {len(syncd)} slash command(s)')
-    except:
-        print("Can't sync slash commands")
+    except Exception as err:
+        print("Can't sync slash commands\nSee Logs.txt for details.")
+        logMessage(f"Information[SlashCommandSync]: Error occurred while syncing slash commands.\nException: {err}")
     #showmodulemessages
     if os.getenv('showmodulemessages') in accept_value:
             if os.getenv('ACLmodule') in accept_value:
@@ -513,20 +514,18 @@ async def newest_update(ctx):
 - Added database support (sqlite3)
 - Bot moderators now must be defined in the database
 - Updated ACL module to v3.1
-- Removed .issues command (use GitHub Issues page)
-- Removed other unused commands
+- Removed .issues command (use GitHub Issues page) 
+  and other unused commands
 - Pip installers now use requirements.txt file
 - Small change in version naming - now each version has a scheme X.Y.Z(-tag)
   instead of X.Y or X.Y.Z
   X -> Major changes incompatible with older versions
   Y -> Normal updates, new functions
   Z -> Bugfixes, small changes
-   (-tag) -> marks versions (like X.Y.Z-test as unfinished version; 
-  these versions will not have a release on GitHub)
 - Moved extendedErrMess variable to the .env file
-- Added .db .showdb commands
-- Updates in .gitignore
+- Added .db .showdb .invitegen .echo /echo commands
 - Updated .file .touch .dir commands
+- Updates in .gitignore
 - Minor fixes and improvements
 
 To see older releases, find 'updates.txt' in 'Files' directory.
@@ -745,7 +744,7 @@ async def mksysctlstart(ctx, mode):
                 except Exception as error:
                     await ctx.send(f'Got 1 error (or more) while creating systemctl entry.\nPossible cause: {error}')
         except:
-            await ctx.send(f"""```{bluescreenface}``` Unexpected problem ocurred""")
+            await ctx.send(f"""```{bluescreenface}``` Unexpected problem occurred""")
     else:
         await ctx.send(not_allowed)
 
@@ -1085,6 +1084,46 @@ async def unban(ctx, member: discord.Member, *, reason=None):
         unbanned = f'Information[Server/Members]: Unbanned {member}. Reason: {reason}\n'
         printMessage(unbanned)
         logMessage(unbanned)
+    else:
+        await ctx.reply(not_allowed)
+
+#10
+@client.command(name='invitegen', help="Create invite link to specific channel via ID.\n.invitegen {channelID} - if None, bot will create invite link to current channel.")
+async def invitegen (ctx, channel_id: int = None):
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
+        try:
+            if channel_id is None:
+                channel = client.get_channel(ctx.message.channel.id)
+            else:
+                channel = client.get_channel(channel_id)
+            
+            if channel is not None:
+                invite = await channel.create_invite(reason=None, max_age=86400, max_uses=0, temporary=False, unique=True)
+                await ctx.reply(f"Invite link: {invite.url}")
+            else:
+                await ctx.reply(f"Channel does not exist.")
+        except Exception as err:
+            await ctx.reply(f"Error occurred: {err}")
+    else:
+        await ctx.reply(not_allowed)
+
+#11
+@client.command(name='echo', help="Make the bot say something.\n.echo {channelID} {message} - you have to type channel ID. It's recommended to use slash version of this command (easier to use).")
+async def echo (ctx, channel_id: int, *, message):
+    if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
+        try:
+            channel = client.get_channel(channel_id)
+
+            if channel is not None:
+                await channel.send(message)
+            else:
+                await ctx.reply(f"Can't find channel. Type proper channel ID.")
+        
+        except Exception as err:
+            if extendedErrMess in accept_value:
+                await ctx.reply(f"Error occurred: {err}")
+            else:
+                await ctx.reply(f"Can't send message. Have you typed command and channel ID correctly?")
     else:
         await ctx.reply(not_allowed)
         #ModeratorOnly-END
@@ -1739,6 +1778,32 @@ async def random_old(interaction):
     import random
     randomn = random.randrange(-1, 999999)
     await interaction.response.send_message(f'This is your random number: {randomn}')
+
+#6
+@client.tree.command(name='echo', description="Make the bot say something.")
+@app_commands.describe(message="Message to send", channel_id="Channel ID where message will be sent")
+async def echo(interaction: discord.Interaction, message: str, channel_id: str = None):
+    if str(interaction.user.id) in admin_usr or is_mod(interaction.user.id):
+        try:
+            if channel_id is None:
+                channel_id = interaction.channel_id
+                channel = client.get_channel(int(channel_id))
+            else:
+                channel = client.get_channel(int(channel_id))
+
+            if channel is not None:
+                await channel.send(message)
+                await interaction.response.send_message("Message sent successfully.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"Can't find channel. Type proper channel ID.", ephemeral=True)
+
+        except Exception as err:
+            if extendedErrMess in accept_value:
+                await interaction.response.send_message(f"Error occurred: {err}", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"Can't send message. Have you typed command and channel ID correctly?", ephemeral=True)
+    else:
+        await interaction.response.send_message(not_allowed, ephemeral=True)
 ################################################ S L A S H   C O M M A N D S  - E N D #######################################################################################
 
 try:
