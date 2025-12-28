@@ -52,7 +52,7 @@ try:
     import discord
     from discord.ext import commands
     from discord import FFmpegPCMAudio
-    from discord import *
+    from discord import app_commands
     import datetime
     import psutil
     import requests
@@ -517,14 +517,15 @@ async def newest_update(ctx):
 - Removed .issues command (use GitHub Issues page) 
   and other unused commands
 - Pip installers now use requirements.txt file
-- Small change in version naming - now each version has a scheme X.Y.Z(-tag)
+- Small change in version format - now each version has a scheme X.Y.Z(-tag)
   instead of X.Y or X.Y.Z
   X -> Major changes incompatible with older versions
   Y -> Normal updates, new functions
   Z -> Bugfixes, small changes
 - Moved extendedErrMess variable to the .env file
 - Added .db .showdb .invitegen .echo /echo commands
-- Updated .file .touch .dir commands
+- Updated .file .touch .dir .bash .delete .cleaner .webreq commands
+- Updated and fixed .kick .ban .unban commands
 - Updates in .gitignore
 - Minor fixes and improvements
 
@@ -622,12 +623,26 @@ async def copylog(ctx, mode):
 
 #3
 @client.command(name='bash', help='Runs Bash like scripts on hosting computer (Linux only)\nUses .sh extensions\nBest to work with .touch command')
-async def bash(ctx, file):
+async def bash(ctx, file=None):
     if str(ctx.message.author.id) in admin_usr:
         try:
-            subprocess.run(['bash', file])
-        except:
-            await ctx.send(f'Failed to run Script')
+            if file is not None:
+                message = f'Information[Bash]: User {ctx.message.author.id} executed script: {file}'
+                printMessage(message)
+                logMessage(message)
+
+                subprocess.run(['bash', file])
+            else:
+                await ctx.reply("Incomplete command.\nType '.bash {filename}'")
+        except Exception as err:
+            message = f'Information[Bash]: User {ctx.message.author.id} failed to run script {file}.\nPossible cause: {err}'
+            printMessage(message)
+            logMessage(message)
+
+            if extendedErrMess in accept_value:
+                await ctx.send(f'Failed to run Script\nPossible cause: {err}')
+            else:
+                await ctx.send(f'Failed to run Script')
     else:
         await ctx.reply(not_allowed)
 
@@ -973,7 +988,7 @@ Floppy: **{os.path.exists('/dev/fd0')}**
         await ctx.send(not_allowed)
 
 #2
-@client.command(name='testos', help='Check OS of server with running bot. \n .testos <os name> \n eg. .testos linux/windows/macos')
+@client.command(name='testos', help='Check OS of server with running bot.\n.testos {linux/windows/macos}')
 async def testos(ctx, operatingsys):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         if operatingsys == 'linux':
@@ -999,26 +1014,26 @@ async def disk(ctx):
         await ctx.send(not_allowed)
 
 #4
-@client.command(name='delete', help='Deletes set amount of messages (eg. .delete 6 => will delete 6 messages)')
-async def delete(ctx, amount: int = 0):
+@client.command(name='delete', help='Deletes set amount of messages\n.delete 6 -> will delete 6 messages')
+async def delete(ctx, amount: int = 1):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
-        deleted = await ctx.channel.purge(limit=amount)
-        await ctx.channel.send(f'Deleted {len(deleted)} message(s)')
+        deleted = await ctx.channel.purge(limit=amount+1)
+        await ctx.channel.send(f'Deleted {len(deleted)-1} message(s)')
         
-        message = f"Information[delete]: Deleted {len(deleted)} messages using '.delete' on channel: {ctx.channel.name}"
+        message = f"Information[delete]: Deleted {len(deleted)-1} messages using '.delete' on channel: //{ctx.guild.name}/{ctx.channel.name}"
         printMessage(message)
         logMessage(message)
     else:
         await ctx.reply(not_allowed)
 
 #5
-@client.command(name='cleaner', help='Cleans channel from last 100 messages')
+@client.command(name='cleaner', help='Wipes out last 100 messages on channel')
 async def cleaner(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         deleted = await ctx.channel.purge(limit=100)
-        await ctx.channel.send(f'[Cleaner] deleted max amount of messages ({len(deleted)})')
+        await ctx.channel.send(f'[Cleaner] Deleted last 100 messages.')
         
-        message = f"Information[cleaner]: Deleted {len(deleted)} messages using '.cleaner' on channel: {ctx.channel.name}"
+        message = f"Information[cleaner]: Deleted {len(deleted)} messages using '.cleaner' on channel: //{ctx.guild.name}/{ctx.channel.name}"
         printMessage(message)
         logMessage(message)
     else:
@@ -1042,48 +1057,67 @@ async def webreq(ctx, mode, *, web):
                 except:
                     await ctx.reply(badsite)
             else:
-                await ctx.reply('')
-        except:
-            await ctx.reply("Wrong mode.")
+                await ctx.reply('Wrong mode.\nSee .help webreq for help.')
+        except Exception as err:
+            message = f"DiscordCommandException[webreq]: {err}"
+            if extendedErrMess in accept_value:
+                await ctx.reply(f"Error occurred: {err}")
+                printMessage(message)
+                logMessage(message)
+            else:
+                await ctx.reply("Error occurred.")
+                printMessage(message)
+                logMessage(message)
     else:
         await ctx.reply(not_allowed)
 
 #7
-@client.command(name='kick', help='Kicks Members')
+@client.command(name='kick', help='Kick Members\n.kick @member {reason} - reason is optional')
 async def kick(ctx, member: discord.Member, *, reason=None):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
-        await member.kick(reason=reason)
-        await ctx.send(f'Kicked **{member}**')
-        
-        kicked = f'Information[Server/Members]: Kicked {member}. Reason: {reason}\n'
-        printMessage(kicked)
-        logMessage(kicked)
+        try:
+            await member.kick(reason=reason)
+            await ctx.send(f'Kicked **{member}**')
+
+            kicked = f'Information[Server/Members]: Kicked {member} with userID:{member.id}. Reason: {reason}\n'
+            printMessage(kicked)
+            logMessage(kicked)
+        except Exception as err:
+            await ctx.reply(f"Error occurred: {err}")
     else:
         await ctx.reply(not_allowed)
 
 #8
-@client.command(name='ban', help='Bans Members')
+@client.command(name='ban', help='Ban Members\n.ban @member {reason} - reason is optional')
 async def ban(ctx, member: discord.Member, *, reason=None):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
-        await member.ban(reason=reason)
-        await ctx.send(f'Banned **{member}**')
-        
-        banned = f'Information[Server/Members]: Banned {member}. Reason: {reason}\n'
-        printMessage(banned)
-        logMessage(banned)
+        try:
+            await member.ban(reason=reason)
+            await ctx.send(f'Banned **{member}**')
+
+            banned = f'Information[Server/Members]: Banned {member} with userID:{member.id}. Reason: {reason}\n'
+            printMessage(banned)
+            logMessage(banned)
+        except Exception as err:
+            await ctx.reply(f"Error occurred: {err}")
     else:
         await ctx.reply(not_allowed)
 
 #9
-@client.command(name='unban', help='Unbans Members')
-async def unban(ctx, member: discord.Member, *, reason=None):
+@client.command(name='unban', help='Unban Members\n.unban @member {reason} - reason is optional')
+async def unban(ctx, member: discord.User, *, reason=None):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
-        await member.unban(reason=reason)
-        await ctx.send(f'Unbanned **{member}**')
-        
-        unbanned = f'Information[Server/Members]: Unbanned {member}. Reason: {reason}\n'
-        printMessage(unbanned)
-        logMessage(unbanned)
+        try:
+            await ctx.guild.unban(member, reason=reason)
+            await ctx.send(f'Unbanned **{member}**')
+
+            unbanned = f'Information[Server/Members]: Unbanned {member} with userID:{member.id}. Reason: {reason}\n'
+            printMessage(unbanned)
+            logMessage(unbanned)
+        except discord.errors.NotFound:
+            await ctx.reply(f"User {member} is not banned.")
+        except Exception as err:
+            await ctx.reply(f"Error occurred: {err}")
     else:
         await ctx.reply(not_allowed)
 
@@ -1756,7 +1790,7 @@ async def ai(interaction: discord.Interaction, question: str):
             model=f"{ai_model}", 
             contents=question, 
             config=types.GenerateContentConfig(
-                system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} v{ver} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
+                system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
                 tools=[
                     types.Tool(
                         google_search=types.GoogleSearch()
