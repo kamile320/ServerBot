@@ -8,30 +8,27 @@
 <a href="https://github.com/kamile320/ServerBot/stargazers">![GitHub Repo stars](https://img.shields.io/github/stars/kamile320/serverbot)</a>  
 <a href="https://github.com/kamile320/ServerBot/forks">![GitHub forks](https://img.shields.io/github/forks/kamile320/serverbot)</a>
 
-<!--Ready Discord Bot-->
-
 ServerBot is a free project that shares ready code for Discord Bots.  
 The goal is to create a great Discord Bot base that anyone can use, modify, install with ease and host for your own.  
 Play music from YouTube URL's and your local files, talk with AI (gemini based), use administration/moderation commands and the most important - operate with files, directories, and run shellscripts on your hosting computer.[^1]  
 
+Works with Linux and Windows operating systems (Linux/WSL recommended).
 
-Works with Linux and Windows operating systems (Linux recommended).
-
-ServerBot is not a Bot hosted by me - this is a project that can be hosted by you, by your own Discord Bot account with your bot token (need to be copied to .env file).<br>
+ServerBot is not a bot hosted by me - this is a project that can be hosted by you, by your own Discord Bot account with your bot token (need to be copied to .env file).<br>
 Everything it needs (pip libraries, ffmpeg, packages etc.) can be installed automatically with setup.sh (Linux) or setup.bat (Windows).<br>
-To run setup.sh you need install 'dialog' command using apt, zypper etc.  
+To run setup.sh you need to install 'dialog' command using apt, zypper etc.  
 If you're using not-Ubuntu 22.04 based distros you need to create python3 virtual environment - easily using setup.sh  
 
 ## Features
 - Basic discord commands
-- Plays music from YouTube/Your local files
-- Can move through directories and open (send) files on discord[^2]
-- Running bash scripts[^2]
-- Can create systemd (systemctl) entry to start with your OS[^2]
-- Shows status of selected systemd services[^2]
+- Play music from YouTube/Your local files
+- Move through directories and open (send) files on discord[^2]
+- Run bash scripts[^2]
+- Create systemd (systemctl) entry to start bot with your OS[^2]
+- Show status of selected systemd services[^2]
 - .ai command to talk with gemini-based AI
-- Logs messages sent by users on discord channels
-- Saves every message sent on available (for the bot) discord channels[^3]
+- Log messages sent by users on discord channels
+- Save every message sent on available (for the bot) discord channels[^3]
 - Use sqlite3 database to register users and grant bot moderators access to mod commands (+level system in future)
 
 ## Advantages of Linux
