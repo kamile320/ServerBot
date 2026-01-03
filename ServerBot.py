@@ -2,8 +2,13 @@ import subprocess
 import os
 import sys
 
-ver = "1.10.0-test"
-displayname='ServerBot'
+
+# Bot Version
+ver = "1.10.0"
+# Bot Name
+displayname = "ServerBot"
+# Name of service in systemd; change if needed, WITHOUT .service extension
+servicename = "ServerBot"
 
 #ModuleVersion
 ACLver = "3.1"
@@ -490,7 +495,6 @@ Discord Server: [Here](https://discord.gg/UMtYGAx5ac)
 
 Used Sounds:
     WinXP/98 sounds -> files from OG OS by Microsoft
-    Omegatronic Bot Micspam: ```https://www.youtube.com/watch?v=BNJxlSpBR5A```
     TF2 upgrade station: ```https://youtube.com/watch?v=Q7eJg7hRvqE```
 """)
 
@@ -515,7 +519,7 @@ async def newest_update(ctx):
 - Bot moderators now must be defined in the database
 - Updated ACL module to v3.1
 - Removed .issues command (use GitHub Issues page) 
-  and other unused commands
+  and other unused/useless commands
 - Pip installers now use requirements.txt file
 - Small change in version format - now each version has a scheme X.Y.Z(-tag)
   instead of X.Y or X.Y.Z
@@ -527,6 +531,10 @@ async def newest_update(ctx):
 - Updated .file .touch .dir .bash .delete .cleaner .webreq commands
 - Updated and fixed .kick .ban .unban commands
 - Updates in .gitignore
+- Updated and renamed .mksysctlstart to .mkservice
+- Added servicename variable for custom systemd service name
+- Corrected some systemctl mentions to systemd
+- Updated sysctladd.py to v1.2 and renamed to systemd_add.py
 - Minor fixes and improvements
 
 To see older releases, find 'updates.txt' in 'Files' directory.
@@ -539,7 +547,7 @@ async def next_update(ctx):
 Ideas for Future Updates
 - Better Informations/Errors
 - More slash commands
-- Database support for leveling system (sqlite3)
+- Database support and leveling system (sqlite3)
 You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac)
 """)
         #BotInfo-END
@@ -695,8 +703,8 @@ async def shrtct(ctx, desk):
         await ctx.send(not_allowed)
 
 #6
-@client.command(name="mksysctlstart", help="Adds ServerBot to systemctl to start with system startup (Bot needs to be running as root)\nMode:\n'def' -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemctl startup will not work. Do not place bot in your home dir.")
-async def mksysctlstart(ctx, mode):
+@client.command(name="mkservice", help="Adds ServerBot to systemd to start with system startup (Bot needs to be running as root)\nMode:\n'def' -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemd startup will not work. Do not place bot in your home dir.")
+async def mkservice(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         try:
             if mode == 'def':
@@ -706,29 +714,30 @@ async def mksysctlstart(ctx, mode):
                         auto = open('Files/autorun.sh', 'w')
                         auto.write(f"#!/bin/bash\ncd {maindir}\npython3 ServerBot.py")
                         auto.close()
+                        os.chmod('Files/autorun.sh', 0o775)
                         await ctx.send('Done.')
 
-                        message = f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)"
+                        message = f"Information[mkservice]: Created autorun.sh file (Files/autorun.sh)"
                         logMessage(message)
                         printMessage(message)
                     except:
                         await ctx.send("Can't create file!")
 
-                    await ctx.send('Making ServerBot.service in /etc/systemd/system..')
+                    await ctx.send(f'Making {servicename}.service in /etc/systemd/system..')
                     try:
-                        sys = open('/etc/systemd/system/ServerBot.service', 'w')
+                        sys = open(f'/etc/systemd/system/{servicename}.service', 'w')
                         sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
                         sys.close()
                         await ctx.send('Done!')
                         await ctx.send(SBservice)
 
-                        message = f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}"
+                        message = f"Information[mkservice]: Created {servicename} service file (/etc/systemd/system/)\n{SBservice}"
                         logMessage(message)
                         printMessage(message)
                     except:
                         await ctx.send("Can't create service file!\nAre you root?")
                 except Exception as error:
-                    await ctx.send(f'Got 1 error (or more) while creating systemctl entry.\nPossible cause: {error}')
+                    await ctx.send(f'Got 1 error (or more) while creating systemd entry.\nPossible cause: {error}')
             elif mode == 'venv':
                 try:
                     await ctx.send('Making autorun.sh file..')
@@ -736,28 +745,29 @@ async def mksysctlstart(ctx, mode):
                         auto = open('Files/autorun.sh', 'w')
                         auto.write(f'#!/bin/bash\ncd {maindir}\n.venv/bin/python3 ServerBot.py')
                         auto.close()
+                        os.chmod('Files/autorun.sh', 0o775)
                         await ctx.send('Done.')
 
-                        message = f"Information[mksysctlstart]: Created autorun.sh file (Files/autorun.sh)"
+                        message = f"Information[mkservice]: Created autorun.sh file (Files/autorun.sh)"
                         logMessage(message)
                         printMessage(message)
                     except:
                         await ctx.send("Can't create file!")
 
-                    await ctx.send('Making ServerBot.service in /etc/systemd/system..')
+                    await ctx.send(f'Making {servicename}.service in /etc/systemd/system..')
                     try:
-                        sys = open('/etc/systemd/system/ServerBot.service', 'w')
+                        sys = open(f'/etc/systemd/system/{servicename}.service', 'w')
                         sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
                         await ctx.send("Done!")
                         await ctx.send(SBservice)
-                    
-                        message = f"Information[mksysctlstart]: Created ServerBot service file (/etc/systemd/system/)\n{SBservice}"
+
+                        message = f"Information[mkservice]: Created {servicename} service file (/etc/systemd/system/)\n{SBservice}"
                         logMessage(message)
                         printMessage(message)
                     except:
                         await ctx.send("Can't create service file!\nAre you root?")
                 except Exception as error:
-                    await ctx.send(f'Got 1 error (or more) while creating systemctl entry.\nPossible cause: {error}')
+                    await ctx.send(f'Got 1 error (or more) while creating systemd entry.\nPossible cause: {error}')
         except:
             await ctx.send(f"""```{bluescreenface}``` Unexpected problem occurred""")
     else:
@@ -765,7 +775,7 @@ async def mksysctlstart(ctx, mode):
 
 #7
 if os.getenv('service_monitor') in accept_value:
-    @client.command(name="service", help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemctl")
+    @client.command(name="service", help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemd")
     async def service(ctx, mode):
         if str(ctx.message.author.id) in admin_usr:
             try:
@@ -1416,18 +1426,6 @@ async def wait(ctx):
         source = FFmpegPCMAudio(f'{maindir}/Media/Team Fortress 2 Upgrade Station.ogg')
         voice.play(source)
         await ctx.reply(f"@everyone, {ctx.author.mention} is waiting!")
-    except AttributeError:
-        await ctx.reply(voice_not_connected_error)
-    except:
-        await ctx.reply(ffmpeg_error)
-
-#10 - micspam
-@client.command(name='micspam', help='OMEGATRONIC BOT MICSPAM')
-async def micspam(ctx):
-    try:
-        voice = ctx.guild.voice_client
-        source = FFmpegPCMAudio(f'{maindir}/Media/OMEGATRONIC BOT MICSPAM.mp3')
-        voice.play(source)
     except AttributeError:
         await ctx.reply(voice_not_connected_error)
     except:
