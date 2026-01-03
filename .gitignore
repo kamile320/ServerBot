@@ -7,3 +7,4 @@ __pycache__/
 Files/autorun.sh
 *.db
 tempDB.txt
+autorun/
