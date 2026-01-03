@@ -15,10 +15,10 @@ sudo apt install -y python3-pip ffmpeg python3-venv git
 
 pip3 install -r Files/setup/requirements.txt
 
-echo "'Externally managed' error? Run 'mkvenv.sh' script from 'Files/setup' directory to easily create one."
+echo "'Externally managed' error? Run 'mkvenv.sh' script from 'Files/setup' directory to easily create python virtual environment."
 sleep 1
 
-echo "Done. In Discord Server you can create Desktop shortcut using '.mkshortcut' and add ServerBot to system startup using '.mksysctlstart'"
+echo "Done. In Discord Server you can create Desktop shortcut using '.mkshortcut' or add ServerBot to system startup using '.mkservice'"
 read -p "Type anything to continue.."
 
 python3 ServerBot.py
