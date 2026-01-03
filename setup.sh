@@ -1,7 +1,11 @@
 #!/bin/bash
 
+# Bot version
 VERSION="v1.10.0"
+# Change version below to install newer release from GitHub (if exists)
 UPDATEVER="v1.10.0"
+# Systemd service name - change if you created systemd entry with different name; only name WITHOUT .service extension
+SERVICE_NAME="ServerBot"
 
 OPTIONS=(1 "Start Bot"
          2 "Start Bot (not venv)"
@@ -9,11 +13,11 @@ OPTIONS=(1 "Start Bot"
          4 "Create Python3 venv in current dir"
          5 "Create .env file"
          6 "Enter to Python3 venv"
-         7 "Manually create systemctl entry"
-         8 "Systemctl service options"
+         7 "Manually create systemd entry"
+         8 "Systemd service options"
          9 "Other options")
 
-OPTIONS_sctl=(1 "Enable"
+OPTIONS_sysd=(1 "Enable"
               2 "Disable"
               3 "Start"
               4 "Stop"
@@ -86,45 +90,45 @@ case $select in
             bash setup.sh
             ;;
         7)
-            echo "Starting sysctladd.py..."
-            python3 Files/sysctladd.py
+            echo "Starting systemd_add.py..."
+            python3 Files/systemd_add.py
             ;;
         8)
-            select_sctl=$(dialog --clear \
+            select_sysd=$(dialog --clear \
             --backtitle "ServerBot ${VERSION}" \
-            --title "Systemctl service options" \
-            --menu "These operations will work only if the ServerBot.service exists" \
+            --title "Systemd service options" \
+            --menu "These operations will work only if the ${SERVICE_NAME}.service exists" \
             18 52 8 \
-            "${OPTIONS_sctl[@]}" \
+            "${OPTIONS_sysd[@]}" \
             2>&1 >/dev/tty)
 
             clear
 
-            case $select_sctl in 
+            case $select_sysd in 
                     1)
-                        sudo systemctl enable ServerBot
+                        sudo systemctl enable ${SERVICE_NAME}
                         bash setup.sh
                         ;;
                     2)
-                        sudo systemctl disable ServerBot
+                        sudo systemctl disable ${SERVICE_NAME}
                         bash setup.sh
                         ;;
                     3)
-                        sudo systemctl start ServerBot
+                        sudo systemctl start ${SERVICE_NAME}
                         bash setup.sh
                         ;;
                     4)
-                        sudo systemctl stop ServerBot
+                        sudo systemctl stop ${SERVICE_NAME}
                         bash setup.sh
                         ;;
                     5)
-                        sudo systemctl status ServerBot
+                        sudo systemctl status ${SERVICE_NAME}
                         bash setup.sh
                         ;;
                     6)
                         select_del=$(dialog --clear \
                         --backtitle "ServerBot ${VERSION}" \
-                        --title "Remove ServerBot.service" \
+                        --title "Remove ${SERVICE_NAME}.service" \
                         --menu "Are you sure? This will disable service and delete entry." \
                         18 52 8 \
                         "${OPTIONS_YN[@]}" \
@@ -134,9 +138,9 @@ case $select in
 
                         case $select_del in
                                 1)
-                                    sudo systemctl stop ServerBot
-                                    sudo systemctl disable ServerBot
-                                    sudo rm /etc/systemd/system/ServerBot.service
+                                    sudo systemctl stop ${SERVICE_NAME}
+                                    sudo systemctl disable ${SERVICE_NAME}
+                                    sudo rm /etc/systemd/system/${SERVICE_NAME}.service
                                     ;;
                                 2)
                                     bash setup.sh
