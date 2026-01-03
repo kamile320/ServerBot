@@ -24,7 +24,7 @@ If you're using not-Ubuntu 22.04 based distros you need to create python3 virtua
 - Play music from YouTube/Your local files
 - Move through directories and open (send) files on discord[^2]
 - Run bash scripts[^2]
-- Create systemd (systemctl) entry to start bot with your OS[^2]
+- Create systemd entry to start bot with your OS[^2]
 - Show status of selected systemd services[^2]
 - .ai command to talk with gemini-based AI
 - Log messages sent by users on discord channels
