@@ -571,6 +571,7 @@ async def ShutDown(ctx):
             print("Logs.txt saved successfully.")
         except:
             print("Error occurred while saving log.")
+
         try:
             print("Closing database...")
             db = sqlite3.connect('Files/serverbot.db')
@@ -1224,7 +1225,7 @@ async def multiconv(ctx, type, number):
         await ctx.send(f'```{bluescreenface}\nUnexpected error occurred```')
 
 #2
-@client.command(name='binary', help='Converts decimal number to binary. \n .binary <dec number>; eg. binary 2019')
+@client.command(name='binary', help='Convert decimal number to binary.\n.binary <dec number>; eg. binary 2019')
 async def binary(ctx, number):
     binn = bin(int(number))
     await ctx.send(f'{number} in binary: {binn}')
@@ -1234,7 +1235,7 @@ async def binary(ctx, number):
     logMessage(message)
 
 #3
-@client.command(name='hexa', help="Converts decimal number to hexadecimal. \n .hexa <dec number>; eg. hexa 2007")
+@client.command(name='hexa', help="Convert decimal number to hexadecimal.\n.hexa <dec number>; eg. hexa 2007")
 async def hexadecimal(ctx, number):
     hexa = hex(int(number))
     await ctx.send(f'{number} in hexadecimal: {hexa}')
@@ -1282,7 +1283,7 @@ async def disconnect(ctx):
         await ctx.reply(leave_error)
 
 #3 - play
-@client.command(name='play', help="Play a local music file.\n.play {filename*}\n*With complete directory path when file isn't in maindir")
+@client.command(name='play', help="Play a local music file.\n.play {filename*}\n*With complete directory path when file isn't located in current dir")
 async def play(ctx, *, name):
     try:
         try:
@@ -1369,7 +1370,7 @@ async def ytplay(ctx, type, *, url):
         await ctx.reply(voice_not_connected_error)
 
 #5 - ytsearch
-@client.command(name='ytsearch', help='Searches YouTube Videos by typed phrase')
+@client.command(name='ytsearch', help='Search YouTube Videos by typed phrase')
 async def ytsearch(ctx, *, search):
     try:
         search_results = ytdl_search.extract_info(f"ytsearch:{search}", download=False)
@@ -1575,8 +1576,8 @@ async def makefile(ctx, name, *, content=None):
 
         #Other
 #1
-@client.command(name="thread", help="Makes server threads\n.thread {name} {reason}")
-async def thread(ctx, name, *, reason):
+@client.command(name="thread", help="Create server threads\n.thread {name} {reason}")
+async def thread(ctx, name, *, reason=None):
     try:
         channel = ctx.channel
         await channel.create_thread(name=name, auto_archive_duration=60, slowmode_delay=None, reason=reason)
@@ -1625,12 +1626,12 @@ Serv3
 ```""")
     
 #2
-@client.command(name='dscserv', help='Shows link to Discord Server')
+@client.command(name='dscserv', help='Show link to Discord Server')
 async def dscserv(ctx):
     await ctx.send(os.getenv('dscserv_link'))
 
 #3
-@client.command(name='addbot', help='Shows Link to add Bot to other Servers\nstable -> sends link to stable version\ntesting -> sends link to testing version')
+@client.command(name='addbot', help='Show invite link to add Bot to other Servers\nstable -> sends link to stable version\ntesting -> sends link to testing version')
 async def addbot(ctx, version):
     if version == "stable":
         await ctx.reply(os.getenv('addstable'))
