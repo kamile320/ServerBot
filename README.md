@@ -40,7 +40,6 @@ Great for lazy game server admins! Because why you should open terminal, connect
 You can use ServerBot like Linux command if you install it using .deb installer (see ServerBot releases).  
 More information and instructions you can find in ***ServerBot Manual*** [[PL]](https://kamile320.github.io/ServerBot/manualPL.html) [[EN]](https://kamile320.github.io/ServerBot/manualEN.html)
 
-ServerBot is an open project - that means you can make your own version of a bot, or help me with making ServerBot way better - better english translations/text, code improvements, bug report etc.
 
 ## Programs that you need to install first (Linux):
 - dialog
@@ -55,7 +54,20 @@ ServerBot is an open project - that means you can make your own version of a bot
 - [Download FFmpeg](https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip) .exe files and add it to PATH (See [setup.bat](https://github.com/kamile320/ServerBot/blob/main/setup.bat) and HTML manuals)
 - The rest will be installed automatically (setup.bat)
 
-Every ideas, bug reports or helping in code improvement you can send me on [Discord.](https://discord.gg/UMtYGAx5ac)  
+
+## Contributing
+ServerBot is an open project - that means you can create your own version of a bot, or help me with making ServerBot better (better English, code improvements, bug report etc.).  
+
+Ways to contribute:
+- Create an [Issue](https://github.com/kamile320/ServerBot/issues)  
+  - Tell me what should be added, fixed, improved, or if you have any problems with installation/running the bot.  
+- Create a [Pull Request](https://github.com/kamile320/ServerBot/pulls)  
+  1) Fork the repository
+  2) Make your changes
+  3) Test your modified version of bot
+  4) If everything works without problems - create a Pull Request.  
+
+You can also share your feedback or ask any questions on my [Discord](https://discord.gg/UMtYGAx5ac) server.
 
 [^1]: No one without your permission can go to your host PC using Discord - user ID's of bot admins must be copied to .env file (more info in html manual)
 [^2]: As said earlier, only bot administrators (typed in the .env file) can use these commands.  
