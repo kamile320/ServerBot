@@ -7,7 +7,7 @@ import sys
 ver = "1.10.0"
 # Bot Name
 displayname = "ServerBot"
-# Name of service in systemd; change if needed, WITHOUT .service extension
+# Name of service in systemd; change if needed, WITHOUT .service file extension
 servicename = "ServerBot"
 
 #ModuleVersion
@@ -402,15 +402,18 @@ async def random_num(ctx, min = int(), max = int()):
             await ctx.reply(random_err)
 
 #2
-@client.command(name='botbanner', help='Shows Bots Banner')
-async def banner(ctx):
+@client.command(name='botbanner', help='Show Bots Banner')
+async def botbanner(ctx):
     await ctx.send(f'```{banner}```')
 
 #3
-@client.command(name='banner', help='Shows your text as Banner')
-async def banner1(ctx, *, text):
-    banner1 = pyfiglet.figlet_format(text)
-    await ctx.send(f'```{banner1}```')
+@client.command(name='banner', help='Show your text as Banner')
+async def userbanner(ctx, *, text=None):
+    if text is not None:
+        userbanner = pyfiglet.figlet_format(text)
+        await ctx.send(f'```{userbanner}```')
+    else:
+        await ctx.send("Incomplete command.\nType text to convert to banner.")
 
 #4
 @client.command(name='blankthing', help='Just blank thing')
@@ -528,7 +531,7 @@ async def newest_update(ctx):
   Z -> Bugfixes, small changes
 - Moved extendedErrMess variable to the .env file
 - Added .db .showdb .invitegen .echo /echo commands
-- Updated .file .touch .dir .bash .delete .cleaner .webreq commands
+- Updated .file .touch .dir .bash .delete .cleaner .webreq .banner .botbanner commands
 - Updated and fixed .kick .ban .unban commands
 - Updates in .gitignore
 - Updated and renamed .mksysctlstart to .mkservice

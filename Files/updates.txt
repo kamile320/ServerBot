@@ -211,7 +211,7 @@ on text in .testbot while running Bot on ARM devices
   Z -> Bugfixes, small changes
 - Moved extendedErrMess variable to the .env file
 - Added .db .showdb .invitegen .echo /echo commands
-- Updated .file .touch .dir .bash .delete .cleaner .webreq commands
+- Updated .file .touch .dir .bash .delete .cleaner .webreq .banner .botbanner commands
 - Updated and fixed .kick .ban .unban commands
 - Updates in .gitignore
 - Updated and renamed .mksysctlstart to .mkservice
