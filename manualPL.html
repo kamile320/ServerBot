@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.9.3 User Manual [PL]">
+    <meta name="description" content="ServerBot v1.10.0 User Manual [PL]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.9.3</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.10.0</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -45,12 +45,16 @@
 
         <a href="https://github.com/kamile320/ServerBot">ServerBot</a> - Bot Discordowy rozwijany przez <b><u>Kamile320</u></b> posiadający funkcje jak:<br>
         <ul>
-            <li>Słuchanie muzyki z plików hosta i linków YouTube'a</li>
             <li>Administracja Serwera</li>
+            <li>Odtwarzanie muzyki z plików hosta i linków YouTube'a</li>
+            <li>Zarządzanie Komputerem Hosta</li>
+            <li>Wykonywanie skryptów bash</li>
+            <li>Logowanie wiadomości</li>
             <li>Tworzenie wątków</li>
-            <li>Zarządzanie Komputerem Hosta (+ Diagnostyka)</li>
             <li>Zarządzanie Plikami i Katalogami</li>
-            <li>Wiele więcej</li>
+            <li>Obsługa bazy danych (SQLite3)</li>
+            <li>Rozmowa ze Sztuczną Inteligencją (Google Gemini)</li>
+            <li>I wiele więcej</li>
         </ul>
         
         <br>
@@ -61,9 +65,11 @@
             <li><a href="#start">Uruchomienie</a></li>
             <li><a href="#autostart">Uruchamianie Automatyczne</a></li>
             <li><a href="#token">Tokeny</a></li>
+            <li><a href="#admin">UserID i Administratorzy bota</a></li>
             <li><a href="#ffmpeg">Windows - instalacja FFmpeg</a></li>
             <li><a href="#modules">Moduły/Rozszerzenia Bota</a></li>
             <li><a href="#ai">Komenda .ai</a></li>
+            <li><a href="#db">Baza Danych (SQLite3)</a></li>
             <li><a href="#comma">Komendy</a></li>
         </ol>
 
@@ -76,23 +82,28 @@
             <li><b>setup.bat</b> - Plik instalujący wymagane biblioteki pythona (Windows)</li>
             <li><b>setup.sh</b> - Menu operacyjne: uruchamianie bota, instalowanie wymaganych biblioteki itp. (wymaga zainstalowania komendy "dialog")</li>
             <li><b>Logs.txt</b> - Plik z Dziennikiem zdarzeń bota na serwerze</li>
-            <li><b>manual.html</b> - Manual Bota</li>
-            <li><b>Media</b> - Katalog z Domyślnymi Muzykami/Dźwiękami</li>
+            <li><b>manualPL.html</b> - Manual Bota [PL]</li>
+            <li><b>manualEN.html</b> - Manual Bota [EN]</li>
+            <li><b>Media</b> - Katalog z Muzykami/Dźwiękami</li>
             <li><b>ACL</b> - Dziennik wiadomości użytkowników (po włączeniu <a href="#ACL">ACL</a>)</li>
             <li><b>.env</b> - Specjalny plik do przechowywania Tokenów Bota</li>
             <li><b>.venv</b> - Wirtualne Środowisko Pythona (Po użyciu setup.sh - opcja 4)</li>
+            <li><b>tempDB.txt</b> - Plik z zawartością bazy danych (po użyciu .showdb)</li>
             <li>
-                <b>Files</b> - Katalog z wymaganymi (i nie) plikami Bota 
+                <b>Files</b> - Katalog z resztą plików Bota 
                 <ul>
                     <li><b>favicon.ico</b> - Ikona Manuala</li>
                     <li><b>updates.txt</b> - Plik z listą ostatnich aktualizacji</li>
                     <li><b>Logs.txt</b> - Kopia Logów Bota</li>
-                    <li><b>autorun.sh</b> - Po użyciu <a href="#autostart">.mksysctlstart</a></li>
+                    <li><b>autorun.sh</b> - Po użyciu <a href="#autostart">.mkservice</a></li>
+                    <li><b>serverbot.db</b> - Baza danych SQLite3</li>
+                    <li><b>systemd_add.py</b> - Skrypt do dodawania bota do startu wraz z systemem poprzez systemd</li>
                     <li>Inne Pliki (zdjęcia, nagrania, itp.)</li>
                     <li><b>setup</b> - Pliki konfiguracyjne</li>
                     <ul>
                         <li><b>setuplib.sh</b> - Instalacja Bibliotek</li>
                         <li><b>mkvenv.sh</b> - Utworzenie <a href="#autostart">venv</a></li>
+                        <li><b>requirement.txt</b> - Plik z listą bibliotek pythonado instalacji</li>
                     </ul>
                 </ul>
             </li>
@@ -108,7 +119,7 @@
         <ul type="square">
             <li>Python 3.9 lub nowszy</li>
             <li>Połączenie z internetem</li>
-            <li>Zainstalowane wymagane biblioteki pythona (patrz - zawartość setup.sh/setuplib.sh)</li>
+            <li>Zainstalowane wymagane biblioteki pythona (patrz - zawartość setup.sh/setuplib.sh/requirements.txt)</li>
             <li>Dodanie do środowiska PATH plików FFmpeg - Tylko Windows (zobacz YT)</li>
             <li>System Operacyjny Linux(rekomendowany) / Windows / MacOS - Najlepiej 64bit</li>
             <li>setup.sh - wymaga komendy "dialog"</li>
@@ -132,7 +143,7 @@
         <h3 id="autostart">Uruchamianie Automatyczne:</h3>
 
         Korzystając z Bota może zechcesz aby automatycznie uruchamiał się wraz z systemem operacyjnym (Linux).<br>
-        Aby to łatwo umożliwić istnieje komenda .mksysctlstart<br>
+        Aby to łatwo umożliwić istnieje komenda .mkservice<br>
         Po wpisaniu komendy trzeba podać dodatkową wartość:<br><br>
         
         <b>def</b> -> tworzy domyślny plik autorun.sh w katalogu <a href="#dirs">Files</a>. Działa głównie na systemach opartych na Ubuntu <b>22.04</b> (Nie korzysta z utworzonego venv)<br><br>
@@ -140,11 +151,11 @@
         <b>venv</b> -> czasem przy instalacji modułów za pomocą pip3 może wyskoczyć błąd <i>externally managed pip</i>.<br>
         W tym przypadku należy utworzyć Wirtualne Środowisko Pythona (Virtual Environment/Venv)<br>
         Jeśli jeszcze go nie utworzyłeś - rekomendowane jest utworzenie go w głównym katalogu Bota (ServerBot).<br><br>
-        Przykład: .mksysctl venv <- wykonujesz tą komendę na Discordzie gdy skrypt działa w głównym katalogu Bota.<br>
+        Przykład: .mkservice venv <- wykonujesz tą komendę na Discordzie gdy skrypt działa w głównym katalogu Bota.<br>
         UWAGA! Bot (a raczej setup.sh) jest przystosowany do nazwy katalogu z wirtualnym środowiskiem o nazwie ".venv".<br>
         Jeśli utworzyłeś ręcznie venv z inną nazwą katalogu, bot może się nie uruchomić!<br>
-        Zalecane jest użycie opcji 4 z setup.sh -> Bez problemu wszystko zainstaluje i skonfiguruje jak trzeba.<br>
-        Aby autostart zadziałał, należy ustawić pliki bota z uprawnieniami odczytu/zapisu/wykonania na 775 (r-x dla wszystkich, rwx dla właściciela i grupy). 
+        Zalecane jest używanie odpowiednich opcji z setup.sh -> Bez problemu wszystko się zainstaluje i skonfiguruje jak trzeba.<br>
+        Aby autostart zadziałał, należy ustawić pliki bota z uprawnieniami odczytu/zapisu/wykonania na 775 (r-x dla wszystkich, rwx dla właściciela i grupy) jeśli nie posiadają takich uprawnień.<br>
         Rekomenduję przenieść pliki Bota do katalogu /ServerBot (żeby nie był w innych katalogach). Nie instaluj bota w katalogu domowym jeśli chcesz uruchamiać go wraz z systemem.<br><br>
 
         <b><i>Jak utworzyć venv:</i></b><br>
@@ -157,44 +168,52 @@
             <li>albo prościej - użyj opcji 4 w <b>setup.sh</b></li>
         </ol>
 
-        <p>Pełna dokuntacja <a href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/">tutaj</a></p>
+        <p>Pełna dokuntacja venv <a href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/">tutaj</a>.</p>
 
         <p align="right">Zdj. 2 - opcje setup.sh</p>
         <a href="Files/setupSB.png"><img align="right" src="Files/setupSB.png" width="35%" height="35%"></a>
 
         <h3 id="token">Tokeny</h3>
-        Bot korzysta z tokenów: Discorda API, OpenAI oraz z ID użytkowników.<br>
+        Bot korzysta z tokenów: API Discorda, Gemini oraz z ID użytkowników.<br>
         Aby bot się uruchomił należy wypełnić odpowiednimi danymi plik <b>.env</b><br><br>
-        Schemat:<br>
-        TOKEN="twój token"<br>
-        AI_token="twój token"<br>
+        <b>Schemat:</b><br>
+        TOKEN="discord token"<br>
+        AI_token="gemini token (do komendy .ai)"<br>
         admin_usr = ['twoje ID']<br>
-        mod_usr = ['twoje ID']<br>
         dscserv_link = 'Link do Serwera Discord'<br>
         addstable = 'stable_link of Discord Bot'<br>
         addtesting = 'testing_link of Discord Bot'<br>
-        service_monitor = 'True/False' - włącza komendę .service<br>
-        service_list = 'Lista usług systemctl do monitorowania poprzez Discorda'<br>
-        showmodulemessages = 'True/False' - wyświetla informacje o włączonych modułach Bota<br>
-        ACLmodule = 'True/False' - Uruchamia funkcję <a href="#ACL">AdvancedChannelListener</a><br>
-        aimodel = 'gemini-2.5-flash' - wybrany model językowy gemini<br>
-        instructions = ['Instrukcje dla modelu językowego']<br><br>
-        <h4>ID użytkownika</h4>
+        service_monitor = 'True/False' -> włącza komendę .service<br>
+        service_list = 'Lista usług systemd do monitorowania poprzez Discorda'<br>
+        showmodulemessages = 'True/False' -> wyświetla informacje o włączonych modułach Bota<br>
+        ACLmodule = 'True/False' -> Uruchamia funkcję <a href="#ACL">AdvancedChannelListener</a><br>
+        aimodel = 'gemini-2.5-flash' -> wybrany model językowy gemini<br>
+        instructions = ['Instrukcje dla modelu językowego']<br>
+        extendedErrMess = 'True/False' -> włącza/wyłącza rozszerzone komunikaty błędów<br><br>
+        
+        <h4 id="#admin">ID użytkownika i Administratorzy bota</h4>
         Niektóre komendy korzystają z funkcji i danych związanych z twoim systemem operacyjnym,<br>
         więc wymagają uprawnień administratora do uruchomienia - chyba nie chcesz żeby ktoś ci usunął system!<br>
         Aby te komendy wykonać, należy podać w <b>admin_usr</b> ID uprawnionych użytkowników do wykonywania tych komend - to muszą być zaufane osoby, a najlepiej tylko ty!<br>
-        Należy też podać <b>mod_usr</b> - pozwala na wykonywanie komend ingerujących w serwer itp.<br>
-        To mogą być zaufani moderatorzy Serwera.
+        Niektóre komendy pozwalają na ingerowanie w serwer itp. - takie komendy są przeznaczone dla moderatorów bota; można ich dodać poprzez nadanie im uprawnień moderatora w bazie danych.<br>
+        Należy użyć komendy <b>.db op {userID}</b> - nada status moderatora bota danemu użytkownikowi. Analogicznie odbieranie uprawnień to <b>.db deop {userID}</b><br>
+        To mogą być zaufani moderatorzy Serwera. Jeśli nikt nie jest dodany jako moderator, tylko użytkownicy z <b>admin_usr</b> będą mogli korzystać z komend moderatora.<br>
 
         <br>
 
         <h3 id="ffmpeg">Windows - instalacja FFmpeg</h3>
         <a href="https://www.ffmpeg.org/download.html">FFmpeg</a> odpowiada za odtwarzanie muzyki na Kanałach Głosowych. Na Windowsie instalacja FFmpeg wygląda inaczej niż na Linuksie.<br>
-        Dla wygody uruchom skrypt <b>setup.bat</b> - po instalacji wszystkich wymaganych bibliotek pythona, pojawi się komunikat o konfiguracji
-        FFmpeg. Należy pobrać .zip programu FFmpeg z oficjalnej strony <a href="https://github.com/BtbN/FFmpeg-Builds">GitHub</a>, najlepiej z podanego w skrypcie 
-        <a href="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip">linku</a>. Po pobraniu należy wypakować pliki tak, aby 
-        pliki .exe znajdowały się w lokalizacji C:\ffmpeg\bin. Jeśli chcesz wypakować w innym miejscu - edytuj skrypt! Po czym (w skrypcie) wciśnij enter, 
-        aby ścieżkę z plikami FFmpeg dodać do PATH. Jeśli pojawi się komunikat o udanej operacji, uruchom ponownie system Windows.
+        Należy ręcznie pobrać pliki FFmpeg i dodać je do zmiennej środowiskowej PATH według poniższych kroków:<br>
+        <ol>
+            <li>Pobierz plik .zip programu FFmpeg z oficjalnej strony <a href="https://github.com/BtbN/FFmpeg-Builds">GitHub</a>, najlepiej z podanego w skrypcie <a href="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip">linku</a>.</li>
+            <li>Wypakuj pliki tak, aby pliki .exe znajdowały się w lokalizacji C:\ffmpeg\bin</li>
+            <li>Otwórz Menu Start i wyszukaj 'Zmienne środowiskowe' - wybierz 'Edytuj zmienne środowiskowe systemu'</li>
+            <li>Wybierz zmienną 'Path' w 'Zmiennych Użytkownika/Systemu' i kliknij 'Edytuj'</li>
+            <li>Kliknij 'Nowy' i dodaj 'C:\ffmpeg\bin' (bez cudzysłowów)</li>
+            <li>Kliknij OK aby zamknąć wszystkie okna</li>
+            <li>Uruchom ponownie komputer aby zastosować zmiany</li>
+        </ol>
+        Po wykonaniu tych kroków, FFmpeg powinien być poprawnie zainstalowany i gotowy do użycia przez Bota.<br>
 
         <br>
 
@@ -216,10 +235,33 @@
         <br>
 
         <h3 id="ai">Komenda .ai</h3>
-        Komenda .ai pozwala na rozmowę ze sztuczną inteligencją. Wykorzystuje api gemini firmy Google.<br>
+        Komenda .ai pozwala na rozmowę ze sztuczną inteligencją. Wykorzystuje API Gemini firmy Google.<br>
         Wystarczy zdobyć token gemini (na stronie <a href="https://ai.google.dev/">Google AI dev</a>) i wpisać go do pliku .env w polu 'AI_token'.<br>
         W pliku .env możesz ustawić model językowy (domyślnie gemini-2.5-flash) w polu 'aimodel', oraz instrukcje dla modelu w polu 'instructions'.<br>
         Rekomenduję zostawić domyślną instrukcję ograniczającą limit odpowiedzi do 1500 znaków - długa odpowiedź może nie zostać wysłana na kanał discord i spowodować błąd.<br>
+
+        <br>
+
+        <h3 id="db">Baza Danych (SQLite3)</h3>
+        Bot korzysta z bazy danych SQLite3 do przechowywania informacji o użytkownikach takich jak:<br>
+        <ul type="square">
+            <li>ID użytkownika</li>
+            <li>Status użytkownika (Moderator itp.)</li>
+            <li>Inne dane związane z użytkownikami (w przyszłości)</li>
+        </ul>
+        Baza danych znajduje się w katalogu <a href="#dirs">Files</a> o nazwie 'serverbot.db'. Bot automatycznie tworzy bazę danych i zbiera dane przy każdej wysłanej wiadomości na serwerze.<br>
+        Jest to wymagane do poprawnego działania funkcji wykorzystujących bazę danych, takie jak: komendy moderatora.<br>
+        W przyszłości planowane jest dodanie więcej funkcji wykorzystujących bazę danych, niekoniecznie wykorzystujących ID użytkowników.<br>
+        Poniższe komendy pozwalają zarzadzać bazą danych z poziomu Discorda:<br>
+        <ul type="square">
+            <li><b>.db register {userID} {username}</b> - ręcznie rejestruje użytkownika w bazie danych</li>
+            <li><b>.db remove {userID}</b> - usuwa użytkownika z bazy danych</li>
+            <li><b>.db op {userID}</b> - nadaje status moderatora bota danemu użytkownikowi</li>
+            <li><b>.db deop {userID}</b> - odbiera status moderatora bota danemu użytkownikowi</li>
+            <li><b>.db select {userID}</b> - wyświetla dane użytkownika o podanym ID</li>
+            <li><b>.db setnickname {nickname} {userID}</b> - ustawia nick użytkownika w bazie danych; jeśli nie podano ID, ustawia nick dla użytkownika wywołującego komendę</li>
+            <li><b>.showdb</b> - zapisuje zawartość bazy danych do pliku tempDB.txt i wysyła jako odpowiedź</li>
+        </ul>
 
         <br>
 
@@ -259,9 +301,12 @@
                     bash<br>
                     rebuild<br>
                     mkshortcut<br>
-                    mksysctlstart {mode}<br>
+                    mkservice {mode}<br>
                     service<br>
                     pingip<br>
+                    module<br>
+                    db<br>
+                    showdb<br>
                 </td>
             </tr>
             <tr valign="top" align="center">
@@ -273,7 +318,6 @@
                     ping<br>
                     release<br>
                     next_update<br>
-                    issues<br>
                 </td>
 
                 <td>
@@ -290,10 +334,11 @@
                     leave<br>
                     play {file dir}<br>
                     ytplay {type} {link}<br>
+                    ytsearch<br>
                     stop<br>
-                    waiting<br>
-                    micspam<br>
                     pause<br>
+                    resume<br>
+                    waiting<br>
                 </td>
 
                 <td>
@@ -307,6 +352,8 @@
                     kick<br>
                     ban<br>
                     unban<br>
+                    invitegen<br>
+                    echo<br>
                 </td>
             </tr>
         </table>

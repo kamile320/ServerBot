@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot 1.9.3 User Manual [EN]">
+    <meta name="description" content="ServerBot v1.10.0 User Manual [EN]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.9.3</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.10.0</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -45,11 +45,15 @@
 
         <a href="https://github.com/kamile320/ServerBot">ServerBot</a> - Discord Bot developed by <b><u>Kamile320</u></b> that features:<br>
         <ul>
-            <li>Listening music from local files and YouTube URL's</li>
             <li>Server Administration</li>
+            <li>Playing music from local files and YouTube URL's</li>
+            <li>Host Computer Management</li>
+            <li>Executing bash scripts</li>
+            <li>Message logging</li>
             <li>Creating threads</li>
-            <li>Host Computer Management (+ Diagnosis)</li>
             <li>File and Directory Management</li>
+            <li>SQLite3 database support</li>
+            <li>AI command (using Gemini API)</li>
             <li>And more</li>
         </ul>
         
@@ -61,9 +65,11 @@
             <li><a href="#start">First Run</a></li>
             <li><a href="#autostart">Autostartup</a></li>
             <li><a href="#token">Tokens</a></li>
+            <li><a href="#admin">UserID and bot Administrators</a></li>
             <li><a href="#ffmpeg">Windows - FFmpeg installation</a></li>
             <li><a href="#modules">Bot Modules/Extensions</a></li>
             <li><a href="#ai">.ai command</a></li>
+            <li><a href="#db">Database (SQLite3)</a></li>
             <li><a href="#comma">Commands</a></li>
         </ol>
 
@@ -76,23 +82,28 @@
             <li><b>setup.bat</b> - File that installs required python libraries (Windows)</li>
             <li><b>setup.sh</b> - Operation menu: starting the bot, installing required libraries, etc. (requires installation of the "dialog" command)</li>
             <li><b>Logs.txt</b> - File with the bot event log on the server</li>
-            <li><b>manual.html</b> - Bot Manual</li>
-            <li><b>Media</b> - Directory with Default Music/Sounds</li>
+            <li><b>manualPL.html</b> - Bot Manual [PL]</li>
+            <li><b>manualEN.html</b> - Bot Manual [EN]</li>
+            <li><b>Media</b> - Directory with Music/Sound files</li>
             <li><b>ACL</b> - User message log (after enabling <a href="#ACL">ACL</a>)</li>
             <li><b>.env</b> - Special file for Bot Tokens</li>
             <li><b>.venv</b> - Python Virtual Environment (After using setup.sh - option 4)</li>
+            <li><b>tempDB.txt</b> - Temporary file with database content (after using .showdb command)</li>
             <li>
                 <b>Files</b> - Directory with required (and not) Bot files
                 <ul>
                     <li><b>favicon.ico</b> - Manual icon</li>
                     <li><b>updates.txt</b> - List of recent updates</li>
                     <li><b>Logs.txt</b> - Copy of Bot Logs</li>
-                    <li><b>autorun.sh</b> - After using <a href="#autostart">.mksysctlstart</a></li>
+                    <li><b>autorun.sh</b> - After using <a href="#autostart">.mkservice</a></li>
+                    <li><b>serverbot.db</b> - SQLite3 Database</li>
+                    <li><b>systemd_add.py</b> - Systemd service creation script</li>
                     <li>Other Files (photos, videos, etc.)</li>
                     <li><b>setup</b> - Config Files</li>
                     <ul>
                         <li><b>setuplib.sh</b> - Installer of pip3 Libraries</li>
                         <li><b>mkvenv.sh</b> - Creates <a href="#autostart">venv</a></li>
+                        <li><b>requirements.txt</b> - List of required python libraries</li>
                     </ul>
                 </ul>
             </li>
@@ -109,7 +120,7 @@
         <ul type="square">
             <li>Python 3.9 or later</li>
             <li>Internet connection</li>
-            <li>Required python libraries installed (see setup.sh/setuplib.sh contents)</li>
+            <li>Required python libraries installed (see setup.sh/setuplib.sh/requirements.txt contents)</li>
             <li>Adding FFmpeg files to the PATH environment - Windows only (see YT)</li>
             <li>Operating System: Linux (recommended) / Windows / MacOS - 64 bit (Recommended)</li>
             <li>setup.sh - requires the "dialog" command</li>
@@ -129,10 +140,10 @@
 
         <br>
 
-        <h3 id="autostart">Autostart via systemctl:</h3>
+        <h3 id="autostart">Autostart using systemd:</h3>
 
         When using the Bot, you may want it to start automatically with the operating system (Linux).<br>
-        To easily enable this, there is the .mksysctlstart command.<br>
+        To easily enable this, there is the .mkservice command.<br>
         After entering the command, you must provide an additional value:<br><br>
         
         <b>def</b> -> creates default autorun.sh file in the <a href="#dirs">Files</a> directory. Works on systems based on Ubuntu <b>22.04</b> (doesn't use venv)<br><br>
@@ -140,11 +151,11 @@
         <b>venv</b> -> sometimes when installing modules using pip3 an <i>externally managed pip</i> error may appear .<br>
         In this case, you should create a Python Virtual Environment/Venv.<br>
         If you have not created it yet, it is recommended to create it in the main Bot directory (ServerBot).<br><br>
-        Example: .mksysctl venv <- executing command on Discord; script of the Bot runs in main directory.<br>
+        Example: .mkservice venv -> executing command on Discord; script of the Bot runs in main directory.<br>
         NOTE! The bot (or rather setup.sh) is adapted to the name of a directory with a virtual environment called ".venv".<br>
         If you manually created venv with different directory name, the bot may not start!<br>
-        It is recommended to use option 4 from setup.sh -> It will easily install and configure everything as needed.<br>
-        For the autostart to work, you need to set the Bot files with read/write/execute permissions to 775 (r-x for everyone, rwx for owner and group). 
+        It is recommended to use proper options from setup.sh -> It will easily install and configure everything needed.<br>
+        For the autostart to work, you need to set the Bot files with read/write/execute permissions to 775 (r-x for everyone, rwx for owner and group) if those files don't already have them.
         I recommend moving the Bot files to the /ServerBot directory (so that it is not in other directories). Do not install bot in your home directory if you want to run it with system startup.<br><br>
 
         <b><i>How to create venv:</i></b><br>
@@ -157,45 +168,52 @@
             <li>or simpler - just use option 4 in <b>setup.sh</b> to run automatic install and enter to venv</li>
         </ol>
 
-        <p>Full documentation of venv <a href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/">here</a></p>
+        <p>Full documentation of venv <a href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/">here</a>.</p>
 
         <p align="right">Pic. 2 - setup.sh options</p>
         <a href="Files/setupSB.png"><img align="right" src="Files/setupSB.png" width="35%" height="35%"></a>
         
 
         <h3 id="token">Tokens</h3>
-        The Bot uses tokens: Discord API, OpenAI and user IDs.<br>
+        The Bot uses API tokens of: Discord, Gemini and user IDs.<br>
         In order for the bot to run, you need to fill in the <b>.env</b> file with the appropriate data.<br><br>
-        Scheme:<br>
-        TOKEN="your bot token"<br>
-        AI_token="your token (API key)"<br>
+        <b>Scheme:</b><br>
+        TOKEN="bot token"<br>
+        AI_token="gamini token (to use .ai)"<br>
         admin_usr = ['your discord user ID']<br>
-        mod_usr = ['your discord user ID']<br>
         dscserv_link = 'Link to your Discord Server'<br>
         addstable = 'stable_link of Discord Bot'<br>
         addtesting = 'testing_link of Discord Bot'<br>
-        service_monitor = 'True/False' - enables .service command<br>
-        service_list = 'List of systemctl services to see via Discord'<br>
-        showmodulemessages = 'True/False' - shows which Bot modules are enabled<br>
-        ACLmodule = 'True/False' - Enables <a href="#ACL">AdvancedChannelListener</a> module<br>
-        aimodel = 'gemini-2.5-flash' - selected gemini's language model<br>
-        instructions = ['Instructions for language model']<br><br>
-        <h4>User ID</h4>
+        service_monitor = 'True/False' -> enables .service command<br>
+        service_list = 'List of systemd services to see via Discord'<br>
+        showmodulemessages = 'True/False' -> shows which Bot modules are enabled<br>
+        ACLmodule = 'True/False' -> Enables <a href="#ACL">AdvancedChannelListener</a> module<br>
+        aimodel = 'gemini-2.5-flash' -> selected gemini's language model<br>
+        instructions = ['Instructions for language model']<br>
+        extendedErrMess = 'True/False' -> turns on/off extended error messages<br><br>
+        
+        <h4 id="#admin">User ID and bot Administrators</h4>
         Some commands uses Operating System data and functions,<br>
-        so it requires administrator privileges to run - you don't want to have removed system by unauthorized user, right?<br>
+        so it requires administrator privileges to run - you don't want to have system removed by unauthorized user, right?<br>
         To execute them, you must provide the ID of trusted and authorized users that can execute these commands in <b>admin_usr</b>. You should be the only one who has rights to execute them.<br>
-        You also need to fill <b>mod_usr</b> with your trusted Discord Server Moderators - allows you to execute commands that interfere with the Discord Server
+        Some commands are intended for Discord Server Moderators - they allow you to interfere with the Discord Server. You can grant Mod privileges to Mod Users in the database using <b>.db op {userID}</b> command. If you want to revoke Mod privileges - use <b>.db deop {userID}</b>.<br>
+        They should be trusted moderators of your discord server. If none of the users have Mod privileges in database, only Bot Administrators will be able to use Mod commands.<br>
         
         <br>
 
         <h3 id="ffmpeg">Windows - FFmpeg installation</h3>
         <a href="https://www.ffmpeg.org/download.html">FFmpeg</a> is responsible for playing music on Voice Channels. On Windows FFmpeg installation looks different than on Linux.<br>
-        Just run <b>setup.bat</b> script - after installation of all needed python libraries you'll see a message about FFmpeg configuration.
-        Download .zip of FFmpeg program from <a href="https://github.com/BtbN/FFmpeg-Builds">GitHub</a> repository, from the 
-        <a href="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip">link</a> provided in the script. 
-        After download, extract files to C:\ffmpeg directory (.exe files must be in C:\ffmpeg\bin directory).
-        If you want to extract ffmpeg to other location - edit setup.bat! After that, press enter (in running setup.bat) to add 
-        FFmpeg to PATH. If you see "SUCCESS" message, reboot Windows.
+        You have to manually install and add FFmpeg files to local user PATH:<br>
+        <ol>
+            <li>Download .zip of FFmpeg program from <a href="https://github.com/BtbN/FFmpeg-Builds">GitHub</a> repository, preferably from the <a href="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip">link</a> provided in the script.</li>
+            <li>Extract files to C:\ffmpeg directory (.exe files must be located in C:\ffmpeg\bin directory).</li>
+            <li>Open Start Menu and search for 'Environment Variables' - select 'Edit the system environment variables'</li>
+            <li>Select 'Path' variable in 'User variables' and click 'Edit'</li>
+            <li>Click 'New' and add 'C:\ffmpeg\bin' (without quotes)</li>
+            <li>Click OK to close all windows</li>
+            <li>Restart your computer to apply changes</li>
+        </ol>
+        After these steps, FFmpeg should be installed and ready to use with the Bot.<br>
 
         <br>
 
@@ -217,10 +235,34 @@
         <br>
 
         <h3 id="ai">.ai command</h3>
-        The .ai command allows you to talk with artificial intelligence. It uses Google's gemini api.<br>
+        The .ai command allows you to talk with artificial intelligence. Uses Google's Gemini API.<br>
         Get a gemini token (On the <a href="https://ai.google.dev/">Google AI dev</a> page) and put token in .env file in the 'AI_token' field.<br>
         In .env file you cen set language model (gemini-2.5-flash as default) in the 'aimodel' field, and instructions for a model in a 'instructions' field.<br>
         I recommend leaving default instruction that limits response to 1500 characters - longer response may not be send to discord channel and cause an error.<br>
+
+
+        <br>
+
+        <h3 id="db">Database (SQLite3)</h3>
+        Bot uses SQLite3 database to store informations about users like:<br>
+        <ul type="square">
+            <li>User ID</li>
+            <li>User Status (Moderator etc.)</li>
+            <li>Other data related to users (in the future)</li>
+        </ul>
+        Database file is located in '<a href="#dirs">Files</a>/serverbot.db'. Bot automatically creates database and collects data after every message sent on channel.<br>
+        It's required to working functions correctly that uses database, such as moderator commands.<br>
+        In the future it's planned to add more functions that use database, not necessarily using user ID's.<br>
+        The following commands allow managing the database from Discord:<br>
+        <ul type="square">
+            <li><b>.db register {userID} {username}</b> - manually registers user in DB</li>
+            <li><b>.db remove {userID}</b> - removes user from DB</li>
+            <li><b>.db op {userID}</b> - grants bot moderator status to the user</li>
+            <li><b>.db deop {userID}</b> - revokes bot moderator status to the user</li>
+            <li><b>.db select {userID}</b> - shows saved data of user</li>
+            <li><b>.db setnickname {nickname} {userID}</b> - sets users nickname in DB; if no ID is provided, sets nickname for the user who invoked the command</li>
+            <li><b>.showdb</b> - saves database content to tempDB.txt file and sends it as a response</li>
+        </ul>
 
         <br>
 
@@ -260,9 +302,12 @@
                     bash<br>
                     rebuild<br>
                     mkshortcut<br>
-                    mksysctlstart {mode}<br>
+                    mkservice {mode}<br>
                     service<br>
                     pingip<br>
+                    module<br>
+                    db<br>
+                    showdb<br>
                 </td>
             </tr>
             <tr valign="top" align="center">
@@ -274,7 +319,6 @@
                     ping<br>
                     release<br>
                     next_update<br>
-                    issues<br>
                 </td>
 
                 <td>
@@ -291,10 +335,11 @@
                     leave<br>
                     play {file dir}<br>
                     ytplay {type} {link}<br>
+                    ytsearch<br>
                     stop<br>
-                    waiting<br>
-                    micspam<br>
                     pause<br>
+                    resume<br>
+                    waiting<br>
                 </td>
 
                 <td>
@@ -308,6 +353,8 @@
                     kick<br>
                     ban<br>
                     unban<br>
+                    invitegen<br>
+                    echo<br>
                 </td>
             </tr>
         </table>
