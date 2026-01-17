@@ -144,7 +144,7 @@
 
         When using the Bot, you may want it to start automatically with the operating system (Linux).<br>
         To easily enable this, there is the .mkservice command.<br>
-        After entering the command, you must provide an additional value:<br><br>
+        After typing the command, you must provide an additional value:<br><br>
         
         <b>def</b> -> creates default autorun.sh file in the <a href="#dirs">Files</a> directory. Works on systems based on Ubuntu <b>22.04</b> (doesn't use venv)<br><br>
 
@@ -194,9 +194,10 @@
         
         <h4 id="#admin">User ID and bot Administrators</h4>
         Some commands uses Operating System data and functions,<br>
-        so it requires administrator privileges to run - you don't want to have system removed by unauthorized user, right?<br>
+        so they require administrator privileges to run - you don't want to have system removed by unauthorized user, right?<br>
         To execute them, you must provide the ID of trusted and authorized users that can execute these commands in <b>admin_usr</b>. You should be the only one who has rights to execute them.<br>
-        Some commands are intended for Discord Server Moderators - they allow you to interfere with the Discord Server. You can grant Mod privileges to Mod Users in the database using <b>.db op {userID}</b> command. If you want to revoke Mod privileges - use <b>.db deop {userID}</b>.<br>
+        Some commands are intended for Discord Server Moderators - they allow you to interfere with the Discord Server. You can grant Mod privileges to Mod Users in the database using <b>.db op {userID}</b> command.<br>
+        If you want to revoke Mod privileges - use <b>.db deop {userID}</b>.<br>
         They should be trusted moderators of your discord server. If none of the users have Mod privileges in database, only Bot Administrators will be able to use Mod commands.<br>
         
         <br>
@@ -255,13 +256,13 @@
         In the future it's planned to add more functions that use database, not necessarily using user ID's.<br>
         The following commands allow managing the database from Discord:<br>
         <ul type="square">
-            <li><b>.db register {userID} {username}</b> - manually registers user in DB</li>
-            <li><b>.db remove {userID}</b> - removes user from DB</li>
-            <li><b>.db op {userID}</b> - grants bot moderator status to the user</li>
-            <li><b>.db deop {userID}</b> - revokes bot moderator status to the user</li>
-            <li><b>.db select {userID}</b> - shows saved data of user</li>
-            <li><b>.db setnickname {nickname} {userID}</b> - sets users nickname in DB; if no ID is provided, sets nickname for the user who invoked the command</li>
-            <li><b>.showdb</b> - saves database content to tempDB.txt file and sends it as a response</li>
+            <li><b>.db register {userID} {username}</b> - manually register user in DB</li>
+            <li><b>.db remove {userID}</b> - remove user from DB</li>
+            <li><b>.db op {userID}</b> - grant bot moderator status to the user</li>
+            <li><b>.db deop {userID}</b> - revoke bot moderator status from user</li>
+            <li><b>.db select {userID}</b> - show saved data of user</li>
+            <li><b>.db setnickname {nickname} {userID}</b> - set user nickname in DB; if no ID is provided, it'll set nickname for the user who invoked the command</li>
+            <li><b>.showdb</b> - save database content to tempDB.txt file and send it as a response</li>
         </ul>
 
         <br>
