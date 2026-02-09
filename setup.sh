@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Bot version
-VERSION="v1.10.0"
+VERSION="v1.10.1"
 # Change version below to install newer release from GitHub (if exists)
-UPDATEVER="v1.10.0"
+UPDATEVER="v1.10.1"
 # Systemd service name - change if you created systemd entry with different name; only name WITHOUT .service extension
 SERVICE_NAME="ServerBot"
 
@@ -62,24 +62,35 @@ case $select in
             ;;
         5)  
             echo "Creating .env file..."
+            echo "#ServerBot v${VERSION} config file" > .env
             echo "TOKEN=''" >> .env
-            echo "AI_token=''" >> .env
             echo "admin_usr = ['']" >> .env
-            echo "#command_dscserv" >> .env
-            echo "dscserv_link = 'https://discord.gg/UMtYGAx5ac'" >> .env
-            echo "#command_addbot" >> .env
-            echo "addstable = 'stable_link'" >> .env
-            echo "addtesting = 'testing_link'" >> .env
-            echo "#service_list" >> .env
-            echo "service_monitor = False" >> .env
-            echo "service_list = ','" >> .env
-            echo "#modules" >> .env
-            echo "showmodulemessages = False" >> .env
-            echo "ACLmodule = False" >> .env
-            echo "#ai" >> .env
+            echo "" >> .env
+            echo "#AI" >> .env
+            echo "AI_token=''" >> .env
             echo "aimodel = 'gemini-2.5-flash'" >> .env
             echo "instructions = ['Answer with max 1500 characters','Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']" >> .env
-            echo "#extendedErrMess" >> .env
+            echo "" >> .env
+            echo "#Music" >> .env
+            echo "JoinLeaveSounds = True" >> .env
+            echo "ForceMediaDir = False" >> .env
+            echo "" >> .env
+            echo "#Command_dscserv" >> .env
+            echo "dscserv_link = 'https://discord.gg/UMtYGAx5ac'" >> .env
+            echo "" >> .env
+            echo "#Service_list" >> .env
+            echo "service_monitor = False" >> .env
+            echo "service_list = ','" >> .env
+            echo "" >> .env
+            echo "#Command_addbot" >> .env
+            echo "addstable = 'stable_link'" >> .env
+            echo "addtesting = 'testing_link'" >> .env
+            echo "" >> .env
+            echo "#Modules" >> .env
+            echo "showmodulemessages = False" >> .env
+            echo "ACLmodule = False" >> .env
+            echo "" >> .env
+            echo "#ExtendedErrorMessages" >> .env
             echo "extendedErrMess = False" >> .env
             sleep 1
             bash setup.sh
