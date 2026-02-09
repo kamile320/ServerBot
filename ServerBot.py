@@ -1,10 +1,11 @@
 import subprocess
 import os
 import sys
+import datetime
 
 
 # Bot Version
-ver = "1.10.0"
+ver = "1.10.1"
 # Bot Name
 displayname = "ServerBot"
 # Name of service in systemd; change if needed, WITHOUT .service file extension
@@ -12,6 +13,57 @@ servicename = "ServerBot"
 
 #ModuleVersion
 ACLver = "3.1"
+
+
+
+#Directory
+maindir = os.getcwd()
+SBbytes = os.path.getsize('ServerBot.py')
+
+#Directory for music files; If you set ForceMediaDir to True, bot will be able to use local sounds only from this dir.
+medialib = f'{maindir}/Media' 
+
+
+
+# .env file template - if .env not exists, bot will automatically create a new one
+# Do not type values here!
+def create_env():
+    try:
+        env = open('.env', 'w')
+        env.write(f"""#ServerBot v{ver} config file
+TOKEN=''
+admin_usr = ['']
+
+#AI
+AI_token=''
+aimodel = 'gemini-2.5-flash'
+instructions = ['Answer with max 1500 characters','Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']
+
+#Music
+JoinLeaveSounds = True
+ForceMediaDir = False
+
+#Command_dscserv
+dscserv_link = 'https://discord.gg/UMtYGAx5ac'
+
+#Service_list
+service_monitor = False
+service_list = ','
+
+#Command_addbot
+addstable = 'stable_link'
+addtesting = 'testing_link'
+
+#Modules
+showmodulemessages = False
+ACLmodule = False
+
+#ExtendedErrorMessages
+extendedErrMess = False""")
+        env.close()
+    except Exception as err:
+        print(f"Error occurred while creating .env file.\nPossible cause: {err}")
+
 
 
 #Check flags
@@ -23,12 +75,31 @@ if '--help' in sys.argv:
           --ignore-pip          Doesn't abort bot startup if an error occur 
                                 while loading pip libraries\n
           --version             Shows version information\n
+          --reset-env           Removes .env file and creates a new one
+                                with default values\n
     """)
     exit()
 
 if '--version' in sys.argv:
     print(f"ServerBot v{ver}\nA.C.L. v{ACLver}")
     exit()
+if '--reset-env' in sys.argv:
+    print("Removing .env file...")
+    if os.path.exists(f'{maindir}/.env'):
+        os.remove(f'{maindir}/.env')
+        print("Removed .env file.\nCreating new one...")
+        create_env()
+        print("Created .env file.\nYou can now fill it with proper values.")
+    else:
+        print(".env file not found.\nCreating new one...")
+        create_env()
+        print("Created .env file.\nYou can now fill it with proper values.")
+
+
+
+if os.path.exists(f'{maindir}/.env') == False:
+    create_env()
+
 
 
 #Loading PIP Libraries
@@ -58,7 +129,6 @@ try:
     from discord.ext import commands
     from discord import FFmpegPCMAudio
     from discord import app_commands
-    import datetime
     import psutil
     import requests
     import asyncio
@@ -88,6 +158,35 @@ print(banner)
 
 
 
+#Intents
+intents = discord.Intents.default()
+intents.message_content = True
+status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}', displayname]
+choice = random.choice(status)
+client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
+testbot_cpu_type = platform.machine() or 'Unknown'
+accept_value = ['True', 'true', 'Enabled', 'enabled', '1', 'yes', 'Yes', 'YES', True]
+start_time = datetime.datetime.now()
+
+
+try:
+    load_dotenv()
+    ############# token/intents/etc ################
+    ai_token = os.getenv('AI_token')
+    if ai_token == '': ai_token = None
+
+    admin_usr = os.getenv('admin_usr')
+    ai_model = f"{os.getenv('aimodel')}"
+    ai_client = genai.Client(api_key=f"{ai_token}")
+    extendedErrMess = os.getenv('extendedErrMess')
+    JLS = os.getenv('JoinLeaveSounds')
+    FMD = os.getenv('ForceMediaDir')
+    ################################################
+except Exception as err:
+    print(f"CAN'T LOAD .env FILE!\nCreate .env file using setup.sh and fill with proper values!\nException: {err}")
+
+
+
 #YT_DLP
 yt_dl_opts = {"format": "bestaudio/best"}
 ytdl = youtube_dl.YoutubeDL(yt_dl_opts)
@@ -98,7 +197,7 @@ ytdl_opts_search = {
     'default_search': 'ytsearch',
     'quiet': True,
     'extract_flat': True,
-    'verbose': False, #True for debug
+    'verbose': False, # True for debug
     'noplaylist': True,
     'format': 'bestaudio/best',
     'http_headers': {
@@ -108,37 +207,12 @@ ytdl_search = youtube_dl.YoutubeDL(ytdl_opts_search)
 
 
 
-#Intents
-intents = discord.Intents.default()
-intents.message_content = True
-status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}', displayname]
-choice = random.choice(status)
-client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
-testbot_cpu_type = platform.processor() or 'Unknown'
-accept_value = ['True', 'true', 'Enabled', 'enabled', '1', 'yes', 'Yes', 'YES', True]
-
-
-
-try:
-    load_dotenv()
-    ############# token/intents/etc ################
-    ai_token = os.getenv('AI_token')
-    admin_usr = os.getenv('admin_usr')
-    ai_model = f"{os.getenv('aimodel')}"
-    ai_client = genai.Client(api_key=f"{ai_token}")
-    extendedErrMess = os.getenv('extendedErrMess')
-    ################################################
-except:
-    print("CAN'T LOAD .env FILE!\nCreate .env file using setup.sh")
-
-
-
 #Log_File
 logs = open('Logs.txt', 'w')
 def createlogs():
     logs.write(f"""S E R V E R  B O T
 LOGS
-Time: {datetime.datetime.now()}
+Time: {datetime.datetime.now().strftime('%H:%M:%S, %d.%m.%Y')}
 Info: Remember to shut down bot by .ShutDown command or log will be empty.
 =============================================================================\n\n""")
     logs.close()
@@ -154,12 +228,6 @@ def logMessage(info):
 def printMessage(info):
     time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
     print(f'[{time}] {info}')
-
-
-
-#Directory
-maindir = os.getcwd()
-SBbytes = os.path.getsize('ServerBot.py')
 
 
 
@@ -200,6 +268,17 @@ def is_mod(id):
     if cur.fetchone() is not None:
         return True
 
+#OS check
+def os_check():
+    if psutil.LINUX:
+        return "Linux"
+    elif psutil.WINDOWS:
+        return "Windows"
+    elif psutil.MACOS:
+        return "macOS"
+    else:
+        return "Other / Unknown"
+
 
 
 #Information/Errors
@@ -212,6 +291,7 @@ chksize_error = "Error occurred while checking file size."
 copiedlog = f"Information[ServerLog]: Copied Log to {maindir}/Files"
 ffmpeg_error = "FFmpeg is not installed or File not found"
 voice_not_connected_error = "You must be connected to VC first!"
+not_playing = "Music is not playing right now."
 leave_error = "How can I left, when I'm not in VC?"
 thread_error = "Something went wrong. Try to type:\n.thread {NameWithoutSpaces} {Reason}\nReason is optional"
 not_allowed = "You're not allowed to use this command."
@@ -304,8 +384,10 @@ Service command: {service_status}
 async def on_ready():
     print(f'Logged as {client.user}')
     print(f'Welcome in ServerBot v{ver}')
+
     #Load Database
     load_db()
+
     #slash_command_sync
     try:
         syncd = await client.tree.sync()
@@ -313,6 +395,7 @@ async def on_ready():
     except Exception as err:
         print("Can't sync slash commands\nSee Logs.txt for details.")
         logMessage(f"Information[SlashCommandSync]: Error occurred while syncing slash commands.\nException: {err}")
+
     #showmodulemessages
     if os.getenv('showmodulemessages') in accept_value:
             if os.getenv('ACLmodule') in accept_value:
@@ -320,7 +403,8 @@ async def on_ready():
                 aclcheck()
             else:
                 print('[showmodulemessages] A.C.L. is disabled.')
-    print('Bot runtime: ', datetime.datetime.now())
+
+    print(start_time.strftime('Time: %H:%M:%S           Day: %d.%m.%Y'))
     print('=' *40)
 
 
@@ -518,27 +602,13 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Added database support (sqlite3)
-- Bot moderators now must be defined in the database
-- Updated ACL module to v3.1
-- Removed .issues command (use GitHub Issues page) 
-  and other unused/useless commands
-- Pip installers now use requirements.txt file
-- Small change in version format - now each version has a scheme X.Y.Z(-tag)
-  instead of X.Y or X.Y.Z
-  X -> Major changes incompatible with older versions
-  Y -> Normal updates, new functions
-  Z -> Bugfixes, small changes
-- Moved extendedErrMess variable to the .env file
-- Added .db .showdb .invitegen .echo /echo commands
-- Updated .file .touch .dir .bash .delete .cleaner .webreq .banner .botbanner commands
-- Updated and fixed .kick .ban .unban commands
-- Updates in .gitignore
-- Updated and renamed .mksysctlstart to .mkservice
-- Added servicename variable for custom systemd service name
-- Corrected some systemctl mentions to systemd
-- Updated sysctladd.py to v1.2 and renamed to systemd_add.py
-- Minor fixes and improvements
+- Updated structure of .env file and improved file creation in setup.sh
+- Now bot will create empty .env file on start if it doesn't exists
+- Updated voice commands
+- Updated .testbot .testos commands
+- Added .library command
+- Added --reset-env flag
+- Small fixes and improvements
 
 To see older releases, find 'updates.txt' in 'Files' directory.
 """)
@@ -975,44 +1045,49 @@ async def showdb(ctx):
 @client.command(name='testbot', help='Tests some functions of Host and Bot')
 async def testbot(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
-        teraz = datetime.datetime.now()
+        now = datetime.datetime.now()
         await ctx.send(f"""
 ***S e r v e r  B o t***  *test*:
-====================================================
-Time: **{teraz.strftime('%d.%m.%Y, %H:%M:%S')}**
+========================================================
+Time: **{now.strftime('%H:%M:%S, %d.%m.%Y')} [Day {(now - start_time).days}]**
 Bot name: **{client.user}**
-Version: **{ver}**
 DisplayName: **{displayname}**
-CPU Usage: **{psutil.cpu_percent()}** (%)
-CPU Count: **{psutil.cpu_count()}**
-CPU Type: **{testbot_cpu_type}**
-RAM Usage: **{psutil.virtual_memory().percent}** (%)
-Ping: **{round(client.latency * 1000)}ms**
-OS Test (Windows): **{psutil.WINDOWS}**
-OS Test (MacOS): **{psutil.MACOS}**
-OS Test (Linux): **{psutil.LINUX}**
-OS Version: **{platform.version()}**
-OS Kernel: **{platform.system()} {platform.release()}**
+Version: **{ver}**
+CPU Usage: **{psutil.cpu_percent()}%**
+CPU Cores: **{psutil.cpu_count(logical=False)}/{psutil.cpu_count(logical=True)}**
+Arch: **{testbot_cpu_type}**
+RAM Usage: **{psutil.virtual_memory().percent}%**
+Ping: **{round(client.latency * 1000)} ms**
+OS Type: **{os_check()}**
+OS Version: **{platform.system()} {platform.release()}**
+OS Kernel: **{platform.version()}**
 Bot Current Dir: **{os.getcwd()}**
 Bot Main Dir: **{maindir}**
-File size: **{os.path.getsize(f'{maindir}/ServerBot.py')}**
-Floppy: **{os.path.exists('/dev/fd0')}**
-====================================================""")
+Music library: **{medialib}**
+File size: **{os.path.getsize(f'{maindir}/ServerBot.py')} B**
+Floppy: **{'Yes' if os.path.exists('/dev/fd0') else 'No'}**
+========================================================""")
     else:
         await ctx.send(not_allowed)
 
 #2
-@client.command(name='testos', help='Check OS of server with running bot.\n.testos {linux/windows/macos}')
-async def testos(ctx, operatingsys):
+@client.command(name='testos', help='Check information about Operating System and Hardware')
+async def testos(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
-        if operatingsys == 'linux':
-            await ctx.send(f'Linux: {psutil.LINUX}')
-        elif operatingsys == 'windows':
-            await ctx.send(f'Windows: {psutil.WINDOWS}')
-        elif operatingsys == 'macos':
-            await ctx.send(f'MacOS: {psutil.MACOS}')
-        else:
-            await ctx.send(f'Please enter windows/linux/macos')
+        await ctx.send(f"""
+***Operating System Information***:
+========================================================
+Type: **{os_check()}**
+Version: **{platform.system()} {platform.release()}**
+Kernel: **{platform.version()}**
+Hostname: **{platform.node() or 'Unknown'}**
+
+Hardware info:
+    CPU Usage: **{psutil.cpu_percent()}%**
+    RAM Usage: **{psutil.virtual_memory().percent}%**
+    CPU Cores: **{psutil.cpu_count(logical=False)}/{psutil.cpu_count(logical=True)}**
+    Arch: **{testbot_cpu_type}**
+========================================================""")
     else:
         await ctx.send(not_allowed)
 
@@ -1252,13 +1327,16 @@ async def hexadecimal(ctx, number):
 
         #VoiceChannel
 #1 - connect
-@client.command(pass_context=True, name='join', help='Join Voice Channel')
+@client.command(pass_context=True, name='join', help="Join Voice Channel")
 async def connect(ctx):
     if (ctx.author.voice):
         channel = ctx.message.author.voice.channel
         voice = await channel.connect()
-        source = FFmpegPCMAudio(f'{maindir}/Media/Windows XP - Autostart.wav')
-        voice.play(source)
+        
+        if (JLS in accept_value):
+            source = FFmpegPCMAudio(f'{maindir}/Media/join.wav')
+            voice.play(source)
+        
         await ctx.reply(f'Connected to {channel.name}')
         
         message = f'Information[VoiceChat]: Joined to {channel.name}'
@@ -1268,14 +1346,17 @@ async def connect(ctx):
         await ctx.reply(voice_not_connected_error)
 
 #2 - disconnect
-@client.command(pass_context=True, name='leave', help='Leave Voice Channel')
+@client.command(pass_context=True, name='leave', help="Leave Voice Channel")
 async def disconnect(ctx):
     if (ctx.voice_client):
         channel = ctx.message.author.voice.channel
         voice = ctx.guild.voice_client
-        source = FFmpegPCMAudio(f'{maindir}/Media/Windows XP - Zamkniecie.wav')
-        voice.play(source)
-        await asyncio.sleep(3)
+
+        if (JLS in accept_value):
+            source = FFmpegPCMAudio(f'{maindir}/Media/leave.wav')
+            voice.play(source)
+            await asyncio.sleep(3)
+        
         await ctx.guild.voice_client.disconnect()
         await ctx.reply("Left from VC")
         
@@ -1286,7 +1367,7 @@ async def disconnect(ctx):
         await ctx.reply(leave_error)
 
 #3 - play
-@client.command(name='play', help="Play a local music file.\n.play {filename*}\n*With complete directory path when file isn't located in current dir")
+@client.command(name='play', help="Play a local music file.\n.play {filename*}\n*Type full directory path when file isn't located in current dir, or if ForceMediaDir is set to False")
 async def play(ctx, *, name):
     try:
         try:
@@ -1300,19 +1381,40 @@ async def play(ctx, *, name):
             message = f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?"
             print(message)
             logMessage(message)
+
         try:
-            exist = os.path.exists(name)
-            if exist == True:
-                voice = ctx.guild.voice_client
-                source = FFmpegPCMAudio(name)
-                voice.play(source)
-                await ctx.reply(f'Playing music...\nSource: {name}')
+            if (FMD in accept_value):
+                music = f"{medialib}/{name}"
+                exist = os.path.exists(music)
+                if exist:
+                    voice = ctx.guild.voice_client
+                    source = FFmpegPCMAudio(music)
+                    voice.play(source)
+                    await ctx.reply(f"Playing {name}...")
+                else:
+                    await ctx.reply("Can't find source file from library.")
+
             else:
-                await ctx.reply("Can't find source file.")
-        except:
-            await ctx.reply("Can't play music.\nSource exist?")
-    except:
-        await ctx.reply(voice_not_connected_error)
+                exist = os.path.exists(name)
+                if exist:
+                    voice = ctx.guild.voice_client
+                    source = FFmpegPCMAudio(name)
+                    voice.play(source)
+                    await ctx.reply(f'Playing music...\nSource: {name}')
+                else:
+                    await ctx.reply("Can't find source file.")
+        
+        except Exception as err:
+            if (extendedErrMess in accept_value):
+                await ctx.reply(f"Can't play music.\nPossible cause: {err}")
+            else:
+                await ctx.reply("Can't play music.\nSource exist?")
+    
+    except Exception as err:
+        if (extendedErrMess in accept_value):
+            await ctx.reply(f"{voice_not_connected_error}\nException: {err}")
+        else:
+            await ctx.reply(f"{voice_not_connected_error}")
 
 #4 - ytplay
 @client.command(name='ytplay', help="Play music from YouTube URL\n.ytplay {url/search} {URL/Title}\nurl - playing from YouTube URL's\nsearch - playing from typed phrase")
@@ -1330,6 +1432,7 @@ async def ytplay(ctx, type, *, url):
             message = f"Information[VoiceChat]: Can't join to {channel.name}. Already joined?"
             printMessage(message)
             logMessage(message)
+
         #URL Playing
         if type == 'url':
             try:
@@ -1342,6 +1445,7 @@ async def ytplay(ctx, type, *, url):
                 await ctx.reply(f'Playing from source...')
             except:
                 await ctx.reply("Can't play music.\nSource exist?")
+        
         #Phrase Playing
         elif type == 'search':
             try:
@@ -1357,6 +1461,7 @@ async def ytplay(ctx, type, *, url):
                 printMessage(message)
                 logMessage(message)
                 await ctx.reply(f"Something went wrong while searching YouTube Video. See 'Logs.txt' for more details")
+
             try:
                 loop = asyncio.get_event_loop()
                 data = await loop.run_in_executor(None, lambda: ytdl.extract_info(output, download=False))
@@ -1373,7 +1478,7 @@ async def ytplay(ctx, type, *, url):
         await ctx.reply(voice_not_connected_error)
 
 #5 - ytsearch
-@client.command(name='ytsearch', help='Search YouTube Videos by typed phrase')
+@client.command(name='ytsearch', help="Search YouTube Videos by typed phrase")
 async def ytsearch(ctx, *, search):
     try:
         search_results = ytdl_search.extract_info(f"ytsearch:{search}", download=False)
@@ -1392,16 +1497,16 @@ async def ytsearch(ctx, *, search):
         logMessage(message)
 
 #6 - stop
-@client.command(pass_context=True, name='stop', help='Stop playing audio')
+@client.command(pass_context=True, name='stop', help="Stop playing audio")
 async def stop(ctx):
     voice = ctx.guild.voice_client
     if voice.is_playing():
         voice.stop()
     else:
-        await ctx.reply('Music is not playing right now')
+        await ctx.reply(not_playing)
 
 #7 - pause
-@client.command(pass_context = True, name='pause', help='Pause/Resume playing audio')
+@client.command(pass_context = True, name='pause', help="Pause/Resume playing audio")
 async def pause(ctx):
     voice = ctx.guild.voice_client
     if voice.is_playing():
@@ -1409,10 +1514,10 @@ async def pause(ctx):
     elif voice.is_paused():
         voice.resume()
     else:
-        await ctx.reply('Music is not playing on the voice channel right now')
+        await ctx.reply(not_playing)
 
 #8 - resume
-@client.command(pass_context = True, name='resume', help='Resume playing audio')
+@client.command(pass_context = True, name='resume', help="Resume playing audio")
 async def resume(ctx):
     voice = ctx.guild.voice_client
     if voice.is_paused():
@@ -1420,7 +1525,7 @@ async def resume(ctx):
     elif voice.is_playing():
         await ctx.send("Music is playing right now")
     else:
-        await ctx.reply('Music is not playing on the voice channel right now')
+        await ctx.reply(not_playing)
 
 #9 - waiting
 @client.command(name='waiting', help="Say everyone that you're waiting!")
@@ -1434,6 +1539,14 @@ async def wait(ctx):
         await ctx.reply(voice_not_connected_error)
     except:
         await ctx.reply(ffmpeg_error)
+
+#10 - library
+if (FMD in accept_value):
+    @client.command(name='library', help="Show list of music files in media library")
+    async def library(ctx):
+            list = os.listdir(medialib)
+            nl = ',\n'
+            await ctx.send(f"**Music files in media library:**\n{nl.join(list)}")
         #VoiceChannel-END
 
 
@@ -1756,28 +1869,27 @@ async def ping(interaction):
 @client.tree.command(name='testbot', description='Tests some functions of Bot')
 async def testbot(interaction):
     if str(interaction.user.id) in admin_usr or is_mod(interaction.user.id):
-        teraz = datetime.datetime.now()
+        now = datetime.datetime.now()
         await interaction.response.send_message(f"""
     ***S e r v e r  B o t***  *test*:
     ====================================================
-    Time: **{teraz.strftime('%d.%m.%Y, %H:%M:%S')}**
+    Time: **{now.strftime('%H:%M:%S, %d.%m.%Y')} [Day {(now - start_time).days}]**
     Bot name: **{client.user}**
-    Version: **{ver}**
     DisplayName: **{displayname}**
-    CPU Usage: **{psutil.cpu_percent()}** (%)
-    CPU Count: **{psutil.cpu_count()}**
-    CPU Type: **{testbot_cpu_type}**
-    RAM Usage: **{psutil.virtual_memory().percent}** (%)
-    Ping: **{round(client.latency * 1000)}ms**
-    OS Test (Windows): **{psutil.WINDOWS}**
-    OS Test (MacOS): **{psutil.MACOS}**
-    OS Test (Linux): **{psutil.LINUX}**
-    OS Version: **{platform.version()}**
-    OS Kernel: **{platform.system()} {platform.release()}**
+    Version: **{ver}**
+    CPU Usage: **{psutil.cpu_percent()}%**
+    CPU Cores: **{psutil.cpu_count(logical=False)}/{psutil.cpu_count(logical=True)}**
+    Arch: **{testbot_cpu_type}**
+    RAM Usage: **{psutil.virtual_memory().percent}%**
+    Ping: **{round(client.latency * 1000)} ms**
+    OS Type: **{os_check()}**
+    OS Version: **{platform.system()} {platform.release()}**
+    OS Kernel: **{platform.version()}**
     Bot Current Dir: **{os.getcwd()}**
     Bot Main Dir: **{maindir}**
-    File size: **{os.path.getsize(f'{maindir}/ServerBot.py')}**
-    Floppy: **{os.path.exists('/dev/fd0')}**
+    Music library: **{medialib}**
+    File size: **{os.path.getsize(f'{maindir}/ServerBot.py')} B**
+    Floppy: **{'Yes' if os.path.exists('/dev/fd0') else 'No'}**
     ====================================================""")
     else:
         await interaction.response.send_message(not_allowed)
