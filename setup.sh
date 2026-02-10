@@ -69,7 +69,7 @@ case $select in
             echo "#AI" >> .env
             echo "AI_token=''" >> .env
             echo "aimodel = 'gemini-2.5-flash'" >> .env
-            echo "instructions = ['Answer with max 1500 characters','Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']" >> .env
+            echo "instructions = ['Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']" >> .env
             echo "" >> .env
             echo "#Music" >> .env
             echo "JoinLeaveSounds = True" >> .env
