@@ -37,7 +37,7 @@ admin_usr = ['']
 #AI
 AI_token=''
 aimodel = 'gemini-2.5-flash'
-instructions = ['Answer with max 1500 characters','Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']
+instructions = ['Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']
 
 #Music
 JoinLeaveSounds = True
@@ -515,7 +515,7 @@ async def ai(ctx, *, question):
     try:
         response = ai_client.models.generate_content(
             model=f"{ai_model}", 
-            contents=question, 
+            contents=f"[Your response MUST CONTAIN MAX 2000 CHARACTERS OR LESS] {question}",
             config=types.GenerateContentConfig(
                 system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
                 tools=[
@@ -1902,7 +1902,7 @@ async def ai(interaction: discord.Interaction, question: str):
     try:
         response = ai_client.models.generate_content(
             model=f"{ai_model}", 
-            contents=question, 
+            contents=f"[Your response MUST CONTAIN MAX 2000 CHARACTERS OR LESS] {question}", 
             config=types.GenerateContentConfig(
                 system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
                 tools=[
