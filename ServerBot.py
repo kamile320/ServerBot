@@ -15,7 +15,6 @@ servicename = "ServerBot"
 ACLver = "3.1"
 
 
-
 #Directory
 maindir = os.getcwd()
 SBbytes = os.path.getsize('ServerBot.py')
@@ -83,6 +82,7 @@ if '--help' in sys.argv:
 if '--version' in sys.argv:
     print(f"ServerBot v{ver}\nA.C.L. v{ACLver}")
     exit()
+
 if '--reset-env' in sys.argv:
     print("Removing .env file...")
     if os.path.exists(f'{maindir}/.env'):
@@ -94,9 +94,10 @@ if '--reset-env' in sys.argv:
         print(".env file not found.\nCreating new one...")
         create_env()
         print("Created .env file.\nYou can now fill it with proper values.")
+    exit()
 
 
-
+#Automatic .env creation
 if os.path.exists(f'{maindir}/.env') == False:
     create_env()
 
@@ -129,18 +130,18 @@ try:
     from discord.ext import commands
     from discord import FFmpegPCMAudio
     from discord import app_commands
+    from dotenv import load_dotenv
+    import asyncio
+    import sqlite3
     import psutil
     import requests
-    import asyncio
     import random
     import shutil
-    import sqlite3
     import pyfiglet
     import platform
     import yt_dlp as youtube_dl
     from google import genai
     from google.genai import types
-    from dotenv import load_dotenv
 except Exception as exc:
     if '--ignore-pip' in sys.argv:
         print(f"Error while importing libraries: {exc}\nIgnoring.. Expect unstable experience.")
@@ -161,7 +162,7 @@ print(banner)
 #Intents
 intents = discord.Intents.default()
 intents.message_content = True
-status = ['Windows 98 SE', 'DSaF:DLI', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}', displayname]
+status = ['Windows 98 SE', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}', displayname]
 choice = random.choice(status)
 client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
 testbot_cpu_type = platform.machine() or 'Unknown'
@@ -183,7 +184,7 @@ try:
     FMD = os.getenv('ForceMediaDir')
     ################################################
 except Exception as err:
-    print(f"CAN'T LOAD .env FILE!\nCreate .env file using setup.sh and fill with proper values!\nException: {err}")
+    print(f"CAN'T LOAD .env FILE!\nCreate .env file using setup.sh and fill it with proper values!\nException: {err}")
 
 
 
@@ -404,7 +405,7 @@ async def on_ready():
             else:
                 print('[showmodulemessages] A.C.L. is disabled.')
 
-    print(start_time.strftime('Time: %H:%M:%S           Day: %d.%m.%Y'))
+    print(start_time.strftime('Time: %H:%M:%S\nDay:  %d.%m.%Y'))
     print('=' *40)
 
 
@@ -444,10 +445,12 @@ async def on_message(message):
 
     await client.process_commands(message)
 
+#client.event-END
 
 
-        #ChatBot
-#Chat
+
+        #Commands
+    #Chat
 #1
 @client.command()
 async def hello(ctx):
@@ -589,7 +592,7 @@ Used Sounds:
 @client.command(name='time', help='Shows local time')
 async def time(ctx):
     now = datetime.datetime.now()
-    await ctx.send(now.strftime('%d.%m.%Y, %H:%M:%S'))
+    await ctx.send(now.strftime("Time: %H:%M:%S\nDay: %d.%m.%Y"))
 
 #4
 @client.command(name='ping', help='Pings the Bot')
@@ -621,6 +624,7 @@ Ideas for Future Updates
 - Better Informations/Errors
 - More slash commands
 - Database support and leveling system (sqlite3)
+- More advanced module system (cogs) or whole code rewrite to make it more modular and easier to update
 You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac)
 """)
         #BotInfo-END
@@ -899,8 +903,8 @@ async def pingip(ctx, ip):
         try:
             ipaddr = ip
             await ctx.send(f"```{subprocess.getoutput([f'ping {ipaddr} -c 1'])}```")
-        except:
-            await ctx.send('Something went wrong')
+        except Exception as err:
+            await ctx.send(f'Something went wrong.\nPossible cause: {err}')
     else:
         await ctx.send(not_allowed)
 
@@ -1092,7 +1096,7 @@ Hardware info:
         await ctx.send(not_allowed)
 
 #3
-@client.command(name="disks", help="Shows mounted disks with free disk space")
+@client.command(name="disks", help="Shows mounted disks with free disk space (Linux only - uses 'df -h' command)")
 async def disk(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
@@ -1327,7 +1331,7 @@ async def hexadecimal(ctx, number):
 
         #VoiceChannel
 #1 - connect
-@client.command(pass_context=True, name='join', help="Join Voice Channel")
+@client.command(name='join', help="Join Voice Channel")
 async def connect(ctx):
     if (ctx.author.voice):
         channel = ctx.message.author.voice.channel
@@ -1346,7 +1350,7 @@ async def connect(ctx):
         await ctx.reply(voice_not_connected_error)
 
 #2 - disconnect
-@client.command(pass_context=True, name='leave', help="Leave Voice Channel")
+@client.command(name='leave', help="Leave Voice Channel")
 async def disconnect(ctx):
     if (ctx.voice_client):
         channel = ctx.message.author.voice.channel
@@ -1497,7 +1501,7 @@ async def ytsearch(ctx, *, search):
         logMessage(message)
 
 #6 - stop
-@client.command(pass_context=True, name='stop', help="Stop playing audio")
+@client.command(name='stop', help="Stop playing audio")
 async def stop(ctx):
     voice = ctx.guild.voice_client
     if voice.is_playing():
@@ -1506,7 +1510,7 @@ async def stop(ctx):
         await ctx.reply(not_playing)
 
 #7 - pause
-@client.command(pass_context = True, name='pause', help="Pause/Resume playing audio")
+@client.command(name='pause', help="Pause/Resume playing audio")
 async def pause(ctx):
     voice = ctx.guild.voice_client
     if voice.is_playing():
@@ -1517,7 +1521,7 @@ async def pause(ctx):
         await ctx.reply(not_playing)
 
 #8 - resume
-@client.command(pass_context = True, name='resume', help="Resume playing audio")
+@client.command(name='resume', help="Resume playing audio")
 async def resume(ctx):
     voice = ctx.guild.voice_client
     if voice.is_paused():
@@ -1587,7 +1591,7 @@ async def dir(ctx, *, mode):
         await ctx.send(not_allowed)
 
 #3
-@client.command(name='file', help='Manage/open/create files and directories\n.file open {filename} -> open file (REMEMBER to add extension (.py/.png/etc))\n.file mkdir {dir_name} -> create directory (folder)\n.file size {filename} -> check size of selected file\n.file create {filename} {content} -> create file with content (like .touch command; content is optional)')
+@client.command(name='file', help='Manage/open/create files and directories\n.file open {filename} -> open (send as reply) file (REMEMBER to add extension - .py/.png/etc)\n.file mkdir {dir_name} -> create directory (folder)\n.file size {filename} -> check size of selected file\n.file create {filename} {content} -> create file with content (like .touch command; content is optional)')
 async def file(ctx, mode, filename, *, value=None):
     if str(ctx.message.author.id) in admin_usr:
         if mode == 'open':#open
@@ -1632,19 +1636,19 @@ async def file(ctx, mode, filename, *, value=None):
                 response_empty = "Created new empty file.\nUse '.dir list' to check this"
                 message = f"Information[FileManager]: Created file {filename}, in directory {directory}.\nContent: {value}"
 
-                if value is None:    
-                    mkfile = open(filename, 'wt')
-                    mkfile.close()
-
-                    await ctx.send(response_empty)
-                    printMessage(message)
-                    logMessage(message)
-                else:
-                    mkfile = open(filename, 'wt')
+                if value is not None:    
+                    mkfile = open(filename, 'wt', encoding='utf-8')
                     mkfile.write(value)
                     mkfile.close()
 
                     await ctx.send(response)
+                    printMessage(message)
+                    logMessage(message)
+                else:
+                    mkfile = open(filename, 'wt', encoding='utf-8')
+                    mkfile.close()
+
+                    await ctx.send(response_empty)
                     printMessage(message)
                     logMessage(message)
             except Exception as err:
@@ -1702,8 +1706,11 @@ async def thread(ctx, name, *, reason=None):
         message = f"Information[Threads]: Created new thread [{name}] on {channel}. Reason: {reason}"
         printMessage(message)
         logMessage(message)
-    except:
-        await ctx.send(thread_error)
+    except Exception as err:
+        if extendedErrMess in accept_value:
+            await ctx.send(f"{thread_error}\nPossible cause: {err}")
+        else:
+            await ctx.send(thread_error)
 
 #2
 @client.command(name='Teensie', help='TeensieGif')
@@ -1848,7 +1855,7 @@ if os.getenv('ACLmodule') in accept_value:
 ################################################ S L A S H   C O M M A N D S ###########################################################################################
 #1
 @client.tree.command(name='random', description='Shows your random number. Type .random [min] [max]')
-@app_commands.describe(min="Minimum value", max="Maximum value")
+@app_commands.describe(min='Minimum value', max='Maximum value')
 async def random_slash(interaction: discord.Interaction, min: int, max: int):
     import random
     try:
@@ -1896,7 +1903,7 @@ async def testbot(interaction):
 
 #4
 @client.tree.command(name='ai', description=f'Talk with AI. Uses {ai_model} model.')
-@app_commands.describe(question="prompt/question for AI")
+@app_commands.describe(question='Prompt/question for AI')
 async def ai(interaction: discord.Interaction, question: str):
     await interaction.response.defer(thinking=True)
     try:
@@ -1928,7 +1935,7 @@ async def random_old(interaction):
     await interaction.response.send_message(f'This is your random number: {randomn}')
 
 #6
-@client.tree.command(name='echo', description="Make the bot say something.")
+@client.tree.command(name='echo', description='Make the bot say something.')
 @app_commands.describe(message="Message to send", channel_id="Channel ID where message will be sent")
 async def echo(interaction: discord.Interaction, message: str, channel_id: str = None):
     if str(interaction.user.id) in admin_usr or is_mod(interaction.user.id):
