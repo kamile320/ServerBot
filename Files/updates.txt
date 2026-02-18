@@ -219,3 +219,14 @@ on text in .testbot while running Bot on ARM devices
 - Corrected some systemctl mentions to systemd
 - Updated sysctladd.py to v1.2 and renamed to systemd_add.py
 - Minor fixes and improvements
+
+
+[ServerBot v1.10.1]
+    Changelog:
+- Updated structure of .env file and improved file creation in setup.sh
+- Now bot will create empty .env file on start if it doesn't exists
+- Updated voice commands
+- Updated .testbot .testos commands
+- Added .library command
+- Added --reset-env flag
+- Small fixes and improvements
