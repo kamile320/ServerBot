@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot v1.10.0 User Manual [EN]">
+    <meta name="description" content="ServerBot v1.10.1 User Manual [EN]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.10.0</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.10.1</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -69,6 +69,7 @@
             <li><a href="#ffmpeg">Windows - FFmpeg installation</a></li>
             <li><a href="#modules">Bot Modules/Extensions</a></li>
             <li><a href="#ai">.ai command</a></li>
+            <li><a href="#yt">Music Commands</a></li>
             <li><a href="#db">Database (SQLite3)</a></li>
             <li><a href="#comma">Commands</a></li>
         </ol>
@@ -84,7 +85,7 @@
             <li><b>Logs.txt</b> - File with the bot event log on the server</li>
             <li><b>manualPL.html</b> - Bot Manual [PL]</li>
             <li><b>manualEN.html</b> - Bot Manual [EN]</li>
-            <li><b>Media</b> - Directory with Music/Sound files</li>
+            <li><b>Media</b> - Default directory/library for music/sound files</li>
             <li><b>ACL</b> - User message log (after enabling <a href="#ACL">ACL</a>)</li>
             <li><b>.env</b> - Special file for Bot Tokens</li>
             <li><b>.venv</b> - Python Virtual Environment (After using setup.sh - option 4)</li>
@@ -119,6 +120,7 @@
         <h5>The Bot requires:</h5>
         <ul type="square">
             <li>Python 3.9 or later</li>
+            <li>Discord.py 2.6.4 or newer</li>
             <li>Internet connection</li>
             <li>Required python libraries installed (see setup.sh/setuplib.sh/requirements.txt contents)</li>
             <li>Adding FFmpeg files to the PATH environment - Windows only (see YT)</li>
@@ -178,20 +180,38 @@
         The Bot uses API tokens of: Discord, Gemini and user IDs.<br>
         In order for the bot to run, you need to fill in the <b>.env</b> file with the appropriate data.<br><br>
         <b>Scheme:</b><br>
-        TOKEN="bot token"<br>
-        AI_token="gamini token (to use .ai)"<br>
-        admin_usr = ['your discord user ID']<br>
-        dscserv_link = 'Link to your Discord Server'<br>
+        TOKEN='discord token'<br>
+        admin_usr = ['your discord ID']<br>
+        <br>
+        #AI<br>
+        AI_token='gemini token (to use .ai command)'<br>
+        aimodel = 'gemini-2.5-flash' -> selected gemini language model<br>
+        instructions = ['Instructions for the language model']<br>
+        <br>
+        #Music<br>
+        JoinLeaveSounds = True/False -> Playing sounds while joining/leaving voice channel<br>
+        ForceMediaDir = False -> 'Locks' users to use sound files ONLY from music library (Media directory as default)<br>
+        <br>
+        #Command_dscserv<br>
+        dscserv_link = 'Discord server link'<br>
+        <br>
+        #Service_list<br>
+        service_monitor = True/False -> enables .service command<br>
+        service_list = 'list of systemd services to monitor using Discord'<br>
+        <br>
+        #Command_addbot
         addstable = 'stable_link of Discord Bot'<br>
         addtesting = 'testing_link of Discord Bot'<br>
-        service_monitor = 'True/False' -> enables .service command<br>
-        service_list = 'List of systemd services to see via Discord'<br>
-        showmodulemessages = 'True/False' -> shows which Bot modules are enabled<br>
-        ACLmodule = 'True/False' -> Enables <a href="#ACL">AdvancedChannelListener</a> module<br>
-        aimodel = 'gemini-2.5-flash' -> selected gemini's language model<br>
-        instructions = ['Instructions for language model']<br>
-        extendedErrMess = 'True/False' -> turns on/off extended error messages<br><br>
+        <br>
+        #Modules<br>
+        showmodulemessages = True/False -> shows informations about enabled modules<br>
+        ACLmodule = True/False -> Enables <a href="#ACL">AdvancedChannelListener</a> module<br>
+        <br>
+        #ExtendedErrorMessages<br>
+        extendedErrMess = True/False -> enables/disables extended error messages<br>
         
+        <br>
+
         <h4 id="#admin">User ID and bot Administrators</h4>
         Some commands uses Operating System data and functions,<br>
         so they require administrator privileges to run - you don't want to have system removed by unauthorized user, right?<br>
@@ -225,7 +245,7 @@
         <ul type="square">
             <li>
                 <a id="ACL" href="https://github.com/kamile320/AdvancedChannelListener"><b>AdvancedChannelListener</b></a> - shows user messages sent on Discord, saves them in ACL/[DiscordUserID].txt file and all messages in ACL/default/message.txt<br>
-                Useful for monitoring users on the server and verifying who is who. It can break user privacy, so use it wisely.<br>
+                Useful for monitoring users on the server and verifying who is who. It can break user privacy, so use it wisely and at your own risk.<br>
                 If you don't want to use this - set ACLmodule = 'False' in .env (set as default).
             </li>
             <li>
@@ -241,6 +261,24 @@
         In .env file you cen set language model (gemini-2.5-flash as default) in the 'aimodel' field, and instructions for a model in a 'instructions' field.<br>
         I recommend leaving default instruction that limits response to 1500 characters - longer response may not be send to discord channel and cause an error.<br>
 
+        <br>
+
+        <h3 id="yt">Music commands</h3>
+        Bot has ability to play music on voice channels in two ways:
+        <ol>
+            <li>
+                <b>Playing local music files</b> - You can use .play command to play music files from your hosting machine. 
+                Bot must, of course, have access to these files and directories. Remember, if file is not located in the same directory as bot, you must provide full path to file. 
+                You can "lock" the bot to specific directory from which it can use music files - set ForceMediaDir to True in the .env file.<br>
+                In the ServerBot.py you can change default music library directory (modify medialib variable). When ForceMediaDir is enabled, there's accessible .library command showing available files in the music library.<br>
+                ForceMediaDir doesn't affect the bot's general ability to move through directories. 
+            </li>
+            <li>
+                <b>Playing music from YouTube</b> - You can play music using .ytplay by providing link to YouTube video (.ytplay url {youtube_url}), or searching for music by title (.ytplay search {music/video title}).<br>
+                You can also use .ytsearch {title} command to search for a YouTube video/music and get the first found result.<br>
+            </li>
+        </ol>
+        Music played on voice channel you can pause (.pause), resume (.resume) or completely stop (.stop).<br>
 
         <br>
 

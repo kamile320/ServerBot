@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot v1.10.0 User Manual [PL]">
+    <meta name="description" content="ServerBot v1.10.1 User Manual [PL]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.10.0</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.10.1</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -69,6 +69,7 @@
             <li><a href="#ffmpeg">Windows - instalacja FFmpeg</a></li>
             <li><a href="#modules">Moduły/Rozszerzenia Bota</a></li>
             <li><a href="#ai">Komenda .ai</a></li>
+            <li><a href="#yt">Komendy muzyczne</a></li>
             <li><a href="#db">Baza Danych (SQLite3)</a></li>
             <li><a href="#comma">Komendy</a></li>
         </ol>
@@ -84,7 +85,7 @@
             <li><b>Logs.txt</b> - Plik z Dziennikiem zdarzeń bota na serwerze</li>
             <li><b>manualPL.html</b> - Manual Bota [PL]</li>
             <li><b>manualEN.html</b> - Manual Bota [EN]</li>
-            <li><b>Media</b> - Katalog z Muzykami/Dźwiękami</li>
+            <li><b>Media</b> - Domyślny katalog/biblioteka plików muzycznych</li>
             <li><b>ACL</b> - Dziennik wiadomości użytkowników (po włączeniu <a href="#ACL">ACL</a>)</li>
             <li><b>.env</b> - Specjalny plik do przechowywania Tokenów Bota</li>
             <li><b>.venv</b> - Wirtualne Środowisko Pythona (Po użyciu setup.sh - opcja 4)</li>
@@ -118,6 +119,7 @@
         <h5>Bot do uruchomienia wymaga:</h5>
         <ul type="square">
             <li>Python 3.9 lub nowszy</li>
+            <li>Discord.py 2.6.4 lub nowszy</li>
             <li>Połączenie z internetem</li>
             <li>Zainstalowane wymagane biblioteki pythona (patrz - zawartość setup.sh/setuplib.sh/requirements.txt)</li>
             <li>Dodanie do środowiska PATH plików FFmpeg - Tylko Windows (zobacz YT)</li>
@@ -177,20 +179,38 @@
         Bot korzysta z tokenów: API Discorda, Gemini oraz z ID użytkowników.<br>
         Aby bot się uruchomił należy wypełnić odpowiednimi danymi plik <b>.env</b><br><br>
         <b>Schemat:</b><br>
-        TOKEN="discord token"<br>
-        AI_token="gemini token (do komendy .ai)"<br>
+        TOKEN='discord token'<br>
         admin_usr = ['twoje ID']<br>
-        dscserv_link = 'Link do Serwera Discord'<br>
-        addstable = 'stable_link of Discord Bot'<br>
-        addtesting = 'testing_link of Discord Bot'<br>
-        service_monitor = 'True/False' -> włącza komendę .service<br>
-        service_list = 'Lista usług systemd do monitorowania poprzez Discorda'<br>
-        showmodulemessages = 'True/False' -> wyświetla informacje o włączonych modułach Bota<br>
-        ACLmodule = 'True/False' -> Uruchamia funkcję <a href="#ACL">AdvancedChannelListener</a><br>
+        <br>
+        #AI<br>
+        AI_token='gemini token (do komendy .ai)'<br>
         aimodel = 'gemini-2.5-flash' -> wybrany model językowy gemini<br>
         instructions = ['Instrukcje dla modelu językowego']<br>
-        extendedErrMess = 'True/False' -> włącza/wyłącza rozszerzone komunikaty błędów<br><br>
+        <br>
+        #Music<br>
+        JoinLeaveSounds = True/False -> Odtwarzanie dźwięku przy dołączaniu/wychodzeniu z kanału głosowego<br>
+        ForceMediaDir = False -> Blokuje użytkowników do korzystania z plików muzycznych JEDYNIE z biblioteki muzycznej (domyślnie katalog Media)<br>
+        <br>
+        #Command_dscserv<br>
+        dscserv_link = 'Link do serwera Discord'<br>
+        <br>
+        #Service_list<br>
+        service_monitor = True/False -> włącza komendę .service<br>
+        service_list = 'Lista usług systemd do monitorowania poprzez discorda'<br>
+        <br>
+        #Command_addbot
+        addstable = 'stable_link of Discord Bot'<br>
+        addtesting = 'testing_link of Discord Bot'<br>
+        <br>
+        #Modules<br>
+        showmodulemessages = True/False -> wyświetla informacje o włączonych modułach Bota<br>
+        ACLmodule = True/False -> Uruchamia funkcję <a href="#ACL">AdvancedChannelListener</a><br>
+        <br>
+        #ExtendedErrorMessages<br>
+        extendedErrMess = True/False -> włącza/wyłącza rozszerzone komunikaty błędów<br>
         
+        <br>
+
         <h4 id="#admin">ID użytkownika i Administratorzy bota</h4>
         Niektóre komendy korzystają z funkcji i danych związanych z twoim systemem operacyjnym,<br>
         więc wymagają uprawnień administratora do uruchomienia - chyba nie chcesz żeby ktoś ci usunął system!<br>
@@ -224,7 +244,7 @@
         <ul type="square">
             <li>
                 <a id="ACL" href="https://github.com/kamile320/AdvancedChannelListener"><b>AdvancedChannelListener</b></a> - rejestruje wiadomości użytkowników na serwerze i zapisuje je w pliku ACL/[DiscordUserID].txt oraz wszystkie wiadomości w ACL/default/message.txt<br>
-                Przydatny do monitorowania użytkowników na serwerze i weryfikowania kto jest kim. Może łamać prywatność użytkowników, więc używaj z rozwagą.<br>
+                Przydatny do monitorowania użytkowników na serwerze i weryfikowania kto jest kim. Może łamać prywatność użytkowników, więc używaj z rozwagą i na własną odpowiedzialność.<br>
                 Jeśli nie zamierzasz używać tego modułu - ustaw w .env ACLmodule = 'False' (ustwaione domyślnie).
             </li>
             <li>
@@ -239,6 +259,25 @@
         Wystarczy zdobyć token gemini (na stronie <a href="https://ai.google.dev/">Google AI dev</a>) i wpisać go do pliku .env w polu 'AI_token'.<br>
         W pliku .env możesz ustawić model językowy (domyślnie gemini-2.5-flash) w polu 'aimodel', oraz instrukcje dla modelu w polu 'instructions'.<br>
         Rekomenduję zostawić domyślną instrukcję ograniczającą limit odpowiedzi do 1500 znaków - długa odpowiedź może nie zostać wysłana na kanał discord i spowodować błąd.<br>
+
+        <br>
+
+        <h3 id="yt">Komendy muzyczne</h3>
+        Bot posiada możliwość odtwarzania muzyki na kanałach głosowych na dwa sposoby:
+        <ol>
+            <li>
+                <b>Odtwarzanie lokalnych plików muzycznych</b> - możesz poprzez komendę .play odtwarzać pliki muzyczne z komputera na którym bot jest hostowany. 
+                Oczywiście bot musi mieć dostep do katalogu i plików które podajesz. Pamiętaj, jeśli plik nie jest w tym samym katalogu w którym aktualnie się znajduje bot, musisz podać pełną ścieżkę do pliku. 
+                Możesz "zamknąć" bota do pojedynczego katalogu z którego będzie mógł wykorzystywać pliki muzyczne - ustaw ForceMediaDir na True w pliku .env<br>
+                W ServerBot.py możesz zmienić domyślny katalog biblioteki muzycznej (zmienna medialib). Gdy ForceMediaDir jest włączony, jest dostępna komenda .library wyświetlająca dostępne pliki z biblioteki muzycznej.<br>
+                ForceMediaDir nie wpływa na ogólną możliwość poruszania się bota po katalogach. 
+            </li>
+            <li>
+                <b>Odtwarzanie muzyki z YouTube</b> - możesz odtwarzać muzykę poprzez .ytplay, podając link do filmu z YouTube'a (.ytplay url {youtube_url}), albo wyszukując muzykę po tytule (.ytplay search {tytuł filmu/muzyki}).<br>
+                Możesz także użyć komendy .ytsearch {tytuł} żeby wyszukać film/muzykę na YT i otrzymać pierwszy znaleziony wynik.<br>
+            </li>
+        </ol>
+        Muzykę odtwarzaną na kanale głosowym możesz wstrzymać (.pause), wznowić (.resume) albo całkowicie zatrzymać (.stop).<br>
 
         <br>
 
