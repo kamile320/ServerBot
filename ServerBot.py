@@ -2,26 +2,28 @@ import subprocess
 import os
 import sys
 import datetime
-
+import sqlite3
 
 # Bot Version
-ver = "1.10.1"
+ver = "1.11.0-test"
 # Bot Name
 displayname = "ServerBot"
 # Name of service in systemd; change if needed, WITHOUT .service file extension
 servicename = "ServerBot"
 
-#ModuleVersion
-ACLver = "3.1"
-
 
 #Directory
 maindir = os.getcwd()
 SBbytes = os.path.getsize('ServerBot.py')
+DB_PATH = f'{maindir}/Files/serverbot.db' #Database path
 
 #Directory for music files; If you set ForceMediaDir to True, bot will be able to use local sounds only from this dir.
 medialib = f'{maindir}/Media' 
 
+#List of modules/cogs you want to load at start; cogs from 'modules/custom' you have to type like 'custom.cogName' - WITHOUT .py
+#If LoadAllModules is True, this list will nothing do; bot will load every cog from 'modules' directory (not from 'modules/custom'!)
+#If you use cogs from 'modules' and 'modules/custom' and you want to load them all on start, type here all your modules and set LAM to False
+loadList = [] #['cog1', 'custom.cog2'] <- example
 
 
 # .env file template - if .env not exists, bot will automatically create a new one
@@ -54,9 +56,8 @@ addstable = 'stable_link'
 addtesting = 'testing_link'
 
 #Modules
-showmodulemessages = False
-ACLmodule = False
-
+LoadAllModules = False
+                  
 #ExtendedErrorMessages
 extendedErrMess = False""")
         env.close()
@@ -80,7 +81,7 @@ if '--help' in sys.argv:
     exit()
 
 if '--version' in sys.argv:
-    print(f"ServerBot v{ver}\nA.C.L. v{ACLver}")
+    print(f"ServerBot v{ver}")
     exit()
 
 if '--reset-env' in sys.argv:
@@ -132,7 +133,6 @@ try:
     from discord import app_commands
     from dotenv import load_dotenv
     import asyncio
-    import sqlite3
     import psutil
     import requests
     import random
@@ -232,39 +232,42 @@ def printMessage(info):
 
 
 
-#Database - create or load
-def load_db():
-    if os.path.exists(f"{maindir}/Files/serverbot.db") == True:
-        if extendedErrMess in accept_value:
-            print("Database found.")
-    else:
-        print("Database not found. Creating new database...")
-        db = sqlite3.connect(f"{maindir}/Files/serverbot.db")
-        cur = db.cursor()
-        cur.execute("""CREATE TABLE IF NOT EXISTS users(
-                    id integer not null primary key AUTOINCREMENT, 
-                    discord_id integer unique not null, 
-                    username text, 
-                    SBrole text default None, 
-                    exp_points integer default 0, 
-                    level integer default 0)""")
-        db.commit()
+#Database - create if not exists
+if os.path.exists(f"{maindir}/Files/serverbot.db") == True:
+    if extendedErrMess in accept_value:
+        print("Database found.")
+else:
+    print("Database not found. Creating new database...")
+    db_create = sqlite3.connect(f"{maindir}/Files/serverbot.db")
+    cur = db_create.cursor()
+    cur.execute("""CREATE TABLE IF NOT EXISTS users(
+                id integer not null primary key AUTOINCREMENT, 
+                discord_id integer unique not null, 
+                username text, 
+                SBrole text default None, 
+                exp_points integer default 0, 
+                level integer default 0)""")
+    db_create.commit()
+    db_create.close()
+
+
+#Database
+SB_DB = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=10)
+
 
 #User registration
 def register_user(id, name):
-    db = sqlite3.connect(f"{maindir}/Files/serverbot.db")
-    cur = db.cursor()
+    cur = SB_DB.cursor()
     #SELECT
     cur.execute('SELECT 1 FROM users WHERE discord_id=?', (id,))
     if cur.fetchone() is None:
         #INSERT
         cur.execute(f"INSERT INTO users (discord_id, username) VALUES (?, ?) ON CONFLICT(discord_id) DO NOTHING", (id, f"{name}"))
-        db.commit()
+        SB_DB.commit()
 
 #Check if mod
 def is_mod(id):
-    db = sqlite3.connect(f"{maindir}/Files/serverbot.db")
-    cur = db.cursor()
+    cur = SB_DB.cursor()
     cur.execute("SELECT 1 FROM users WHERE discord_id=? AND SBrole='mod'", (id,))
     if cur.fetchone() is not None:
         return True
@@ -300,83 +303,6 @@ SBservice = "Run post installation commands to enable ServerBot.service to start
 service_err = "Something went wrong.\nHave you added the service entries to the .env file?"
 badsite = "Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist?"
 random_err = 'Something went wrong. Have you typed correct min/max values?'
-    #A.C.L
-if os.getenv('ACLmodule') in accept_value:
-    ACL_notfounderr = "User history not found."
-    ACL_historynotfound = "Default message history does not exist."
-    ACL_nopermission = "You don't have permission to use ACL mode. This incident will be reported."
-    ACL_rm_all_success = "Cleared all saved message history."
-    ACL_rm_all_fail = "Can't clear all message history."
-    ACL_rm_user_fail = "Can't clear message history of the selected user. Does it even exist?"
-
-
-
-#AdvancedChannelListener
-def aclcheck():
-    if os.path.exists(f'{maindir}/ACL') == True:
-        print("ACL check OK")
-    else:
-        print("ACL not found.\nCreating...")
-        try:
-            os.makedirs(f'{maindir}/ACL')
-        except:
-            print('Cannot create ACL directory.')
-
-
-#MessageLogging
-def userLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
-    time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
-    if os.path.exists(f'{maindir}/ACL/{usr_id}/message.txt') == True:
-        usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a', encoding='utf-8')
-        usrmessage.write(f'[{time}] [{srv}({srv_id}) / {chnl}({chnl_id})] {usr}: {usrmsg}\n')
-        usrmessage.close()
-    else:
-        print("[ACL] New user detected. Creating new entry...")
-        os.makedirs(f'{maindir}/ACL/{usr_id}')
-        usrmessage = open(f'{maindir}/ACL/{usr_id}/message.txt', 'a', encoding='utf-8')
-        usrmessage.write(f'{displayname} user message log\nUsername: {usr}\nUserID: {usr_id}\n##############################\n\n')
-        usrmessage.write(f'[{time}] [{srv}({srv_id}) / {chnl}({chnl_id})] {usr}: {usrmsg}\n')
-        usrmessage.close()
-
-
-def channelLog(usr, usrmsg, chnl, srv, usr_id, chnl_id, srv_id):
-    time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
-    print(f"[{time}] [Message//{srv}/{chnl}] {usr}: {usrmsg}")
-    if os.path.exists(f'{maindir}/ACL/default/message.txt') == True:
-        usrmessage = open(f'{maindir}/ACL/default/message.txt', 'a', encoding='utf-8')
-        usrmessage.write(f"[{time}] [Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
-        usrmessage.close()
-    else:
-        print("[ACL] Default message history not detected. Creating new entry...")
-        os.makedirs(f'{maindir}/ACL/default')
-        usrmessage = open(f'{maindir}/ACL/default/message.txt', 'a', encoding='utf-8')
-        usrmessage.write(f"[{time}] [Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
-        usrmessage.close()
-
-
-
-#Module Status
-if os.getenv('ACLmodule') in accept_value:
-    ACLstatus = 'enabled'
-else:
-    ACLstatus = 'disabled'
-
-if os.getenv('service_monitor') in accept_value:
-    service_status = 'enabled'
-else:
-    service_status = 'disabled'
-
-#LogModuleStatus [After Status]
-if os.getenv('showmodulemessages') in accept_value:
-    def logmodule():
-        logs = open('Logs.txt', 'a', encoding='utf-8')
-        logs.write(f"""
-=========={displayname} Built-in modules: ==========
-Advanced Channel Listener v{ACLver}: {ACLstatus} 
-Service command: {service_status}
-\n\n""")
-        logs.close()
-    logmodule()
 
 
 
@@ -385,9 +311,36 @@ Service command: {service_status}
 async def on_ready():
     print(f'Logged as {client.user}')
     print(f'Welcome in ServerBot v{ver}')
-
-    #Load Database
-    load_db()
+    
+    #Load_cog_modules_on_ready
+    # Load all built-in modules from 'modules' directory; cogs from 'modules/custom' you have to load manually, or add to loading list as 'custom.cogName'
+    if os.getenv('LoadAllModules') in accept_value:
+        for i in os.listdir(f'{maindir}/modules'):
+            try:
+                if i.endswith('.py'):
+                    await client.load_extension(f"modules.{i[:-3]}")
+                if extendedErrMess in accept_value:
+                    message = f"Loaded {i} module."
+                    print(message)
+                    logMessage(message)
+            except Exception as err:
+                message = f"Failed to load {i} module: {err}"
+                print(message)
+                logMessage(message)
+    # If LAM is False, bot will load only modules selected in loadList variable
+    else:
+        if loadList != []:
+            for i in loadList:
+                try:
+                    await client.load_extension(f"modules.{i}")
+                    if extendedErrMess in accept_value:
+                        message = f"Loaded {i} module."
+                        print(message)
+                        logMessage(message)
+                except Exception as err:
+                    message = f"Failed to load {i} module: {err}"
+                    print(message)
+                    logMessage(message)
 
     #slash_command_sync
     try:
@@ -395,15 +348,7 @@ async def on_ready():
         print(f'Synced {len(syncd)} slash command(s)')
     except Exception as err:
         print("Can't sync slash commands\nSee Logs.txt for details.")
-        logMessage(f"Information[SlashCommandSync]: Error occurred while syncing slash commands.\nException: {err}")
-
-    #showmodulemessages
-    if os.getenv('showmodulemessages') in accept_value:
-            if os.getenv('ACLmodule') in accept_value:
-                print('Advanced Channel Listener module enabled')
-                aclcheck()
-            else:
-                print('[showmodulemessages] A.C.L. is disabled.')
+        logMessage(f"Information[SlashCommandSync]: Error occurred while syncing slash commands: {err}")
 
     print(start_time.strftime('Time: %H:%M:%S\nDay:  %d.%m.%Y'))
     print('=' *40)
@@ -436,10 +381,9 @@ async def on_message(message):
     except AttributeError:
         serverid = "DM"
 
-    #A.C.L
-    if os.getenv('ACLmodule') in accept_value:
-        channelLog(username, user_message, channel, server, userid, channelid, serverid)
-        userLog(username, user_message, channel, server, userid, channelid, serverid)
+    for cog in client.cogs.values():
+        if hasattr(cog, 'on_message_hook'):
+            await cog.on_message_hook(message)
 
     register_user(userid, username)
 
@@ -605,13 +549,16 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Updated structure of .env file and improved file creation in setup.sh
-- Now bot will create empty .env file on start if it doesn't exists
-- Updated voice commands
-- Updated .testbot .testos commands
-- Added .library command
-- Added --reset-env flag
-- Small fixes and improvements
+- Added "portal" system - connect two channels and send messages between them with .psend command
+- Added .portal_create, .portal_search and .psend commands
+- Updated .ShutDown .testbot commands
+- Updated database support
+- Added cog (module) support
+- Updated .module command - now bot can load/unload/reload/list supported cog modules
+- Updated ACL to v4.0 and removed from the main file
+- Added 'modules' directory for 'built-in' modules and 'modules/custom' for additional ones
+- Removed showmodulemessages, ACLmodule variables from .env file and functions that used them
+- Updated .env file scheme
 
 To see older releases, find 'updates.txt' in 'Files' directory.
 """)
@@ -636,7 +583,10 @@ You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac
 @client.command(name='ShutDown', help='Turns Off the Bot')
 async def ShutDown(ctx):
     if str(ctx.message.author.id) in admin_usr:
+        await ctx.send(f'Shutting down...')
         print("Information[ShutDown]: Started turning off the Bot")
+        await asyncio.sleep(1)
+ 
         try:
             print("Saving Logs.txt...")
             src = open(f'{maindir}/Logs.txt', 'r')
@@ -645,25 +595,25 @@ async def ShutDown(ctx):
             logs.write(append)
             logs.close()
             src.close()
-            print("Logs.txt saved successfully.")
         except:
             print("Error occurred while saving log.")
+        
+        try:
+            print("Closing Discord connection...")
+            await client.close()
+        except Exception as err:
+            message = f"Information[ShutDown]: Failed to disconnect from Discord.\nPossible cause: {err}"
+            printMessage(message)
+            logMessage(message)
+            await ctx.send("Failed to disconnect from Discord. See Logs.txt or console for details.")
 
         try:
             print("Closing database...")
-            db = sqlite3.connect('Files/serverbot.db')
-            db.close()
+            SB_DB.close()
         except:
             print("Failed to close databse.")
 
-        print("Information[ShutDown]: Shutting Down...")
-        await ctx.send(f'ClosingBot.')
-        await asyncio.sleep(1)
-        await ctx.send(f'ClosingBot..')
-        await asyncio.sleep(1)
-        await ctx.send(f'ClosingBot...')
-        await asyncio.sleep(1)
-        exit()
+        print("Information[ShutDown]: Shutting down...")
     else:
         await ctx.reply(not_allowed)
 
@@ -909,25 +859,91 @@ async def pingip(ctx, ip):
         await ctx.send(not_allowed)
 
 #9
-@client.command(name='module', help='Shows status of built-in modules')
-async def module(ctx):
+@client.command(name='module', help="Manage built-in and additional modules (cogs).\nload -> loads module\nunload -> unloads module\nreload -> reload module\nlist -> lists available modules from 'modules' directory. Add 'active' to list only active modules.")
+async def module(ctx, mode, *, name=None):
     if str(ctx.message.author.id) in admin_usr:
-        #ACL
-        if os.getenv('ACLmodule') in accept_value:
-            ACLstatus = 'enabled'
+        if mode == 'load':
+            try:
+                if name is not None:
+                    await client.load_extension(f'modules.{name}')
+                    await ctx.reply(f"{name} module loaded.")
+                    message = f"Information[modules]: {name} module loaded."
+                    printMessage(message)
+                    logMessage(message)
+                else:
+                    await ctx.reply("Incomplete command. Enter module name.")
+            except Exception as e:
+                await ctx.reply(f'Failed to load {name} module. See Logs.txt for details.')
+                message = f'Information[modules]: Failed to load {name} module: {e}'
+                printMessage(message)
+                logMessage(message)
+
+        elif mode == 'unload':
+            try:
+                if name is not None:
+                    await client.unload_extension(f'modules.{name}')
+                    await ctx.reply(f"{name} module unloaded.")
+                    message = f"Information[modules]: {name} module unloaded."
+                    printMessage(message)
+                    logMessage(message)
+                else:
+                    await ctx.reply("Incomplete command. Enter module name.")
+            except Exception as e:
+                await ctx.reply(f'Failed to unload {name} module. See Logs.txt for details.')
+                message = f'Information[modules]: Failed to unload {name} module: {e}'
+                printMessage(message)
+                logMessage(message)
+
+        elif mode == 'reload':
+            try:
+                if name is not None:
+                    await client.reload_extension(f'modules.{name}')
+                    await ctx.reply(f"{name} module reloaded.")
+                    message = f"Information[modules]: {name} module reloaded."
+                    printMessage(message)
+                    logMessage(message)
+                else:
+                    await ctx.reply("Incomplete command. Enter module name.")
+            except Exception as e:
+                await ctx.reply(f'Failed to reload {name} module. See Logs.txt for details.')
+                message = f'Information[modules]: Failed to reload {name} module: {e}'
+                printMessage(message)
+                logMessage(message)
+
+        elif mode == 'list':
+            try:
+                if name == 'active':
+                    loaded_modules = [cog for cog in client.cogs.keys()]
+                    if not loaded_modules:
+                        await ctx.send("There's no active modules.")
+                        return
+                    else:
+                        await ctx.send(f"**Active modules:**\n{', '.join(loaded_modules)}")
+                
+                else:
+                    listdir = []
+                    listdir_c = []
+                    br = '\n- '
+                    for f in os.listdir(f'{maindir}/modules'):
+                        if f.endswith('.py'):
+                            listdir.append(f.replace('.py', ''))
+                    for f in os.listdir(f'{maindir}/modules/custom'):
+                        if f.endswith('.py'):
+                            listdir_c.append(f.replace('.py', ''))
+
+                    await ctx.send(f"""
+==========**ServerBot modules: **==========
+Available modules:\n- {br.join(listdir)}
+
+Additional modules (from modules/custom):\n- {br.join(listdir_c)}""")
+            except Exception as e:
+                await ctx.send(f'Unexpected error occurred. See Logs.txt for details.')
+                message = f'Information[modules]: Failed to list modules: {e}'
+                printMessage(message)
+                logMessage(message)
+            
         else:
-            ACLstatus = 'disabled'
-        #Service
-        if os.getenv('service_monitor') in accept_value:
-            service_status = 'enabled'
-        else:
-            service_status = 'disabled'
-        
-        await ctx.send(f"""
-==========**{displayname} Built-in modules: **==========
-Advanced Channel Listener v{ACLver}: {ACLstatus} 
-Service command:  {service_status}
-""")
+            await ctx.reply("Wrong mode selected. Use '.help module' for help.")
     else:
         await ctx.send(not_allowed)
         #AdminOnly-END
@@ -939,8 +955,7 @@ Service command:  {service_status}
 @client.command(name='db', help='Database commands\n.db register {userID} {nickname} - manually registers user in database. Nickname is optional\n.db remove {userID} - removes user from database.\n.db op {userID} - gives Moderator role to user (Discord bot mod).\n.db deop {userID} - removes Mod role from user.\n.db select {userID} - search user data in database.\n.db setnickname {nickname} {userID} - updates user nickname.')
 async def db(ctx, mode, value1, *, value2=None):
     if str(ctx.message.author.id) in admin_usr:
-        db = sqlite3.connect(f"{maindir}/Files/serverbot.db")
-        cur = db.cursor()
+        cur = SB_DB.cursor()
 
         if mode == 'register':
             try:
@@ -948,7 +963,7 @@ async def db(ctx, mode, value1, *, value2=None):
                     value2 = "No nickname"
                 #INSERT
                 cur.execute(f"INSERT INTO users (discord_id, username) VALUES (?, ?)", (value1, value2,))
-                db.commit()
+                SB_DB.commit()
                 #SELECT
                 res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (value1,))
 
@@ -960,7 +975,7 @@ async def db(ctx, mode, value1, *, value2=None):
             try:
                 #DELETE
                 cur.execute(f"DELETE FROM users WHERE discord_id = ?", (value1,))
-                db.commit()
+                SB_DB.commit()
                 #SELECT
                 res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (value1,))
 
@@ -972,7 +987,7 @@ async def db(ctx, mode, value1, *, value2=None):
             try:
                 #UPDATE
                 cur.execute(f"UPDATE users SET SBrole='mod' WHERE discord_id=?", (value1,))
-                db.commit()
+                SB_DB.commit()
 
                 gained = f"User <@{value1}> gained Moderator privileges."
                 await ctx.reply(gained)
@@ -985,7 +1000,7 @@ async def db(ctx, mode, value1, *, value2=None):
             try:
                 #UPDATE
                 cur.execute(f"UPDATE users SET SBrole='None' WHERE discord_id=?", (value1,))
-                db.commit()
+                SB_DB.commit()
 
                 revoked = f"Revoked Moderator privileges from <@{value1}>"
                 await ctx.reply(revoked)
@@ -1009,7 +1024,7 @@ async def db(ctx, mode, value1, *, value2=None):
                     value2 = ctx.message.author.id
                 #UPDATE
                 cur.execute(f"UPDATE users SET username=? WHERE discord_id=?", (value1, value2,))
-                db.commit()
+                SB_DB.commit()
 
                 #SELECT
                 res = cur.execute(f"SELECT username, discord_id FROM users WHERE discord_id=?", (value2,))
@@ -1027,8 +1042,7 @@ async def db(ctx, mode, value1, *, value2=None):
 @client.command(name='showdb', help='Shows database content in .txt file')
 async def showdb(ctx):
     if str(ctx.message.author.id) in admin_usr:
-        db = sqlite3.connect(f"{maindir}/Files/serverbot.db")
-        cur = db.cursor()
+        cur = SB_DB.cursor()
         #SELECT
         result = cur.execute("SELECT * FROM users")
         #SAVE
@@ -1050,6 +1064,7 @@ async def showdb(ctx):
 async def testbot(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         now = datetime.datetime.now()
+        loaded_modules = [cog for cog in client.cogs.keys()]
         await ctx.send(f"""
 ***S e r v e r  B o t***  *test*:
 ========================================================
@@ -1068,6 +1083,7 @@ OS Kernel: **{platform.version()}**
 Bot Current Dir: **{os.getcwd()}**
 Bot Main Dir: **{maindir}**
 Music library: **{medialib}**
+Loaded modules: **{len(loaded_modules)}**
 File size: **{os.path.getsize(f'{maindir}/ServerBot.py')} B**
 Floppy: **{'Yes' if os.path.exists('/dev/fd0') else 'No'}**
 ========================================================""")
@@ -1776,63 +1792,148 @@ async def yt(ctx, YTname):
 
 
 
-    ###Built-in Modules###
-        
-        #AdvancedChannelListener
-#1
-if os.getenv('ACLmodule') in accept_value:
-    @client.command(name='ACL', help='Manage A.C.L. users messages saved history\ngetusr - shows User history by User ID\nget history - history of all saved messages\nclear [all/user_id] - removes all saved messages or only messages of selected user')
-    async def ACL(ctx, mode, *, value):
-        if str(ctx.message.author.id) in admin_usr:
-            if mode == 'getusr':
-                try:
-                    await ctx.send(file=discord.File(f'{maindir}/ACL/{value}/message.txt'))
-                except:
-                    await ctx.send(ACL_notfounderr)
-            elif mode == 'get' and value == 'history':
-                try:
-                    await ctx.send(file=discord.File(f'{maindir}/ACL/default/message.txt'))
-                except:
-                    await ctx.send(ACL_historynotfound)
-            elif mode == 'clear':
-                if value == 'all':
-                    try:
-                        shutil.rmtree(f'{maindir}/ACL/')
-                        await ctx.send(ACL_rm_all_success)
-                        message = f"Information[ACL]: {ACL_rm_all_success} Command executed by: {ctx.author.id}\n"
-                        printMessage(message)
-                        logMessage(message)
-                    except Exception as exc:
-                        if extendedErrMess:
-                            await ctx.send(f"{ACL_rm_all_fail} \nException: {exc}")
-                        else:
-                            await ctx.send(ACL_rm_all_fail)
-                        message = f"Information[ACL]: User {ctx.message.author.id} tried to clear all message history but failed. \nException: \n{exc}\n"
-                        printMessage(message)
-                        logMessage(message)
-                else:
-                    try:
-                        shutil.rmtree(f'{maindir}/ACL/{value}')
-                        await ctx.send(f"Cleared message history of <@{value}>.")
-                        message = f"Information[ACL]: User {ctx.message.author.id} cleared message history of {value}.\n"
-                        printMessage(message)
-                        logMessage(message)
-                    except Exception as exc:
-                        if extendedErrMess:
-                            await ctx.send(f"{ACL_rm_user_fail} \nException: {exc}")
-                        else:
-                            await ctx.send(ACL_rm_user_fail)
-                        message = f"Information[ACL]: User {ctx.message.author.id} tried to clear message history of {value} but failed. \nException: \n{exc}\n"
-                        printMessage(message)
-                        logMessage(message)
+        #Portal
+#1 - link channels
+@client.command(name='portal_create', help='Connect two channels. Bot will send message to other channel after using .p_send command in one of connected channels')
+async def portal_create(ctx, channel1, channel2):
+    if str(ctx.message.author.id) in admin_usr:
+
+        try:
+            channel1 = int(channel1)
+            channel2 = int(channel2)
+        except:
+            await ctx.reply("Please enter valid channel IDs")
+            return
+
+        #Create database if not exist
+        def check_portal_db():
+            if os.path.exists(f"{maindir}/Files/serverbot.db") == True:
+                if extendedErrMess in accept_value:
+                    print("Information[portal/create]: Database found.")
+
+                #CREATE TABLE
+                cur = SB_DB.cursor()
+                cur.execute("""CREATE TABLE IF NOT EXISTS portal(
+                            id integer not null primary key AUTOINCREMENT, 
+                            channel1 integer unique not null, 
+                            channel2 integer unique not null)""")
+                SB_DB.commit()
             else:
-                await ctx.send("Wrong mode. See '.help ACL' for more info")
+                print("DATABASE NOT FOUND! Restart bot to create a new one!")
+
+        #Create connection
+        def portal_connect(c1, c2):
+            cur = SB_DB.cursor()
+            #SELECT
+            cur.execute('SELECT 1 FROM portal WHERE channel1 IN (?, ?) OR channel2 IN (?, ?)', (c1, c2, c1, c2))
+            if cur.fetchone() is not None:
+                return False
+            else:
+                #INSERT
+                cur.execute(f"INSERT INTO portal (channel1, channel2) VALUES (?, ?)", (c1, c2))
+                SB_DB.commit()
+                return True
+
+        await ctx.reply("Creating connection...")
+        try:
+            check_portal_db()
+            if portal_connect(channel1, channel2) == False:
+                await ctx.reply("One of selected channels are already in use.")
+            else:
+                await ctx.reply("Success!")
+        except Exception as err:
+            await ctx.reply(f"Error: {err}")
+    else:
+        await ctx.send(not_allowed)
+
+
+#2 - remove connection
+@client.command(name='portal_remove', help='Remove connection between two channels')
+async def portal_remove(ctx, channel1):
+    if str(ctx.message.author.id) in admin_usr:
+
+        try:
+            channel1 = int(channel1)
+        except:
+            await ctx.reply("Please enter valid channel ID")
+            return
+
+        #Remove connection
+        def portal_disconnect(c1):
+            cur = SB_DB.cursor()
+            #SELECT
+            cur.execute('SELECT 1 FROM portal WHERE channel1=? OR channel2=?', (c1, c1))
+            if cur.fetchone() is not None:
+                #DELETE
+                cur.execute(f"DELETE FROM portal WHERE channel1=? OR channel2=?", (c1, c1))
+                SB_DB.commit()
+
+        await ctx.reply("Removing connection...")
+        try:
+            portal_disconnect(channel1)
+            await ctx.reply("Success!")
+        except Exception as err:
+            await ctx.reply(f"Error: {err}")
+    else:
+        await ctx.send(not_allowed)
+
+
+#3 - search connections
+@client.command(name='portal_search', help='Search for connected channels')
+async def portal_search(ctx, channel):
+    try:
+        try:
+            channel = int(channel)
+        except:
+            await ctx.reply("Please enter valid channel ID")
+            return
+
+        cur = SB_DB.cursor()
+
+        res = cur.execute(f"SELECT channel1, channel2 FROM portal WHERE channel1=? OR channel2=?", (channel, channel))
+        results = res.fetchall()
+        if results:
+            await ctx.reply(f"Found connection for selected channel: {results}")
         else:
-            await ctx.send(ACL_nopermission)
-            message = f"Information[ACL]: User {ctx.message.author.id} tried to use .ACL command without permission.\nSee {maindir}/ACL/{ctx.message.author.id} for more information.\n"
-            printMessage(message)
-            logMessage(message)
-        #AdvancedChannelListener-END
+            await ctx.reply(f"No connection found for your channel.")
+    except Exception as err:
+        await ctx.reply(f"Error while searching for connection: {err}")
+
+
+#4 - send message
+@client.command(name='psend', help='Send message to another channel.')
+async def portal_send(ctx, *, mess):
+        cur = SB_DB.cursor()
+        
+        channel_in_id = ctx.channel.id
+        
+        def get_output(ch_in):
+            try:
+                #SELECT
+                res = cur.execute(f"SELECT channel1, channel2 FROM portal WHERE channel1=? OR channel2=?", (ch_in, ch_in))
+                row = res.fetchone()
+
+                if row[0] == ch_in:
+                    return row[1]
+                elif row[1] == ch_in:
+                    return row[0]
+                else:
+                    print(f"Information[portal/psend]: No connected channel found for {ch_in}")
+                    return None
+            except Exception as err:
+                print(f"Information[portal/psend]: Error while fetching data from database: {err}")
+
+        channel_out_id = get_output(channel_in_id)
+        channel_out = client.get_channel(channel_out_id)
+
+        try:
+            if channel_out is not None:
+                await channel_out.send(f"[{ctx.author}]: {mess}")
+            else:
+                await ctx.reply("You're using command on a not linked channel, or one of the channels are not acessible by bot.")
+        except Exception as err:
+            await ctx.reply(f"Error while sending message: {err}")
+        #Portal-END
 
 
 
@@ -1877,6 +1978,7 @@ async def ping(interaction):
 async def testbot(interaction):
     if str(interaction.user.id) in admin_usr or is_mod(interaction.user.id):
         now = datetime.datetime.now()
+        loaded_modules = [cog for cog in client.cogs.keys()]
         await interaction.response.send_message(f"""
     ***S e r v e r  B o t***  *test*:
     ====================================================
@@ -1895,6 +1997,7 @@ async def testbot(interaction):
     Bot Current Dir: **{os.getcwd()}**
     Bot Main Dir: **{maindir}**
     Music library: **{medialib}**
+    Loaded modules: **{', '.join(loaded_modules)}**
     File size: **{os.path.getsize(f'{maindir}/ServerBot.py')} B**
     Floppy: **{'Yes' if os.path.exists('/dev/fd0') else 'No'}**
     ====================================================""")
