@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Bot version
-VERSION="v1.10.1"
+VERSION="v1.11.0"
 # Change version below to install newer release from GitHub (if exists)
-UPDATEVER="v1.10.1"
+UPDATEVER="v1.11.0"
 # Systemd service name - change if you created systemd entry with different name; only name WITHOUT .service extension
 SERVICE_NAME="ServerBot"
 
@@ -87,8 +87,7 @@ case $select in
             echo "addtesting = 'testing_link'" >> .env
             echo "" >> .env
             echo "#Modules" >> .env
-            echo "showmodulemessages = False" >> .env
-            echo "ACLmodule = False" >> .env
+            echo "LoadAllModules = False" >> .env
             echo "" >> .env
             echo "#ExtendedErrorMessages" >> .env
             echo "extendedErrMess = False" >> .env
