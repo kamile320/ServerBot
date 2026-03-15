@@ -8,5 +8,4 @@ Files/autorun.sh
 *.db
 tempDB.txt
 autorun/
-modules/test.py
-modules/custom/test.py
+test.py
