@@ -65,6 +65,7 @@ case $select in
             echo "#ServerBot v${VERSION} config file" > .env
             echo "TOKEN=''" >> .env
             echo "admin_usr = ['']" >> .env
+            echo "custom_prefix = ''" >> .env
             echo "" >> .env
             echo "#AI" >> .env
             echo "AI_token=''" >> .env
