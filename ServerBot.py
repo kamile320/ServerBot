@@ -34,7 +34,8 @@ def create_env():
         env.write(f"""#ServerBot v{ver} config file
 TOKEN=''
 admin_usr = ['']
-
+custom_prefix = ''
+                  
 #AI
 AI_token=''
 aimodel = 'gemini-2.5-flash'
@@ -98,6 +99,7 @@ if '--reset-env' in sys.argv:
     exit()
 
 
+
 #Automatic .env creation
 if os.path.exists(f'{maindir}/.env') == False:
     create_env()
@@ -159,17 +161,7 @@ print(banner)
 
 
 
-#Intents
-intents = discord.Intents.default()
-intents.message_content = True
-status = ['Windows 98 SE', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}', displayname]
-choice = random.choice(status)
-client = commands.Bot(command_prefix='.', intents=intents, activity=discord.Game(name=choice))
-testbot_cpu_type = platform.machine() or 'Unknown'
-accept_value = ['True', 'true', 'Enabled', 'enabled', '1', 'yes', 'Yes', 'YES', True]
-start_time = datetime.datetime.now()
-
-
+#Loading .env
 try:
     load_dotenv()
     ############# token/intents/etc ################
@@ -185,6 +177,18 @@ try:
     ################################################
 except Exception as err:
     print(f"CAN'T LOAD .env FILE!\nCreate .env file using setup.sh and fill it with proper values!\nException: {err}")
+
+
+
+#Intents
+intents = discord.Intents.default()
+intents.message_content = True
+status = ['Windows 98 SE', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}', displayname]
+choice = random.choice(status)
+client = commands.Bot(command_prefix={os.getenv('custom_prefix') or '.'}, intents=intents, activity=discord.Game(name=choice))
+testbot_cpu_type = platform.machine() or 'Unknown'
+accept_value = ['True', 'true', 'Enabled', 'enabled', '1', 'yes', 'Yes', 'YES', True]
+start_time = datetime.datetime.now()
 
 
 
@@ -250,10 +254,8 @@ else:
     db_create.commit()
     db_create.close()
 
-
 #Database
 SB_DB = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=10)
-
 
 #User registration
 def register_user(id, name):
@@ -282,6 +284,20 @@ def os_check():
         return "macOS"
     else:
         return "Other / Unknown"
+
+
+
+#Create modules/custom
+def test_custom():
+    if os.path.exists(f'{maindir}/modules/custom') == False:
+        try:
+            os.makedirs(f'{maindir}/modules/custom')
+            return 0 # Was missing and created
+        except:
+            print(f"Cannot create 'modules/custom' directory!")
+            return 1 # Was missing and cannot create
+    elif os.path.exists(f'{maindir}/modules/custom') == True:
+        return 2 # All OK
 
 
 
@@ -314,6 +330,7 @@ async def on_ready():
     
     #Load_cog_modules_on_ready
     # Load all built-in modules from 'modules' directory; cogs from 'modules/custom' you have to load manually, or add to loading list as 'custom.cogName'
+    test_custom()
     if os.getenv('LoadAllModules') in accept_value:
         for i in os.listdir(f'{maindir}/modules'):
             try:
@@ -357,25 +374,25 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    #Username
+        #Username
     username = str(message.author).split('#')[0]
-    #UserMessage
+        #UserMessage
     user_message = str(message.content)
-    #Channel
+        #Channel
     try:
         channel = str(message.channel.name)
     except AttributeError:
         channel = str(message.channel)
-    #Server
+        #Server
     try:
         server = str(message.guild.name)
     except AttributeError:
         server = str(message.guild)
-    #UserID
+        #UserID
     userid = message.author.id
-    #ChannelID
+        #ChannelID
     channelid = message.channel.id
-    #ServerID
+        #ServerID
     try:
         serverid = message.guild.id
     except AttributeError:
@@ -493,7 +510,7 @@ async def badge(ctx, member: discord.Member):
         badges = [flag.name for flag in user_flags]
         await ctx.send(f'{member} has the following badges: {", ".join(badges)}')
     except:
-        await ctx.reply("Incorrect user or incomplete command. Use .badge @user")
+        await ctx.reply("Incorrect user or incomplete command. Use '.badge @user'")
         #Random/Fun-END
 
 
@@ -551,14 +568,15 @@ async def newest_update(ctx):
     Changelog:
 - Added "portal" system - connect two channels and send messages between them with .psend command
 - Added .portal_create, .portal_search and .psend commands
-- Updated .ShutDown .testbot commands
+- Updated .ShutDown .testbot .rebuild commands
 - Updated database support
 - Added cog (module) support
 - Updated .module command - now bot can load/unload/reload/list supported cog modules
-- Updated ACL to v4.0 and removed from the main file
+- Updated ACL to v4.1 and removed from the main file
 - Added 'modules' directory for 'built-in' modules and 'modules/custom' for additional ones
 - Removed showmodulemessages, ACLmodule variables from .env file and functions that used them
 - Updated .env file scheme
+- Added custom_prefix variable in the .env file ('.' prefix is still set as default)
 
 To see older releases, find 'updates.txt' in 'Files' directory.
 """)
@@ -687,24 +705,48 @@ async def bash(ctx, file=None):
 async def rebuild(ctx):
     if str(ctx.message.author.id) in admin_usr:
         await ctx.send('Trying to rebuild files...')
+        message = "Information[Rebuild]: Started rebuilding files and directories."
+        printMessage(message)
+        logMessage(message)
+
         try:
+            print("Creating 'Logs.txt'...")
             os.chdir(maindir)
             logs1 = open('Logs.txt', 'w')
             logs1.close()
 
+            print("Creating 'Files' directory...")
             os.makedirs(f'{maindir}/Files')
             os.chdir(f'{maindir}/Files')
+            
+            print("Creating 'updates.txt'...")
             updates = open('updates.txt', 'w')
             updates.close()
+
+            print("Creating 'Files/Logs.txt'...")
             logs2 = open('Logs.txt', 'w')
             logs2.close()
             
+            print("Creating 'Files/setup' directory...")
             os.makedirs(f'{maindir}/Files/setup')
+
+            print("Creating 'Media' directory...")
             os.makedirs(f'{maindir}/Media')
+            
             os.chdir(maindir)
+
+            print("Creating 'modules' directory...")
+            os.makedirs(f'{maindir}/modules')
+
+            print("Creating 'modules/custom' directory...")
+            os.makedirs(f'{maindir}/modules/custom')
+
+            message = "Information[Rebuild]: Successfully rebuilded files and directories."
+            printMessage(message)
+            logMessage(message)
             await ctx.send("Success.\nRebuilded Files with no content")
-        except:
-            await ctx.send("Can't rebuild files.")
+        except Exception as error:
+            await ctx.send(f"Rebuilding files failed.\nException: {error}")
     else:
         await ctx.reply(not_allowed)
 
@@ -911,6 +953,13 @@ async def module(ctx, mode, *, name=None):
                 logMessage(message)
 
         elif mode == 'list':
+            if test_custom() == 0:
+                message = "Information[module]: Created missing 'modules/custom' directory."
+                print(message)
+                logMessage(message)
+            elif test_custom() == 1:
+                await ctx.send("The 'modules/custom' directory is missing and cannot be created.")
+
             try:
                 if name == 'active':
                     loaded_modules = [cog for cog in client.cogs.keys()]
