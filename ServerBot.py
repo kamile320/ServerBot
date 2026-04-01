@@ -5,7 +5,7 @@ import datetime
 import sqlite3
 
 # Bot Version
-ver = "1.11.0-test"
+ver = "1.11.0"
 # Bot Name
 displayname = "ServerBot"
 # Name of service in systemd; change if needed, WITHOUT .service file extension
@@ -22,7 +22,7 @@ medialib = f'{maindir}/Media'
 
 #List of modules/cogs you want to load at start; cogs from 'modules/custom' you have to type like 'custom.cogName' - WITHOUT .py
 #If LoadAllModules is True, this list will nothing do; bot will load every cog from 'modules' directory (not from 'modules/custom'!)
-#If you use cogs from 'modules' and 'modules/custom' and you want to load them all on start, type here all your modules and set LAM to False
+#If you use cogs from 'modules' and 'modules/custom' dirs and you want to load them all on start, type here all your modules and set LAM to False
 loadList = [] #['cog1', 'custom.cog2'] <- example
 
 
@@ -35,7 +35,7 @@ def create_env():
 TOKEN=''
 admin_usr = ['']
 custom_prefix = ''
-                  
+
 #AI
 AI_token=''
 aimodel = 'gemini-2.5-flash'
@@ -58,7 +58,7 @@ addtesting = 'testing_link'
 
 #Modules
 LoadAllModules = False
-                  
+
 #ExtendedErrorMessages
 extendedErrMess = False""")
         env.close()
@@ -329,7 +329,7 @@ async def on_ready():
     print(f'Welcome in ServerBot v{ver}')
     
     #Load_cog_modules_on_ready
-    # Load all built-in modules from 'modules' directory; cogs from 'modules/custom' you have to load manually, or add to loading list as 'custom.cogName'
+    #   Load all built-in modules from 'modules' directory; cogs from 'modules/custom' you have to load manually, or add to loading list as 'custom.cogName'
     test_custom()
     if os.getenv('LoadAllModules') in accept_value:
         for i in os.listdir(f'{maindir}/modules'):
@@ -344,7 +344,7 @@ async def on_ready():
                 message = f"Failed to load {i} module: {err}"
                 print(message)
                 logMessage(message)
-    # If LAM is False, bot will load only modules selected in loadList variable
+    #   If LAM is False, bot will load only modules selected in loadList variable
     else:
         if loadList != []:
             for i in loadList:
@@ -359,7 +359,7 @@ async def on_ready():
                     print(message)
                     logMessage(message)
 
-    #slash_command_sync
+    #Slash_command_sync
     try:
         syncd = await client.tree.sync()
         print(f'Synced {len(syncd)} slash command(s)')
@@ -406,7 +406,7 @@ async def on_message(message):
 
     await client.process_commands(message)
 
-#client.event-END
+#ClientEvent-END
 
 
 
@@ -437,7 +437,7 @@ async def hello_there(ctx):
 
         #Random/Fun
 #1
-@client.command(name='random', help='Shows your random number.\nType .random [min] [max]')
+@client.command(name='random', help="Shows your random number.\nType .random [min] [max]")
 async def random_num(ctx, min = int(), max = int()):
     import random
     try:
@@ -450,12 +450,12 @@ async def random_num(ctx, min = int(), max = int()):
             await ctx.reply(random_err)
 
 #2
-@client.command(name='botbanner', help='Show Bots Banner')
+@client.command(name='botbanner', help="Show bot's banner")
 async def botbanner(ctx):
     await ctx.send(f'```{banner}```')
 
 #3
-@client.command(name='banner', help='Show your text as Banner')
+@client.command(name='banner', help="Show your text as Banner")
 async def userbanner(ctx, *, text=None):
     if text is not None:
         userbanner = pyfiglet.figlet_format(text)
@@ -464,18 +464,21 @@ async def userbanner(ctx, *, text=None):
         await ctx.send("Incomplete command.\nType text to convert to banner.")
 
 #4
-@client.command(name='blankthing', help='Just blank thing')
+@client.command(name='blankthing', help="Just blank thing")
 async def blank(ctx):
     await ctx.send('ㅤ')
 
 #5
-@client.command(name='apple', help='Test for be an Apple')
+@client.command(name='apple', help="Test for be an Apple")
 async def blank(ctx):
     await ctx.send('')
 
 #6
-@client.command(name='ai', help=f'Talk with AI.\nUses {ai_model} model.\n.ai [question]')
+@client.command(name='ai', help=f"Talk with AI.\nUses {ai_model} model.\n.ai [question]")
 async def ai(ctx, *, question):
+    if ai_token is None:
+        await ctx.reply("AI token not found. Enter valid Gemini API token in the .env file to use this command.")
+        return
     try:
         response = ai_client.models.generate_content(
             model=f"{ai_model}", 
@@ -498,12 +501,12 @@ async def ai(ctx, *, question):
         logMessage(error_message)
 
 #7
-@client.command(name='GNU+Linux', help='Richard Stallman.')
+@client.command(name='GNU+Linux', help="Richard Stallman.")
 async def gnu(ctx):
     await ctx.send("I’d just like to interject for a moment. What you’re refering to as Linux, is in fact, GNU/Linux, or as I’ve recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX.  Many computer users run a modified version of the GNU system every day, without realizing it. Through a peculiar turn of events, the version of GNU which is widely used today is often called Linux, and many of its users are not aware that it is basically the GNU system, developed by the GNU Project.  There really is a Linux, and these people are using it, but it is just a part of the system they use. Linux is the kernel: the program in the system that allocates the machine’s resources to the other programs that you run. The kernel is an essential part of an operating system, but useless by itself; it can only function in the context of a complete operating system. Linux is normally used in combination with the GNU operating system: the whole system is basically GNU with Linux added, or GNU/Linux. All the so-called Linux distributions are really distributions of GNU/Linux!")
 
 #8
-@client.command(name='badge')
+@client.command(name='badge', help="Shows user badges.\n.badge @user")
 async def badge(ctx, member: discord.Member):
     try:
         user_flags = member.public_flags.all()
@@ -530,7 +533,7 @@ async def manual(ctx, type):
         await ctx.send(f"Something went wrong. Try again.")
 
 #2
-@client.command(name='credits', help='Shows Credits')
+@client.command(name='credits', help="Shows Credits")
 async def credits(ctx):
     await ctx.send(f"""
 ***S e r v e r  B o t***
@@ -550,31 +553,31 @@ Used Sounds:
 """)
 
 #3
-@client.command(name='time', help='Shows local time')
+@client.command(name='time', help="Shows local time")
 async def time(ctx):
     now = datetime.datetime.now()
     await ctx.send(now.strftime("Time: %H:%M:%S\nDay: %d.%m.%Y"))
 
 #4
-@client.command(name='ping', help='Pings the Bot')
+@client.command(name='ping', help="Pings the Bot")
 async def ping(ctx):
     await ctx.send(f':tennis: Pong! ({round(client.latency * 1000)}ms)')
 
 #5
-@client.command(name='release', help='Shows last changes of Bot functions/Changelog')
+@client.command(name='release', help="Shows last changes of Bot functions/Changelog")
 async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
 - Added "portal" system - connect two channels and send messages between them with .psend command
-- Added .portal_create, .portal_search and .psend commands
-- Updated .ShutDown .testbot .rebuild commands
+- Added .portal and .psend commands
+- Updated .ShutDown .testbot .rebuild .ai /ai commands
 - Updated database support
 - Added cog (module) support
 - Updated .module command - now bot can load/unload/reload/list supported cog modules
 - Updated ACL to v4.1 and removed from the main file
 - Added 'modules' directory for 'built-in' modules and 'modules/custom' for additional ones
-- Removed showmodulemessages, ACLmodule variables from .env file and functions that used them
+- Removed showmodulemessages and ACLmodule variables from .env file and functions that used them
 - Updated .env file scheme
 - Added custom_prefix variable in the .env file ('.' prefix is still set as default)
 
@@ -582,7 +585,7 @@ To see older releases, find 'updates.txt' in 'Files' directory.
 """)
 
 #6
-@client.command(name='next_update', help='Shows future functions/updates')
+@client.command(name='next_update', help="Shows future functions/updates")
 async def next_update(ctx):
     await ctx.send("""
 Ideas for Future Updates
@@ -598,7 +601,7 @@ You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac
 
         #AdminOnly
 #1
-@client.command(name='ShutDown', help='Turns Off the Bot')
+@client.command(name='ShutDown', help="Turns Off the Bot")
 async def ShutDown(ctx):
     if str(ctx.message.author.id) in admin_usr:
         await ctx.send(f'Shutting down...')
@@ -636,7 +639,7 @@ async def ShutDown(ctx):
         await ctx.reply(not_allowed)
 
 #2
-@client.command(name='copylog', help='Copies Bot Log file\nappend -> adds new value to older in Files/Logs.txt\nreplace -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs')
+@client.command(name='copylog', help="Copies Bot Log file\nappend -> adds new value to older in Files/Logs.txt\nreplace -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs")
 async def copylog(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         if mode == 'append':
@@ -676,7 +679,7 @@ async def copylog(ctx, mode):
         await ctx.reply(not_allowed)
 
 #3
-@client.command(name='bash', help='Runs Bash like scripts on hosting computer (Linux only)\nUses .sh extensions\nBest to work with .touch command')
+@client.command(name='bash', help="Runs Bash like scripts on hosting computer (Linux only)\nUses .sh extensions\nBest to work with .touch command")
 async def bash(ctx, file=None):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -701,7 +704,7 @@ async def bash(ctx, file=None):
         await ctx.reply(not_allowed)
 
 #4
-@client.command(name='rebuild', help='Rebuilds files and directories')
+@client.command(name='rebuild', help="Rebuilds files and directories")
 async def rebuild(ctx):
     if str(ctx.message.author.id) in admin_usr:
         await ctx.send('Trying to rebuild files...')
@@ -751,7 +754,7 @@ async def rebuild(ctx):
         await ctx.reply(not_allowed)
 
 #5
-@client.command(name="mkshortcut", help="Creates a shortcut on your Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of your Desktop Folder (Desktop/Pulpit etc.)]")
+@client.command(name='mkshortcut', help="Creates a shortcut on your Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of your Desktop Folder (Desktop/Pulpit etc.)]")
 async def shrtct(ctx, desk):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -773,7 +776,7 @@ async def shrtct(ctx, desk):
         await ctx.send(not_allowed)
 
 #6
-@client.command(name="mkservice", help="Adds ServerBot to systemd to start with system startup (Bot needs to be running as root)\nMode:\n'def' -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemd startup will not work. Do not place bot in your home dir.")
+@client.command(name='mkservice', help="Adds ServerBot to systemd to start with system startup (Bot needs to be running as root)\nMode:\n'def' -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemd startup will not work. Do not place bot in your home dir.")
 async def mkservice(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -845,7 +848,7 @@ async def mkservice(ctx, mode):
 
 #7
 if os.getenv('service_monitor') in accept_value:
-    @client.command(name="service", help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemd")
+    @client.command(name='service', help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemd")
     async def service(ctx, mode):
         if str(ctx.message.author.id) in admin_usr:
             try:
@@ -889,7 +892,7 @@ if os.getenv('service_monitor') in accept_value:
             await ctx.send(not_allowed)
 
 #8
-@client.command(name='pingip', help='Pings selected IPv4 address.')
+@client.command(name='pingip', help="Pings selected IPv4 address.")
 async def pingip(ctx, ip):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -915,7 +918,7 @@ async def module(ctx, mode, *, name=None):
                 else:
                     await ctx.reply("Incomplete command. Enter module name.")
             except Exception as e:
-                await ctx.reply(f'Failed to load {name} module. See Logs.txt for details.')
+                await ctx.reply(f'Failed to load {name} module: {e}')
                 message = f'Information[modules]: Failed to load {name} module: {e}'
                 printMessage(message)
                 logMessage(message)
@@ -931,7 +934,7 @@ async def module(ctx, mode, *, name=None):
                 else:
                     await ctx.reply("Incomplete command. Enter module name.")
             except Exception as e:
-                await ctx.reply(f'Failed to unload {name} module. See Logs.txt for details.')
+                await ctx.reply(f'Failed to unload {name} module: {e}')
                 message = f'Information[modules]: Failed to unload {name} module: {e}'
                 printMessage(message)
                 logMessage(message)
@@ -947,7 +950,7 @@ async def module(ctx, mode, *, name=None):
                 else:
                     await ctx.reply("Incomplete command. Enter module name.")
             except Exception as e:
-                await ctx.reply(f'Failed to reload {name} module. See Logs.txt for details.')
+                await ctx.reply(f'Failed to reload {name} module: {e}')
                 message = f'Information[modules]: Failed to reload {name} module: {e}'
                 printMessage(message)
                 logMessage(message)
@@ -1001,7 +1004,7 @@ Additional modules (from modules/custom):\n- {br.join(listdir_c)}""")
 
         #Database
 #1
-@client.command(name='db', help='Database commands\n.db register {userID} {nickname} - manually registers user in database. Nickname is optional\n.db remove {userID} - removes user from database.\n.db op {userID} - gives Moderator role to user (Discord bot mod).\n.db deop {userID} - removes Mod role from user.\n.db select {userID} - search user data in database.\n.db setnickname {nickname} {userID} - updates user nickname.')
+@client.command(name='db', help="Database commands\n.db register {userID} {nickname} - manually registers user in database. Nickname is optional\n.db remove {userID} - removes user from database.\n.db op {userID} - gives Moderator role to user (Discord bot mod).\n.db deop {userID} - removes Mod role from user.\n.db select {userID} - search user data in database.\n.db setnickname {nickname} {userID} - updates user nickname.")
 async def db(ctx, mode, value1, *, value2=None):
     if str(ctx.message.author.id) in admin_usr:
         cur = SB_DB.cursor()
@@ -1088,7 +1091,7 @@ async def db(ctx, mode, value1, *, value2=None):
         await ctx.reply(not_allowed)
 
 #2
-@client.command(name='showdb', help='Shows database content in .txt file')
+@client.command(name='showdb', help="Shows database content in .txt file")
 async def showdb(ctx):
     if str(ctx.message.author.id) in admin_usr:
         cur = SB_DB.cursor()
@@ -1109,7 +1112,7 @@ async def showdb(ctx):
 
         #ModeratorOnly
 #1
-@client.command(name='testbot', help='Tests some functions of Host and Bot')
+@client.command(name='testbot', help="Tests some functions of Host and Bot")
 async def testbot(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         now = datetime.datetime.now()
@@ -1140,7 +1143,7 @@ Floppy: **{'Yes' if os.path.exists('/dev/fd0') else 'No'}**
         await ctx.send(not_allowed)
 
 #2
-@client.command(name='testos', help='Check information about Operating System and Hardware')
+@client.command(name='testos', help="Check information about Operating System and Hardware")
 async def testos(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         await ctx.send(f"""
@@ -1161,7 +1164,7 @@ Hardware info:
         await ctx.send(not_allowed)
 
 #3
-@client.command(name="disks", help="Shows mounted disks with free disk space (Linux only - uses 'df -h' command)")
+@client.command(name='disks', help="Shows mounted disks with free disk space (Linux only - uses 'df -h' command)")
 async def disk(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
@@ -1172,7 +1175,7 @@ async def disk(ctx):
         await ctx.send(not_allowed)
 
 #4
-@client.command(name='delete', help='Deletes set amount of messages\n.delete 6 -> will delete 6 messages')
+@client.command(name='delete', help="Deletes set amount of messages\n.delete 6 -> will delete 6 messages")
 async def delete(ctx, amount: int = 1):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         deleted = await ctx.channel.purge(limit=amount+1)
@@ -1185,7 +1188,7 @@ async def delete(ctx, amount: int = 1):
         await ctx.reply(not_allowed)
 
 #5
-@client.command(name='cleaner', help='Wipes out last 100 messages on channel')
+@client.command(name='cleaner', help="Wipes out last 100 messages on channel")
 async def cleaner(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         deleted = await ctx.channel.purge(limit=100)
@@ -1198,7 +1201,7 @@ async def cleaner(ctx):
         await ctx.reply(not_allowed)
 
 #6
-@client.command(name="webreq", help="Sends website request codes and headers\n.webreq {get/getheader} {website}")
+@client.command(name='webreq', help="Sends website request codes and headers\n.webreq {get/getheader} {website}")
 async def webreq(ctx, mode, *, web):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
@@ -1230,7 +1233,7 @@ async def webreq(ctx, mode, *, web):
         await ctx.reply(not_allowed)
 
 #7
-@client.command(name='kick', help='Kick Members\n.kick @member {reason} - reason is optional')
+@client.command(name='kick', help="Kick Members\n.kick @member {reason} - reason is optional")
 async def kick(ctx, member: discord.Member, *, reason=None):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
@@ -1246,7 +1249,7 @@ async def kick(ctx, member: discord.Member, *, reason=None):
         await ctx.reply(not_allowed)
 
 #8
-@client.command(name='ban', help='Ban Members\n.ban @member {reason} - reason is optional')
+@client.command(name='ban', help="Ban Members\n.ban @member {reason} - reason is optional")
 async def ban(ctx, member: discord.Member, *, reason=None):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
@@ -1262,7 +1265,7 @@ async def ban(ctx, member: discord.Member, *, reason=None):
         await ctx.reply(not_allowed)
 
 #9
-@client.command(name='unban', help='Unban Members\n.unban @member {reason} - reason is optional')
+@client.command(name='unban', help="Unban Members\n.unban @member {reason} - reason is optional")
 async def unban(ctx, member: discord.User, *, reason=None):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
@@ -1324,7 +1327,7 @@ async def echo (ctx, channel_id: int, *, message):
 
         #Converters
 #1
-@client.command(name='convert', help='Advanced Converter v1.0\n========================\n\nConverts one number to other number systems - binary, octal, decimal, hexa (hexadecimal)')
+@client.command(name='convert', help="Advanced Converter v1.0\n========================\n\nConverts one number to other number systems - binary, octal, decimal, hexa (hexadecimal)")
 async def multiconv(ctx, type, number):
     try:
         if type == 'decimal':
@@ -1372,7 +1375,7 @@ async def multiconv(ctx, type, number):
         await ctx.send(f'```{bluescreenface}\nUnexpected error occurred```')
 
 #2
-@client.command(name='binary', help='Convert decimal number to binary.\n.binary <dec number>; eg. binary 2019')
+@client.command(name='binary', help="Convert decimal number to binary.\n.binary <dec number>; eg. binary 2019")
 async def binary(ctx, number):
     binn = bin(int(number))
     await ctx.send(f'{number} in binary: {binn}')
@@ -1656,7 +1659,7 @@ async def dir(ctx, *, mode):
         await ctx.send(not_allowed)
 
 #3
-@client.command(name='file', help='Manage/open/create files and directories\n.file open {filename} -> open (send as reply) file (REMEMBER to add extension - .py/.png/etc)\n.file mkdir {dir_name} -> create directory (folder)\n.file size {filename} -> check size of selected file\n.file create {filename} {content} -> create file with content (like .touch command; content is optional)')
+@client.command(name='file', help="Manage/open/create files and directories\n.file open {filename} -> open (send as reply) file (REMEMBER to add extension - .py/.png/etc)\n.file mkdir {dir_name} -> create directory (folder)\n.file size {filename} -> check size of selected file\n.file create {filename} {content} -> create file with content (like .touch command; content is optional)")
 async def file(ctx, mode, filename, *, value=None):
     if str(ctx.message.author.id) in admin_usr:
         if mode == 'open':#open
@@ -1728,7 +1731,7 @@ async def file(ctx, mode, filename, *, value=None):
         await ctx.send(not_allowed)
 
 #4
-@client.command(name='touch', help='Create files with selected extension and content.\n.touch {filename} {content} - content is optional')
+@client.command(name='touch', help="Create files with selected extension and content.\n.touch {filename} {content} - content is optional")
 async def makefile(ctx, name, *, content=None):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -1761,7 +1764,7 @@ async def makefile(ctx, name, *, content=None):
 
         #Other
 #1
-@client.command(name="thread", help="Create server threads\n.thread {name} {reason}")
+@client.command(name='thread', help="Create server threads\n.thread {name} {reason}")
 async def thread(ctx, name, *, reason=None):
     try:
         channel = ctx.channel
@@ -1778,7 +1781,7 @@ async def thread(ctx, name, *, reason=None):
             await ctx.send(thread_error)
 
 #2
-@client.command(name='Teensie', help='TeensieGif')
+@client.command(name='Teensie', help="TeensieGif")
 async def Teensie(ctx):
     try:
         await ctx.send(file=discord.File(f'{maindir}/Files/Teensie.gif'))
@@ -1790,7 +1793,7 @@ async def Teensie(ctx):
 
         #Links_and_Servers
 #1
-@client.command(name='mcservs', help='Shows Addresses to Minecraft Servers\nYou need to enter your own addresses')
+@client.command(name='mcservs', help="Shows Addresses to Minecraft Servers\nYou need to enter your own addresses")
 async def mcservs(ctx):
 
     await ctx.send(f"""
@@ -1814,12 +1817,12 @@ Serv3
 ```""")
     
 #2
-@client.command(name='dscserv', help='Show link to Discord Server')
+@client.command(name='dscserv', help="Show link to Discord Server")
 async def dscserv(ctx):
     await ctx.send(os.getenv('dscserv_link'))
 
 #3
-@client.command(name='addbot', help='Show invite link to add Bot to other Servers\nstable -> sends link to stable version\ntesting -> sends link to testing version')
+@client.command(name='addbot', help="Show invite link to add Bot to other Servers\nstable -> sends link to stable version\ntesting -> sends link to testing version")
 async def addbot(ctx, version):
     if version == "stable":
         await ctx.reply(os.getenv('addstable'))
@@ -1829,7 +1832,7 @@ async def addbot(ctx, version):
         await ctx.send("Wrong value, try again.")
 
 #4
-@client.command(name='yt', help='Sends Link to YT\ntest1\ntest2')
+@client.command(name='yt', help="Sends Link to YT\ntest1\ntest2")
 async def yt(ctx, YTname):
     if YTname == 'test1':
         await ctx.send(f'test1')
@@ -1843,20 +1846,19 @@ async def yt(ctx, YTname):
 
         #Portal
 #1 - link channels
-@client.command(name='portal_create', help='Connect two channels. Bot will send message to other channel after using .p_send command in one of connected channels')
-async def portal_create(ctx, channel1, channel2):
+@client.command(name='portal', help="Manage connections between channels. Portal creates connection between two channels, allowing to communicate between them. Bot will send message to other channel after using .psend command in one of connected channels.\n.portal create {id1} {id2} -> creates connection\n.portal remove {id} -> removes connection that contains selected channel ID.\n.portal search {id} -> search for connection with selected channel ID\n.portal show -> saves database with all connections in tempDB.txt file")
+async def portal(ctx, mode, channel1=None, channel2=None):
     if str(ctx.message.author.id) in admin_usr:
-
         try:
-            channel1 = int(channel1)
-            channel2 = int(channel2)
+            channel1 = int(channel1) if channel1 is not None else None
+            channel2 = int(channel2) if channel2 is not None else None
         except:
             await ctx.reply("Please enter valid channel IDs")
             return
 
         #Create database if not exist
         def check_portal_db():
-            if os.path.exists(f"{maindir}/Files/serverbot.db") == True:
+            if os.path.exists(DB_PATH) == True:
                 if extendedErrMess in accept_value:
                     print("Information[portal/create]: Database found.")
 
@@ -1883,30 +1885,6 @@ async def portal_create(ctx, channel1, channel2):
                 SB_DB.commit()
                 return True
 
-        await ctx.reply("Creating connection...")
-        try:
-            check_portal_db()
-            if portal_connect(channel1, channel2) == False:
-                await ctx.reply("One of selected channels are already in use.")
-            else:
-                await ctx.reply("Success!")
-        except Exception as err:
-            await ctx.reply(f"Error: {err}")
-    else:
-        await ctx.send(not_allowed)
-
-
-#2 - remove connection
-@client.command(name='portal_remove', help='Remove connection between two channels')
-async def portal_remove(ctx, channel1):
-    if str(ctx.message.author.id) in admin_usr:
-
-        try:
-            channel1 = int(channel1)
-        except:
-            await ctx.reply("Please enter valid channel ID")
-            return
-
         #Remove connection
         def portal_disconnect(c1):
             cur = SB_DB.cursor()
@@ -1917,40 +1895,55 @@ async def portal_remove(ctx, channel1):
                 cur.execute(f"DELETE FROM portal WHERE channel1=? OR channel2=?", (c1, c1))
                 SB_DB.commit()
 
-        await ctx.reply("Removing connection...")
-        try:
-            portal_disconnect(channel1)
-            await ctx.reply("Success!")
-        except Exception as err:
-            await ctx.reply(f"Error: {err}")
+
+        if mode == 'create':#create
+            await ctx.reply("Creating connection...")
+            try:
+                check_portal_db()
+                if portal_connect(channel1, channel2) == False:
+                    await ctx.reply("One of selected channels are already in use.")
+                else:
+                    await ctx.reply("Success!")
+            except Exception as err:
+                await ctx.reply(f"Error occurred: {err}")
+
+        elif mode == 'remove':#remove
+            await ctx.reply("Removing connection...")
+            try:
+                portal_disconnect(channel1)
+                await ctx.reply("Success!")
+            except Exception as err:
+                await ctx.reply(f"Error occurred: {err}")
+
+        elif mode == 'search':#search
+            cur = SB_DB.cursor()
+
+            res = cur.execute(f"SELECT channel1, channel2 FROM portal WHERE channel1=? OR channel2=?", (channel1, channel1))
+            results = res.fetchall()
+            if results:
+                await ctx.reply(f"Found connection for selected channel: {results}")
+            else:
+                await ctx.reply(f"No connection found for your channel.")
+
+        elif mode == 'show':#show
+            cur = SB_DB.cursor()
+            #SELECT
+            result = cur.execute("SELECT * FROM portal")
+            #SAVE
+            save = open(f"{maindir}/tempDB.txt", 'w', encoding='utf-8')
+            save.write(str(result.fetchall()))
+            save.close()
+
+            await ctx.reply("Database content saved in tempDB.txt file.")
+            await ctx.send(file=discord.File(f"{maindir}/tempDB.txt"))
+
+        else:#else
+            await ctx.reply("Wrong mode selected or incomplete command.\nSee .help portal for more info.")
     else:
         await ctx.send(not_allowed)
 
-
-#3 - search connections
-@client.command(name='portal_search', help='Search for connected channels')
-async def portal_search(ctx, channel):
-    try:
-        try:
-            channel = int(channel)
-        except:
-            await ctx.reply("Please enter valid channel ID")
-            return
-
-        cur = SB_DB.cursor()
-
-        res = cur.execute(f"SELECT channel1, channel2 FROM portal WHERE channel1=? OR channel2=?", (channel, channel))
-        results = res.fetchall()
-        if results:
-            await ctx.reply(f"Found connection for selected channel: {results}")
-        else:
-            await ctx.reply(f"No connection found for your channel.")
-    except Exception as err:
-        await ctx.reply(f"Error while searching for connection: {err}")
-
-
-#4 - send message
-@client.command(name='psend', help='Send message to another channel.')
+#2 - send message
+@client.command(name='psend', help="Send message to another channel.")
 async def portal_send(ctx, *, mess):
         cur = SB_DB.cursor()
         
@@ -1988,7 +1981,7 @@ async def portal_send(ctx, *, mess):
 
         #Test_Commands
 #1
-#@client.command(name='test', help='test', tts=True)
+#@client.command(name='test', help="test", tts=True)
 #async def test(ctx):
 #    await ctx.send(f'test {ctx.author.mention}')
 
@@ -2004,7 +1997,7 @@ async def portal_send(ctx, *, mess):
 
 ################################################ S L A S H   C O M M A N D S ###########################################################################################
 #1
-@client.tree.command(name='random', description='Shows your random number. Type .random [min] [max]')
+@client.tree.command(name='random', description="Shows your random number. Type .random [min] [max]")
 @app_commands.describe(min='Minimum value', max='Maximum value')
 async def random_slash(interaction: discord.Interaction, min: int, max: int):
     import random
@@ -2018,12 +2011,12 @@ async def random_slash(interaction: discord.Interaction, min: int, max: int):
             await interaction.response.send_message(random_err)
 
 #2
-@client.tree.command(name='ping', description='Pings the Bot')
+@client.tree.command(name='ping', description="Pings the Bot")
 async def ping(interaction):
     await interaction.response.send_message(f':tennis: Pong! ({round(client.latency * 1000)}ms)')
 
 #3
-@client.tree.command(name='testbot', description='Tests some functions of Bot')
+@client.tree.command(name='testbot', description="Tests some functions of Bot")
 async def testbot(interaction):
     if str(interaction.user.id) in admin_usr or is_mod(interaction.user.id):
         now = datetime.datetime.now()
@@ -2054,10 +2047,13 @@ async def testbot(interaction):
         await interaction.response.send_message(not_allowed)
 
 #4
-@client.tree.command(name='ai', description=f'Talk with AI. Uses {ai_model} model.')
-@app_commands.describe(question='Prompt/question for AI')
+@client.tree.command(name='ai', description=f"Talk with AI. Uses {ai_model} model.")
+@app_commands.describe(question="Prompt/question for AI")
 async def ai(interaction: discord.Interaction, question: str):
     await interaction.response.defer(thinking=True)
+    if ai_token is None:
+        await interaction.followup.send("AI token not found. Enter valid Gemini API token in the .env file to use this command.")
+        return
     try:
         response = ai_client.models.generate_content(
             model=f"{ai_model}", 
@@ -2080,14 +2076,14 @@ async def ai(interaction: discord.Interaction, question: str):
         logMessage(error_message)
 
 #5
-@client.tree.command(name='random_old', description='Shows your random number [Old version]')
+@client.tree.command(name='random_old', description="Shows your random number [Old version]")
 async def random_old(interaction):
     import random
     randomn = random.randrange(-1, 999999)
     await interaction.response.send_message(f'This is your random number: {randomn}')
 
 #6
-@client.tree.command(name='echo', description='Make the bot say something.')
+@client.tree.command(name='echo', description="Make the bot say something.")
 @app_commands.describe(message="Message to send", channel_id="Channel ID where message will be sent")
 async def echo(interaction: discord.Interaction, message: str, channel_id: str = None):
     if str(interaction.user.id) in admin_usr or is_mod(interaction.user.id):
