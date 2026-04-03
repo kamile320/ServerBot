@@ -23,7 +23,7 @@ medialib = f'{maindir}/Media'
 #List of modules/cogs you want to load at start; cogs from 'modules/custom' you have to type like 'custom.cogName' - WITHOUT .py
 #If LoadAllModules is True, this list will nothing do; bot will load every cog from 'modules' directory (not from 'modules/custom'!)
 #If you use cogs from 'modules' and 'modules/custom' dirs and you want to load them all on start, type here all your modules and set LAM to False
-loadList = [] #['cog1', 'custom.cog2'] <- example
+loadList = [] # ['cog1', 'custom.cog2'] <- example
 
 
 # .env file template - if .env not exists, bot will automatically create a new one
@@ -581,7 +581,7 @@ async def newest_update(ctx):
 - Updated .env file scheme
 - Added custom_prefix variable in the .env file ('.' prefix is still set as default)
 
-To see older releases, find 'updates.txt' in 'Files' directory.
+To see older releases, read 'updates.txt' in the 'Files' directory.
 """)
 
 #6
@@ -1945,36 +1945,36 @@ async def portal(ctx, mode, channel1=None, channel2=None):
 #2 - send message
 @client.command(name='psend', help="Send message to another channel.")
 async def portal_send(ctx, *, mess):
-        cur = SB_DB.cursor()
-        
-        channel_in_id = ctx.channel.id
-        
-        def get_output(ch_in):
-            try:
-                #SELECT
-                res = cur.execute(f"SELECT channel1, channel2 FROM portal WHERE channel1=? OR channel2=?", (ch_in, ch_in))
-                row = res.fetchone()
+    cur = SB_DB.cursor()
 
-                if row[0] == ch_in:
-                    return row[1]
-                elif row[1] == ch_in:
-                    return row[0]
-                else:
-                    print(f"Information[portal/psend]: No connected channel found for {ch_in}")
-                    return None
-            except Exception as err:
-                print(f"Information[portal/psend]: Error while fetching data from database: {err}")
+    channel_in_id = ctx.channel.id
 
-        channel_out_id = get_output(channel_in_id)
-        channel_out = client.get_channel(channel_out_id)
-
+    def get_output(ch_in):
         try:
-            if channel_out is not None:
-                await channel_out.send(f"[{ctx.author}]: {mess}")
+            #SELECT
+            res = cur.execute(f"SELECT channel1, channel2 FROM portal WHERE channel1=? OR channel2=?", (ch_in, ch_in))
+            row = res.fetchone()
+
+            if row[0] == ch_in:
+                return row[1]
+            elif row[1] == ch_in:
+                return row[0]
             else:
-                await ctx.reply("You're using command on a not linked channel, or one of the channels are not acessible by bot.")
+                print(f"Information[portal/psend]: No connected channel found for {ch_in}")
+                return None
         except Exception as err:
-            await ctx.reply(f"Error while sending message: {err}")
+            print(f"Information[portal/psend]: Error while fetching data from database: {err}")
+
+    channel_out_id = get_output(channel_in_id)
+    channel_out = client.get_channel(channel_out_id)
+
+    try:
+        if channel_out is not None:
+            await channel_out.send(f"[{ctx.author}]: {mess}")
+        else:
+            await ctx.reply("You're using command on a not linked channel, or one of the channels are not acessible by bot.")
+    except Exception as err:
+        await ctx.reply(f"Error while sending message: {err}")
         #Portal-END
 
 
