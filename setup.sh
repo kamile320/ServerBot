@@ -62,7 +62,7 @@ case $select in
             ;;
         5)  
             echo "Creating .env file..."
-            echo "#ServerBot v${VERSION} config file" > .env
+            echo "#ServerBot ${VERSION} config file" > .env
             echo "TOKEN=''" >> .env
             echo "admin_usr = ['']" >> .env
             echo "custom_prefix = ''" >> .env
