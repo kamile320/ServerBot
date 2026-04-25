@@ -38,7 +38,7 @@ custom_prefix = ''
 
 #AI
 AI_token=''
-aimodel = 'gemini-2.5-flash'
+AI_model = 'gemini-2.5-flash'
 instructions = ['Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']
 
 #Music
@@ -169,7 +169,7 @@ try:
     if ai_token == '': ai_token = None
 
     admin_usr = os.getenv('admin_usr')
-    ai_model = f"{os.getenv('aimodel')}"
+    ai_model = f"{os.getenv('AI_model')}" or 'gemini-2.5-flash'
     ai_client = genai.Client(api_key=f"{ai_token}")
     extendedErrMess = os.getenv('extendedErrMess')
     JLS = os.getenv('JoinLeaveSounds')
