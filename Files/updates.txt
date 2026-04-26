@@ -230,3 +230,18 @@ on text in .testbot while running Bot on ARM devices
 - Added .library command
 - Added --reset-env flag
 - Small fixes and improvements
+
+
+[ServerBot v1.11.0]
+    Changelog:
+- Added "portal" system - connect two channels and send messages between them with .psend command
+- Added .portal and .psend commands
+- Updated .ShutDown .testbot .rebuild .ai /ai commands
+- Updated database support
+- Added cog (module) support
+- Updated .module command - now bot can load/unload/reload/list supported cog modules
+- Updated ACL to v4.1 and removed from the main file
+- Added 'modules' directory for 'built-in' modules and 'modules/custom' for additional ones
+- Removed showmodulemessages and ACLmodule variables from .env file and functions that used them
+- Updated .env file scheme
+- Added custom_prefix variable in the .env file ('.' prefix is still set as default)
