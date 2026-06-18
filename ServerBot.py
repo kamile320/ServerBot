@@ -15,7 +15,8 @@ servicename = "ServerBot"
 #Directory
 maindir = os.getcwd()
 SBbytes = os.path.getsize('ServerBot.py')
-DB_PATH = f'{maindir}/Files/serverbot.db' #Database path
+DB_PATH = f'{maindir}/Files/serverbot.db' # Database path
+ai_chat = f'{maindir}/Files/AI_chat'      # Directory where longer Gemini responses are saved
 
 #Directory for music files; If you set ForceMediaDir to True, bot will be able to use local sounds only from this dir.
 medialib = f'{maindir}/Media' 
@@ -482,7 +483,7 @@ async def ai(ctx, *, question):
     try:
         response = ai_client.models.generate_content(
             model=f"{ai_model}", 
-            contents=f"[Your response MUST CONTAIN MAX 2000 CHARACTERS OR LESS] {question}",
+            contents=f"{question}",
             config=types.GenerateContentConfig(
                 system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
                 tools=[
@@ -492,7 +493,21 @@ async def ai(ctx, *, question):
                 ]
             )
         )
-        await ctx.reply(response.text)
+        message = response.text
+        if extendedErrMess in accept_value:
+            length = f"Information[AI]: Length of the bot's response is {len(message)}."
+            printMessage(length)
+            logMessage(length)
+        if len(message) <= 2000:
+            await ctx.reply(message)
+        else:
+            if os.path.exists(ai_chat) == False:
+                os.makedirs(ai_chat)
+            name = f"ai_response_{datetime.datetime.now().strftime('%d.%m.%Y_%H-%M-%S')}.txt"
+            file = open(f"{ai_chat}/{name}", 'w', encoding='utf-8')
+            file.write(message)
+            file.close()
+            await ctx.reply(file=discord.File(f"{ai_chat}/{name}"))
     except Exception as err:
         await ctx.reply(f"Something went wrong, possible cause:\n{err}")
         
@@ -572,6 +587,7 @@ async def newest_update(ctx):
 - Added "portal" system - connect two channels and send messages between them with .psend command
 - Added .portal and .psend commands
 - Updated .ShutDown .testbot .rebuild .ai /ai commands
+- AI commands now save responses longer than 2000 characters and sends them as a file
 - Updated database support
 - Added cog (module) support
 - Updated .module command - now bot can load/unload/reload/list supported cog modules
@@ -2057,7 +2073,7 @@ async def ai(interaction: discord.Interaction, question: str):
     try:
         response = ai_client.models.generate_content(
             model=f"{ai_model}", 
-            contents=f"[Your response MUST CONTAIN MAX 2000 CHARACTERS OR LESS] {question}", 
+            contents=f"{question}", 
             config=types.GenerateContentConfig(
                 system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
                 tools=[
@@ -2067,7 +2083,21 @@ async def ai(interaction: discord.Interaction, question: str):
                 ]
             )
         )
-        await interaction.followup.send(response.text)
+        message = response.text
+        if extendedErrMess in accept_value:
+            length = f"Information[AI]: Length of the bot's response is {len(message)}."
+            printMessage(length)
+            logMessage(length)
+        if len(message) <= 2000:
+            await interaction.followup.send(message)
+        else:
+            if os.path.exists(ai_chat) == False:
+                os.makedirs(ai_chat)
+            name = f"ai_response_{datetime.datetime.now().strftime('%d.%m.%Y_%H-%M-%S')}.txt"
+            file = open(f"{ai_chat}/{name}", 'w', encoding='utf-8')
+            file.write(message)
+            file.close()
+            await interaction.followup.send(file=discord.File(f"{ai_chat}/{name}"))
     except Exception as error:
         await interaction.followup.send(f"Something went wrong, possible cause:\n{error}")
         
