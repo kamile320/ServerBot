@@ -237,6 +237,7 @@ on text in .testbot while running Bot on ARM devices
 - Added "portal" system - connect two channels and send messages between them with .psend command
 - Added .portal and .psend commands
 - Updated .ShutDown .testbot .rebuild .ai /ai commands
+- AI commands now save responses longer than 2000 characters and sends them as a file
 - Updated database support
 - Added cog (module) support
 - Updated .module command - now bot can load/unload/reload/list supported cog modules
