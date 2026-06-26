@@ -32,7 +32,7 @@ If you're using not-Ubuntu 22.04 based distros you need to create python3 virtua
 - Use sqlite3 database to register users and grant bot moderators access to mod commands (+level system in future)
 
 ## Advantages of Linux
-This Bot is also good for administrative tasks for your servers - saying servers I mean not only Discord Servers but real Servers.<br>
+This Bot is also good for administrative tasks for your servers - saying servers I don't mean only Discord Servers but real Servers.  
 You can use a bot like a ssh connection - detect service failures/status, run shellscripts to automate processes or even detect hardware info and free/full space of your mounted volumes.  
 Great for lazy game server admins! Because why you should open terminal, connect to the server, check something, log out...  
 ...when you can do it in your Discord chat.
@@ -46,7 +46,7 @@ More information and instructions you can find in ***ServerBot Manual*** [[PL]](
 - python3 (3.9 or newer)
 - python3-pip
 - Discord Bot user (Application) created in [Discord Developer Portal](https://discord.com/developers/docs/intro)
-- The rest will be installed automatically (Bot will tell if something is missing, or just install everything using setup.sh)
+- The rest will be installed automatically (Bot will tell if something is missing - or just install everything using setup.sh)
 
 ## Programs that you need to install first (Windows):
 - Python 3 (3.9 or newer; add to PATH + pip)
@@ -56,7 +56,7 @@ More information and instructions you can find in ***ServerBot Manual*** [[PL]](
 
 
 ## Contributing
-ServerBot is an open project - that means you can create your own version of a bot, or help me with making ServerBot better (better English, code improvements, bug report etc.).  
+ServerBot is an open project - that means you can create your own version of a bot, or help me with making project better (better English, code improvements, bug report etc.).  
 
 Ways to contribute:
 - Create an [Issue](https://github.com/kamile320/ServerBot/issues)  
