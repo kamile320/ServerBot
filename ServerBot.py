@@ -36,9 +36,10 @@ def create_env():
 TOKEN=''
 admin_usr = ['']
 custom_prefix = ''
+addBot = 'inviteLink'
 
 #AI
-AI_token=''
+AI_token = ''
 AI_model = 'gemini-2.5-flash'
 instructions = ['Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']
 
@@ -52,10 +53,6 @@ dscserv_link = 'https://discord.gg/UMtYGAx5ac'
 #Service_list
 service_monitor = False
 service_list = ','
-
-#Command_addbot
-addstable = 'stable_link'
-addtesting = 'testing_link'
 
 #Modules
 LoadAllModules = False
@@ -584,9 +581,9 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Added "portal" system - connect two channels and send messages between them with .psend command
+- Added 'portal' system - connect two channels and send messages between them with .psend command
 - Added .portal and .psend commands
-- Updated .ShutDown .testbot .rebuild .ai /ai commands
+- Updated .ShutDown .testbot .rebuild .ai /ai .addbot .yt commands
 - AI commands now save responses longer than 2000 characters and sends them as a file
 - Updated database support
 - Added cog (module) support
@@ -595,7 +592,7 @@ async def newest_update(ctx):
 - Added 'modules' directory for 'built-in' modules and 'modules/custom' for additional ones
 - Removed showmodulemessages and ACLmodule variables from .env file and functions that used them
 - Updated .env file scheme
-- Added custom_prefix variable in the .env file ('.' prefix is still set as default)
+- Added custom_prefix variable in the .env file (prefix '.' still set as default)
 
 To see older releases, read 'updates.txt' in the 'Files' directory.
 """)
@@ -1838,20 +1835,22 @@ async def dscserv(ctx):
     await ctx.send(os.getenv('dscserv_link'))
 
 #3
-@client.command(name='addbot', help="Show invite link to add Bot to other Servers\nstable -> sends link to stable version\ntesting -> sends link to testing version")
-async def addbot(ctx, version):
-    if version == "stable":
-        await ctx.reply(os.getenv('addstable'))
-    elif version == "testing":
-        await ctx.reply(os.getenv('addtesting'))
-    else:
-        await ctx.send("Wrong value, try again.")
+@client.command(name='addbot', help="Send invite link to add Bot to other Servers")
+async def addbot(ctx):
+    try:
+        await ctx.reply(os.getenv('addBot'))
+    except Exception as err:
+        if extendedErrMess in accept_value:
+            await ctx.send(f"Something went wrong.\nException: {err}")
+        else:
+            await ctx.send("Something went wrong.")
 
 #4
-@client.command(name='yt', help="Sends Link to YT\ntest1\ntest2")
+@client.command(name='yt', help="Sends link to YouTube channels\ntest1\ntest2")
 async def yt(ctx, YTname):
+    # You can add more if/elif's as you need
     if YTname == 'test1':
-        await ctx.send(f'test1')
+        await ctx.send(f'test1') # Replace test1 with link to YouTube channel
     elif YTname == 'test2':
         await ctx.send(f'test2')
     else:
