@@ -234,9 +234,9 @@ on text in .testbot while running Bot on ARM devices
 
 [ServerBot v1.11.0]
     Changelog:
-- Added "portal" system - connect two channels and send messages between them with .psend command
+- Added 'portal' system - connect two channels and send messages between them with .psend command
 - Added .portal and .psend commands
-- Updated .ShutDown .testbot .rebuild .ai /ai commands
+- Updated .ShutDown .testbot .rebuild .ai /ai .addbot .yt commands
 - AI commands now save responses longer than 2000 characters and sends them as a file
 - Updated database support
 - Added cog (module) support
@@ -245,4 +245,4 @@ on text in .testbot while running Bot on ARM devices
 - Added 'modules' directory for 'built-in' modules and 'modules/custom' for additional ones
 - Removed showmodulemessages and ACLmodule variables from .env file and functions that used them
 - Updated .env file scheme
-- Added custom_prefix variable in the .env file ('.' prefix is still set as default)
+- Added custom_prefix variable in the .env file (prefix '.' still set as default)
