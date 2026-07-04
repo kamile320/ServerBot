@@ -66,9 +66,10 @@ case $select in
             echo "TOKEN=''" >> .env
             echo "admin_usr = ['']" >> .env
             echo "custom_prefix = ''" >> .env
+            echo "addBot = 'inviteLink'" >> .env
             echo "" >> .env
             echo "#AI" >> .env
-            echo "AI_token=''" >> .env
+            echo "AI_token = ''" >> .env
             echo "AI_model = 'gemini-2.5-flash'" >> .env
             echo "instructions = ['Always answer in users language','Be precise and truthseeking','Do not answer to illegal, harmful, sexual or violent content']" >> .env
             echo "" >> .env
@@ -82,10 +83,6 @@ case $select in
             echo "#Service_list" >> .env
             echo "service_monitor = False" >> .env
             echo "service_list = ','" >> .env
-            echo "" >> .env
-            echo "#Command_addbot" >> .env
-            echo "addstable = 'stable_link'" >> .env
-            echo "addtesting = 'testing_link'" >> .env
             echo "" >> .env
             echo "#Modules" >> .env
             echo "LoadAllModules = False" >> .env
