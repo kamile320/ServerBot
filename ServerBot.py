@@ -31,7 +31,7 @@ loadList = [] # ['cog1', 'custom.cog2'] <- example
 # Do not type values here!
 def create_env():
     try:
-        env = open('.env', 'w')
+        env = open('.env', 'w', encoding='utf-8')
         env.write(f"""#ServerBot v{ver} config file
 TOKEN=''
 admin_usr = ['']
@@ -211,7 +211,7 @@ ytdl_search = youtube_dl.YoutubeDL(ytdl_opts_search)
 
 
 #Log_File
-logs = open('Logs.txt', 'w')
+logs = open('Logs.txt', 'w', encoding='utf-8')
 def createlogs():
     logs.write(f"""S E R V E R  B O T
 LOGS
@@ -677,10 +677,10 @@ async def copylog(ctx, mode):
                 await ctx.send("Error occurred while copying log. Maybe folder doesn't exist?")
         elif mode == 'clearall':
             try:
-                l1 = open(f"{maindir}/Logs.txt", 'w')
+                l1 = open(f"{maindir}/Logs.txt", 'w', encoding='utf-8')
                 l1.write("")
                 l1.close()
-                l2 = open(f"{maindir}/Files/Logs.txt", 'w')
+                l2 = open(f"{maindir}/Files/Logs.txt", 'w', encoding='utf-8')
                 l2.write("")
                 l2.close()
                 await ctx.send("Successfully cleared Logs.")
@@ -774,7 +774,7 @@ async def shrtct(ctx, desk):
             home_dir = os.path.expanduser('~')
             os.chdir(home_dir)
             os.chdir(desk)
-            shrt = open('ServerBot.sh', 'w')
+            shrt = open('ServerBot.sh', 'w', encoding='utf-8')
             shrt.write(f'cd {maindir}\npython3 ServerBot.py')
             shrt.close()
             os.chdir(maindir)
@@ -797,7 +797,7 @@ async def mkservice(ctx, mode):
                 try:
                     await ctx.send("Making autorun.sh file..")
                     try:
-                        auto = open('Files/autorun.sh', 'w')
+                        auto = open('Files/autorun.sh', 'w', encoding='utf-8')
                         auto.write(f"#!/bin/bash\ncd {maindir}\npython3 ServerBot.py")
                         auto.close()
                         os.chmod('Files/autorun.sh', 0o775)
@@ -811,7 +811,7 @@ async def mkservice(ctx, mode):
 
                     await ctx.send(f'Making {servicename}.service in /etc/systemd/system..')
                     try:
-                        sys = open(f'/etc/systemd/system/{servicename}.service', 'w')
+                        sys = open(f'/etc/systemd/system/{servicename}.service', 'w', encoding='utf-8')
                         sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
                         sys.close()
                         await ctx.send('Done!')
@@ -828,7 +828,7 @@ async def mkservice(ctx, mode):
                 try:
                     await ctx.send('Making autorun.sh file..')
                     try:
-                        auto = open('Files/autorun.sh', 'w')
+                        auto = open('Files/autorun.sh', 'w', encoding='utf-8')
                         auto.write(f'#!/bin/bash\ncd {maindir}\n.venv/bin/python3 ServerBot.py')
                         auto.close()
                         os.chmod('Files/autorun.sh', 0o775)
@@ -842,7 +842,7 @@ async def mkservice(ctx, mode):
 
                     await ctx.send(f'Making {servicename}.service in /etc/systemd/system..')
                     try:
-                        sys = open(f'/etc/systemd/system/{servicename}.service', 'w')
+                        sys = open(f'/etc/systemd/system/{servicename}.service', 'w', encoding='utf-8')
                         sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
                         await ctx.send("Done!")
                         await ctx.send(SBservice)
@@ -1987,7 +1987,7 @@ async def portal_send(ctx, *, mess):
         if channel_out is not None:
             await channel_out.send(f"[{ctx.author}]: {mess}")
         else:
-            await ctx.reply("You're using command on a not linked channel, or one of the channels are not acessible by bot.")
+            await ctx.reply("You're using command on a not linked channel, or one of the channels are not accessible by bot.")
     except Exception as err:
         await ctx.reply(f"Error while sending message: {err}")
         #Portal-END
