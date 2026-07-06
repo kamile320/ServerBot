@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot v1.10.1 User Manual [EN]">
+    <meta name="description" content="ServerBot v1.11.0 User Manual [EN]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.10.1</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.11.0</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -54,12 +54,13 @@
             <li>File and Directory Management</li>
             <li>SQLite3 database support</li>
             <li>AI command (using Gemini API)</li>
+            <li>Connecting channels between servers</li>
             <li>And more</li>
         </ul>
-        
+
         <br>
 
-        <h3>Content:</h3>
+        <h2>Content:</h2>
         <ol>
             <li><a href="#dirs">Structure of Directory</a></li>
             <li><a href="#start">First Run</a></li>
@@ -70,13 +71,14 @@
             <li><a href="#modules">Bot Modules/Extensions</a></li>
             <li><a href="#ai">.ai command</a></li>
             <li><a href="#yt">Music Commands</a></li>
+            <li><a href="#portal">'Portal' (connecting channels)</a></li>
             <li><a href="#db">Database (SQLite3)</a></li>
             <li><a href="#comma">Commands</a></li>
         </ol>
 
         <br>
 
-        <h3 id="dirs">List of Files and Directories:</h3>
+        <h2 id="dirs">List of Files and Directories:</h2>
 
         <ol>
             <li><b>ServerBot.py</b> - Main script file</li>
@@ -90,6 +92,13 @@
             <li><b>.env</b> - Special file for Bot Tokens</li>
             <li><b>.venv</b> - Python Virtual Environment (After using setup.sh - option 4)</li>
             <li><b>tempDB.txt</b> - Temporary file with database content (after using .showdb command)</li>
+            <li>
+                <b>modules</b> - Directory with bot <a href="#modules">modules</a>
+                <ul>
+                    <li><b>custom</b> - Directory for additional modules; optional</li>
+                    <li><b>ACL.py</b> - <a href="#ACL">AdvancedChannelListener</a> module</li>
+                </ul>
+            </li>
             <li>
                 <b>Files</b> - Directory with required (and not) Bot files
                 <ul>
@@ -109,56 +118,58 @@
                 </ul>
             </li>
         </ol>
-        
+
         <br>
 
-        <p align="right">Pic. 1 - Running the script</p>
-        <a href="Files/UbuntuSB.png"><img align="right" src="Files/UbuntuSB.png" width="40%" height="40%"></a>
-        
-        
-        <h3 id="start">First run:</h3>
-        <h5>The Bot requires:</h5>
+        <p align="right">Img. 1 - running the script</p>
+        <a href="Files/UbuntuSB.png"><img align="right" src="Files/UbuntuSB.png" width="40%" height="40%" title="running the script" alt="Img. 1 - running the script"></a>
+
+        <h2 id="start">First run:</h2>
+        <h4>The Bot requires:</h4>
         <ul type="square">
             <li>Python 3.9 or later</li>
             <li>Discord.py 2.6.4 or newer</li>
             <li>Internet connection</li>
             <li>Required python libraries installed (see setup.sh/setuplib.sh/requirements.txt contents)</li>
-            <li>Adding FFmpeg files to the PATH environment - Windows only (see YT)</li>
-            <li>Operating System: Linux (recommended) / Windows / MacOS - 64 bit (Recommended)</li>
+            <li>Adding FFmpeg files to the PATH environment - Windows only (see YT, setup.bat and <a href="#ffmpeg">FFmpeg installation</a>)</li>
+            <li>Operating System: Linux (recommended) / Windows / MacOS - 64 bit (recommended; tested on x86_64 and ARMv7l)</li>
             <li>setup.sh - requires the "dialog" command</li>
         </ul>
 
         <br>
-        
+
         You should run the script (python3 or setup.sh) through the IDE, terminal or other program.<br>
         If something goes wrong, the Bot should let you know what the problem is<br>
         and ask for approval of the correction or it will abandon the launch/installation.<br>
         After running the script, Bot should connect with Discord and be ready to work.<br>
-        [!] You can install bot via .deb file - remember that bot will install in /usr/share/serverbot. 
-        Use serverbot command with sudo, if you want configure <a href="#autostart">autostart</a>.<br>
+        [!] You can install bot using .deb file - remember that bot will install in /usr/share/serverbot. 
+        Use serverbot command with sudo, if you want to configure <a href="#autostart">autostart</a>.<br>
+
         <br>
 
         The current Bot Commands can be seen using the .help command
 
         <br>
 
-        <h3 id="autostart">Autostart using systemd:</h3>
+        <h2 id="autostart">Autostart using systemd:</h2>
 
         When using the Bot, you may want it to start automatically with the operating system (Linux).<br>
         To easily enable this, there is the .mkservice command.<br>
         After typing the command, you must provide an additional value:<br><br>
         
-        <b>def</b> -> creates default autorun.sh file in the <a href="#dirs">Files</a> directory. Works on systems based on Ubuntu <b>22.04</b> (doesn't use venv)<br><br>
+        <b>def</b> - creates default autorun.sh file in the <a href="#dirs">Files</a> directory. Works on systems based on Ubuntu <b>22.04</b> (doesn't use venv)<br><br>
 
-        <b>venv</b> -> sometimes when installing modules using pip3 an <i>externally managed pip</i> error may appear .<br>
+        <b>venv</b> - sometimes when installing modules using pip3 an <i>externally managed pip</i> error may appear .<br>
         In this case, you should create a Python Virtual Environment/Venv.<br>
         If you have not created it yet, it is recommended to create it in the main Bot directory (ServerBot).<br><br>
-        Example: .mkservice venv -> executing command on Discord; script of the Bot runs in main directory.<br>
+        Example: .mkservice venv - executing command on Discord; script of the Bot runs in main directory.<br>
         NOTE! The bot (or rather setup.sh) is adapted to the name of a directory with a virtual environment called ".venv".<br>
         If you manually created venv with different directory name, the bot may not start!<br>
-        It is recommended to use proper options from setup.sh -> It will easily install and configure everything needed.<br>
-        For the autostart to work, you need to set the Bot files with read/write/execute permissions to 775 (r-x for everyone, rwx for owner and group) if those files don't already have them.
-        I recommend moving the Bot files to the /ServerBot directory (so that it is not in other directories). Do not install bot in your home directory if you want to run it with system startup.<br><br>
+        It is recommended to use proper options from setup.sh - It will easily install and configure everything needed.<br>
+        For the autostart to work, you need to set the Bot files with read/write/execute permissions to 775 (r-x for everyone, rwx for owner and group) if those files don't already have them.<br>
+        I recommend moving the Bot files to the /ServerBot directory (so that it is not in other directories). Do not install bot in your home directory if you want to run it with system startup.<br>
+
+        <br>
 
         <b><i>How to create venv:</i></b><br>
         <ol>
@@ -172,47 +183,44 @@
 
         <p>Full documentation of venv <a href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/">here</a>.</p>
 
-        <p align="right">Pic. 2 - setup.sh options</p>
-        <a href="Files/setupSB.png"><img align="right" src="Files/setupSB.png" width="35%" height="35%"></a>
-        
+        <p align="right">Img. 2 - setup.sh options</p>
+        <a href="Files/setupSB.png"><img align="right" src="Files/setupSB.png" width="35%" height="35%" title="setup.sh options" alt="Img. 2 - setup.sh options"></a>
 
-        <h3 id="token">Tokens</h3>
+        <h2 id="token">Tokens</h2>
         The Bot uses API tokens of: Discord, Gemini and user IDs.<br>
         In order for the bot to run, you need to fill in the <b>.env</b> file with the appropriate data.<br><br>
         <b>Scheme:</b><br>
-        TOKEN='discord token'<br>
+        #ServerBot<br>
+        TOKEN='discord bot token'<br>
         admin_usr = ['your discord ID']<br>
+        custom_prefix='selected bots prefix' ('.' as default)<br>
+        addBot = 'invite link of Discord Bot'<br>
         <br>
         #AI<br>
-        AI_token='gemini token (to use .ai command)'<br>
-        aimodel = 'gemini-2.5-flash' -> selected gemini language model<br>
+        AI_token = 'gemini token (to use .ai command)'<br>
+        AI_model = 'gemini-2.5-flash' - selected gemini language model<br>
         instructions = ['Instructions for the language model']<br>
         <br>
         #Music<br>
-        JoinLeaveSounds = True/False -> Playing sounds while joining/leaving voice channel<br>
-        ForceMediaDir = False -> 'Locks' users to use sound files ONLY from music library (Media directory as default)<br>
+        JoinLeaveSounds = True/False - Playing sounds while joining/leaving voice channel<br>
+        ForceMediaDir = False - 'Locks' users to use sound files ONLY from music library (Media directory as default)<br>
         <br>
         #Command_dscserv<br>
         dscserv_link = 'Discord server link'<br>
         <br>
         #Service_list<br>
-        service_monitor = True/False -> enables .service command<br>
+        service_monitor = True/False - enables .service command<br>
         service_list = 'list of systemd services to monitor using Discord'<br>
         <br>
-        #Command_addbot
-        addstable = 'stable_link of Discord Bot'<br>
-        addtesting = 'testing_link of Discord Bot'<br>
-        <br>
         #Modules<br>
-        showmodulemessages = True/False -> shows informations about enabled modules<br>
-        ACLmodule = True/False -> Enables <a href="#ACL">AdvancedChannelListener</a> module<br>
+        LoadAllModules = True/False - loads all modules from 'modules' directory<br>
         <br>
         #ExtendedErrorMessages<br>
-        extendedErrMess = True/False -> enables/disables extended error messages<br>
+        extendedErrMess = True/False - enables/disables extended error messages<br>
         
         <br>
 
-        <h4 id="#admin">User ID and bot Administrators</h4>
+        <h2 id="#admin">User ID and bot Administrators</h2>
         Some commands uses Operating System data and functions,<br>
         so they require administrator privileges to run - you don't want to have system removed by unauthorized user, right?<br>
         To execute them, you must provide the ID of trusted and authorized users that can execute these commands in <b>admin_usr</b>. You should be the only one who has rights to execute them.<br>
@@ -222,7 +230,7 @@
         
         <br>
 
-        <h3 id="ffmpeg">Windows - FFmpeg installation</h3>
+        <h2 id="ffmpeg">Windows - FFmpeg installation</h2>
         <a href="https://www.ffmpeg.org/download.html">FFmpeg</a> is responsible for playing music on Voice Channels. On Windows FFmpeg installation looks different than on Linux.<br>
         You have to manually install and add FFmpeg files to local user PATH:<br>
         <ol>
@@ -238,32 +246,33 @@
 
         <br>
 
-        <h3 id="modules">Bot Extensions/modules</h3>
+        <h2 id="modules">Bot Extensions/modules</h2>
 
         Bot has extensions/modules that extend functions, which can be enabled or disabled in the .env file.<br>
-        Modules are also available as separate repositories (Discord Bots) on GitHub.<br>
+        Some modules are also available as separate repositories on GitHub.<br>
         <ul type="square">
             <li>
-                <a id="ACL" href="https://github.com/kamile320/AdvancedChannelListener"><b>AdvancedChannelListener</b></a> - shows user messages sent on Discord, saves them in ACL/[DiscordUserID].txt file and all messages in ACL/default/message.txt<br>
+                <a id="ACL" href="https://github.com/kamile320/AdvancedChannelListener"><b>AdvancedChannelListener</b></a> - shows user messages sent on Discord, saves them in 'ACL/[DiscordUserID]/[DiscordUserID].txt' file and all messages in 'ACL/default/message.txt' file.<br>
                 Useful for monitoring users on the server and verifying who is who. It can break user privacy, so use it wisely and at your own risk.<br>
-                If you don't want to use this - set ACLmodule = 'False' in .env (set as default).
+                ACL is added as a (cog) module, separated from the main code. It's located in 'modules/ACL.py'<br>
+                If you don't want to use this - just disable it from loading at start (disabled as default).
             </li>
             <li>
-                <b>.service</b> - command that allows to check status of systemctl services running on your host server. Enable service_monitor and provide a list of services in service_list in .env file. 
+                <b>.service</b> - command that allows to check status of systemctl services running on your host server. Enable service_monitor and provide a list of services in the service_list in the .env file.
             </li>
         </ul>
 
         <br>
 
-        <h3 id="ai">.ai command</h3>
+        <h2 id="ai">.ai command</h2>
         The .ai command allows you to talk with artificial intelligence. Uses Google's Gemini API.<br>
-        Get a gemini token (On the <a href="https://ai.google.dev/">Google AI dev</a> page) and put token in .env file in the 'AI_token' field.<br>
-        In .env file you cen set language model (gemini-2.5-flash as default) in the 'aimodel' field, and instructions for a model in a 'instructions' field.<br>
-        I recommend leaving default instruction that limits response to 1500 characters - longer response may not be send to discord channel and cause an error.<br>
+        Get a gemini token (On the <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a> page) and put token in .env file in the 'AI_token' field.<br>
+        In .env file you cen set language model (gemini-2.5-flash as default) in the 'AI_model' field, and instructions for a model in a 'instructions' field.<br>
+        If AI generates response longer than allowed message length on Discord, bot will save its response to file and send it as a file.<br>
 
         <br>
 
-        <h3 id="yt">Music commands</h3>
+        <h2 id="yt">Music commands</h2>
         Bot has ability to play music on voice channels in two ways:
         <ol>
             <li>
@@ -282,7 +291,20 @@
 
         <br>
 
-        <h3 id="db">Database (SQLite3)</h3>
+        <h2 id="portal">'Portal' - connecting channels between Discord servers</h2>
+        Portal (name might be changed) creates connection between two channels, allowing for a communication between them no matter if the channels are on two different servers or not.<br>
+        Bot will send a message to the second channel after using '.psend [message]' command on one of the paired channels. Command uses SQLite3 database.<br>
+        You can pair channels and manage them using commands below:
+        <ul type="square">
+            <li><b>.portal create {id1} {id2}</b> - creates connection (bot must have access to both channels)</li>
+            <li><b>.portal remove {id}</b> - removes connection with the selected channel ID</li>
+            <li><b>.portal search {id}</b> - searches for a connection in the database with selected channel ID</li>
+            <li><b>.portal show</b> - saves database (all connections) to 'tempDB.txt' file and sends as a response</li>
+        </ul>
+
+        <br>
+
+        <h2 id="db">Database (SQLite3)</h2>
         Bot uses SQLite3 database to store informations about users like:<br>
         <ul type="square">
             <li>User ID</li>
@@ -305,7 +327,7 @@
 
         <br>
 
-        <h3 id="comma">Basic Commands:</h3>
+        <h2 id="comma">Basic Commands:</h2>
         <table border>
             <tr valign="top" align="center">
                 <td>
@@ -314,6 +336,7 @@
                     bye<br>
                     hi<br>
                     hello_there<br>
+                    psend<br>
                 </td>
 
                 <td>
@@ -347,6 +370,7 @@
                     module<br>
                     db<br>
                     showdb<br>
+                    portal<br>
                 </td>
             </tr>
             <tr valign="top" align="center">

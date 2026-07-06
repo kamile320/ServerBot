@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot v1.10.1 User Manual [PL]">
+    <meta name="description" content="ServerBot v1.11.0 User Manual [PL]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.10.1</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.11.0</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -54,12 +54,13 @@
             <li>Zarządzanie Plikami i Katalogami</li>
             <li>Obsługa bazy danych (SQLite3)</li>
             <li>Rozmowa ze Sztuczną Inteligencją (Google Gemini)</li>
-            <li>I wiele więcej</li>
+            <li>Łączenie kanałów między serwerami</li>
+            <li>I więcej</li>
         </ul>
-        
+
         <br>
 
-        <h3>Spis Treści</h3>
+        <h2>Spis Treści</h2>
         <ol>
             <li><a href="#dirs">Struktura Katalogowa</a></li>
             <li><a href="#start">Uruchomienie</a></li>
@@ -70,13 +71,14 @@
             <li><a href="#modules">Moduły/Rozszerzenia Bota</a></li>
             <li><a href="#ai">Komenda .ai</a></li>
             <li><a href="#yt">Komendy muzyczne</a></li>
+            <li><a href="#portal">'Portal' (łączenie kanałów)</a></li>
             <li><a href="#db">Baza Danych (SQLite3)</a></li>
             <li><a href="#comma">Komendy</a></li>
         </ol>
 
         <br>
 
-        <h3 id="dirs">Struktura Katalogowa:</h3>
+        <h2 id="dirs">Struktura Katalogowa:</h2>
 
         <ol>
             <li><b>ServerBot.py</b> - Główny plik skryptu</li>
@@ -90,6 +92,13 @@
             <li><b>.env</b> - Specjalny plik do przechowywania Tokenów Bota</li>
             <li><b>.venv</b> - Wirtualne Środowisko Pythona (Po użyciu setup.sh - opcja 4)</li>
             <li><b>tempDB.txt</b> - Plik z zawartością bazy danych (po użyciu .showdb)</li>
+            <li>
+                <b>modules</b> - Katalog z <a href="#modules">modułami</a> Bota
+                <ul>
+                    <li><b>custom</b> - Katalog przeznaczony na niestandardowe moduły dla porządku; opcjonalny</li>
+                    <li><b>ACL.py</b> - Moduł <a href="#ACL">AdvancedChannelListener</a></li>
+                </ul>
+            </li>
             <li>
                 <b>Files</b> - Katalog z resztą plików Bota 
                 <ul>
@@ -109,26 +118,26 @@
                 </ul>
             </li>
         </ol>
-        
+
         <br>
 
-        <p align="right">Zdj.1 - Uruchomienie skryptu</p>
-        <a href="Files/UbuntuSB.png"><img align="right" src="Files/UbuntuSB.png" width="40%" height="40%"></a>
-        
-        <h3 id="start">Pierwsze uruchomienie:</h3>
-        <h5>Bot do uruchomienia wymaga:</h5>
+        <p align="right">Zdj. 1 - uruchomienie skryptu</p>
+        <a href="Files/UbuntuSB.png"><img align="right" src="Files/UbuntuSB.png" width="40%" height="40%" title="uruchomienie skryptu" alt="Zdj. 1 - uruchomienie skryptu"></a>
+
+        <h2 id="start">Pierwsze uruchomienie:</h2>
+        <h4>Bot do uruchomienia wymaga:</h4>
         <ul type="square">
             <li>Python 3.9 lub nowszy</li>
             <li>Discord.py 2.6.4 lub nowszy</li>
             <li>Połączenie z internetem</li>
             <li>Zainstalowane wymagane biblioteki pythona (patrz - zawartość setup.sh/setuplib.sh/requirements.txt)</li>
-            <li>Dodanie do środowiska PATH plików FFmpeg - Tylko Windows (zobacz YT)</li>
-            <li>System Operacyjny Linux(rekomendowany) / Windows / MacOS - Najlepiej 64bit</li>
+            <li>Dodanie do środowiska PATH plików FFmpeg - Tylko Windows (zobacz YT, setup.bat i <a href="#ffmpeg">instalację FFmpeg</a>)</li>
+            <li>System Operacyjny Linux (rekomendowany) / Windows / MacOS - najlepiej 64bit (testowane na x86_64 i ARMv7l)</li>
             <li>setup.sh - wymaga komendy "dialog"</li>
         </ul>
 
         <br>
-        
+
         Należy poprzez IDE, terminal albo inny program uruchomić skrypt - python3 lub setup.sh.<br>
         Jeżeli coś pójdzie nie tak, Bot powinien dać znać w czym problem<br>
         i poprosić o zatwierdzenie wykonania korekty albo porzuci uruchomienie/instalację.<br>
@@ -142,23 +151,25 @@
 
         <br>
 
-        <h3 id="autostart">Uruchamianie Automatyczne:</h3>
+        <h2 id="autostart">Uruchamianie Automatyczne:</h2>
 
         Korzystając z Bota może zechcesz aby automatycznie uruchamiał się wraz z systemem operacyjnym (Linux).<br>
         Aby to łatwo umożliwić istnieje komenda .mkservice<br>
         Po wpisaniu komendy trzeba podać dodatkową wartość:<br><br>
         
-        <b>def</b> -> tworzy domyślny plik autorun.sh w katalogu <a href="#dirs">Files</a>. Działa głównie na systemach opartych na Ubuntu <b>22.04</b> (Nie korzysta z utworzonego venv)<br><br>
+        <b>def</b> - tworzy domyślny plik autorun.sh w katalogu <a href="#dirs">Files</a>. Działa głównie na systemach opartych na Ubuntu <b>22.04</b> (Nie korzysta z utworzonego venv)<br><br>
 
-        <b>venv</b> -> czasem przy instalacji modułów za pomocą pip3 może wyskoczyć błąd <i>externally managed pip</i>.<br>
+        <b>venv</b> - czasem przy instalacji modułów za pomocą pip3 może wyskoczyć błąd <i>externally managed pip</i>.<br>
         W tym przypadku należy utworzyć Wirtualne Środowisko Pythona (Virtual Environment/Venv)<br>
         Jeśli jeszcze go nie utworzyłeś - rekomendowane jest utworzenie go w głównym katalogu Bota (ServerBot).<br><br>
-        Przykład: .mkservice venv <- wykonujesz tą komendę na Discordzie gdy skrypt działa w głównym katalogu Bota.<br>
+        Przykład: .mkservice venv - wykonujesz tę komendę na Discordzie gdy skrypt działa w głównym katalogu Bota.<br>
         UWAGA! Bot (a raczej setup.sh) jest przystosowany do nazwy katalogu z wirtualnym środowiskiem o nazwie ".venv".<br>
         Jeśli utworzyłeś ręcznie venv z inną nazwą katalogu, bot może się nie uruchomić!<br>
-        Zalecane jest używanie odpowiednich opcji z setup.sh -> Bez problemu wszystko się zainstaluje i skonfiguruje jak trzeba.<br>
+        Zalecane jest używanie odpowiednich opcji z setup.sh - Bez problemu wszystko się zainstaluje i skonfiguruje jak trzeba.<br>
         Aby autostart zadziałał, należy ustawić pliki bota z uprawnieniami odczytu/zapisu/wykonania na 775 (r-x dla wszystkich, rwx dla właściciela i grupy) jeśli nie posiadają takich uprawnień.<br>
-        Rekomenduję przenieść pliki Bota do katalogu /ServerBot (żeby nie był w innych katalogach). Nie instaluj bota w katalogu domowym jeśli chcesz uruchamiać go wraz z systemem.<br><br>
+        Rekomenduję przenieść pliki Bota do katalogu /ServerBot (żeby nie był w innych katalogach). Nie instaluj bota w katalogu domowym jeśli chcesz uruchamiać go wraz z systemem.<br>
+
+        <br>
 
         <b><i>Jak utworzyć venv:</i></b><br>
         <ol>
@@ -173,45 +184,43 @@
         <p>Pełna dokuntacja venv <a href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/">tutaj</a>.</p>
 
         <p align="right">Zdj. 2 - opcje setup.sh</p>
-        <a href="Files/setupSB.png"><img align="right" src="Files/setupSB.png" width="35%" height="35%"></a>
+        <a href="Files/setupSB.png"><img align="right" src="Files/setupSB.png" width="35%" height="35%" title="opcje setup.sh" alt="Zdj. 2 - opcje setup.sh"></a>
 
-        <h3 id="token">Tokeny</h3>
+        <h2 id="token">Tokeny</h2>
         Bot korzysta z tokenów: API Discorda, Gemini oraz z ID użytkowników.<br>
         Aby bot się uruchomił należy wypełnić odpowiednimi danymi plik <b>.env</b><br><br>
         <b>Schemat:</b><br>
-        TOKEN='discord token'<br>
+        #ServerBot<br>
+        TOKEN='discord bot token'<br>
         admin_usr = ['twoje ID']<br>
+        custom_prefix='wybrany prefix bota' (domyślnie '.')<br>
+        addBot = 'invite link of Discord Bot'<br>
         <br>
         #AI<br>
-        AI_token='gemini token (do komendy .ai)'<br>
-        aimodel = 'gemini-2.5-flash' -> wybrany model językowy gemini<br>
+        AI_token = 'gemini token (do komendy .ai)'<br>
+        AI_model = 'gemini-2.5-flash' - wybrany model językowy gemini<br>
         instructions = ['Instrukcje dla modelu językowego']<br>
         <br>
         #Music<br>
-        JoinLeaveSounds = True/False -> Odtwarzanie dźwięku przy dołączaniu/wychodzeniu z kanału głosowego<br>
-        ForceMediaDir = False -> Blokuje użytkowników do korzystania z plików muzycznych JEDYNIE z biblioteki muzycznej (domyślnie katalog Media)<br>
+        JoinLeaveSounds = True/False - Odtwarzanie dźwięku przy dołączaniu/wychodzeniu z kanału głosowego<br>
+        ForceMediaDir = False - Blokuje użytkowników do korzystania z plików muzycznych JEDYNIE z biblioteki muzycznej (domyślnie katalog 'Media')<br>
         <br>
         #Command_dscserv<br>
         dscserv_link = 'Link do serwera Discord'<br>
         <br>
         #Service_list<br>
-        service_monitor = True/False -> włącza komendę .service<br>
+        service_monitor = True/False - włącza komendę .service<br>
         service_list = 'Lista usług systemd do monitorowania poprzez discorda'<br>
         <br>
-        #Command_addbot
-        addstable = 'stable_link of Discord Bot'<br>
-        addtesting = 'testing_link of Discord Bot'<br>
-        <br>
         #Modules<br>
-        showmodulemessages = True/False -> wyświetla informacje o włączonych modułach Bota<br>
-        ACLmodule = True/False -> Uruchamia funkcję <a href="#ACL">AdvancedChannelListener</a><br>
+        LoadAllModules = True/False - ładuje wszystkie moduły z katalogu 'modules'<br>
         <br>
         #ExtendedErrorMessages<br>
-        extendedErrMess = True/False -> włącza/wyłącza rozszerzone komunikaty błędów<br>
+        extendedErrMess = True/False - włącza/wyłącza rozszerzone komunikaty błędów<br>
         
         <br>
 
-        <h4 id="#admin">ID użytkownika i Administratorzy bota</h4>
+        <h2 id="#admin">ID użytkownika i Administratorzy bota</h2>
         Niektóre komendy korzystają z funkcji i danych związanych z twoim systemem operacyjnym,<br>
         więc wymagają uprawnień administratora do uruchomienia - chyba nie chcesz żeby ktoś ci usunął system!<br>
         Aby te komendy wykonać, należy podać w <b>admin_usr</b> ID uprawnionych użytkowników do wykonywania tych komend - to muszą być zaufane osoby, a najlepiej tylko ty!<br>
@@ -221,7 +230,7 @@
 
         <br>
 
-        <h3 id="ffmpeg">Windows - instalacja FFmpeg</h3>
+        <h2 id="ffmpeg">Windows - instalacja FFmpeg</h2>
         <a href="https://www.ffmpeg.org/download.html">FFmpeg</a> odpowiada za odtwarzanie muzyki na Kanałach Głosowych. Na Windowsie instalacja FFmpeg wygląda inaczej niż na Linuksie.<br>
         Należy ręcznie pobrać pliki FFmpeg i dodać je do zmiennej środowiskowej PATH według poniższych kroków:<br>
         <ol>
@@ -237,15 +246,16 @@
 
         <br>
 
-        <h3 id="modules">Moduły/Rozszerzenia Bota</h3>
+        <h2 id="modules">Moduły/Rozszerzenia Bota</h2>
 
         Bot posiada moduły/rozszerzenia rozszerzające funkcje, które można włączyć lub wyłączyć w pliku .env<br>
-        Moduły są także dostępne jako osobne repozytoria (Boty Discord) na GitHubie.<br>
+        Niektóre moduły są także dostępne jako osobne repozytoria na GitHubie.<br>
         <ul type="square">
             <li>
-                <a id="ACL" href="https://github.com/kamile320/AdvancedChannelListener"><b>AdvancedChannelListener</b></a> - rejestruje wiadomości użytkowników na serwerze i zapisuje je w pliku ACL/[DiscordUserID].txt oraz wszystkie wiadomości w ACL/default/message.txt<br>
+                <a id="ACL" href="https://github.com/kamile320/AdvancedChannelListener"><b>AdvancedChannelListener</b></a> - rejestruje wiadomości użytkowników na serwerze i zapisuje je w lokalizacji 'ACL/[DiscordUserID]/[DiscordUserID].txt' oraz wszystkie wiadomości w 'ACL/default/message.txt'<br>
                 Przydatny do monitorowania użytkowników na serwerze i weryfikowania kto jest kim. Może łamać prywatność użytkowników, więc używaj z rozwagą i na własną odpowiedzialność.<br>
-                Jeśli nie zamierzasz używać tego modułu - ustaw w .env ACLmodule = 'False' (ustwaione domyślnie).
+                ACL jest dodany w formie modułu (cog) oddzielonego od głównego kodu - znajduje się w katalogu 'modules/ACL.py'<br>
+                Jeśli nie zamierzasz używać tego modułu - wyłącz go z uruchamiania przy starcie (nieuwzględniony domyślnie).
             </li>
             <li>
                 <b>.service</b> - komenda pozwalająca na podgląd statusu usług systemctl na serwerze hostującym bota. Włącz ją w pliku .env ustawiając service_monitor = True oraz wpisując listę usług do service_list.
@@ -254,15 +264,15 @@
 
         <br>
 
-        <h3 id="ai">Komenda .ai</h3>
+        <h2 id="ai">Komenda .ai</h2>
         Komenda .ai pozwala na rozmowę ze sztuczną inteligencją. Wykorzystuje API Gemini firmy Google.<br>
-        Wystarczy zdobyć token gemini (na stronie <a href="https://ai.google.dev/">Google AI dev</a>) i wpisać go do pliku .env w polu 'AI_token'.<br>
-        W pliku .env możesz ustawić model językowy (domyślnie gemini-2.5-flash) w polu 'aimodel', oraz instrukcje dla modelu w polu 'instructions'.<br>
-        Rekomenduję zostawić domyślną instrukcję ograniczającą limit odpowiedzi do 1500 znaków - długa odpowiedź może nie zostać wysłana na kanał discord i spowodować błąd.<br>
+        Wystarczy zdobyć token Gemini (na stronie <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a>) i wpisać go do pliku .env w polu 'AI_token'.<br>
+        W pliku .env możesz ustawić model językowy (domyślnie gemini-2.5-flash) w polu 'AI_model', oraz instrukcje dla modelu w polu 'instructions'.<br>
+        Jeśli AI wygeneruje odpowiedź dłuższą niż dozwolona długość wiadomości na Discordzie, bot zapisze odpowiedź do pliku i wyśle ją jako plik.<br>
 
         <br>
 
-        <h3 id="yt">Komendy muzyczne</h3>
+        <h2 id="yt">Komendy muzyczne</h2>
         Bot posiada możliwość odtwarzania muzyki na kanałach głosowych na dwa sposoby:
         <ol>
             <li>
@@ -281,14 +291,27 @@
 
         <br>
 
-        <h3 id="db">Baza Danych (SQLite3)</h3>
+        <h2 id="portal">'Portal' - łączenie kanałów między serwerami Discord</h2>
+        Portal (nazwa może ulec zmianie) tworzy połączenie między dwoma kanałami, pozwalając na komunikację między nimi niezależnie czy kanały są na dwóch różnych serwerach, czy nie.<br>
+        Bot wyśle wiadomość do drugiego kanału po użyciu komendy '.psend [treść wiadomości]' na połączonym kanale w parę. Komenda wykorzystuje bazę danych SQLite3.<br>
+        Można łączyć kanały i nimi zarządzać za pomocą poniższych komend:
+        <ul type="square">
+            <li><b>.portal create {id1} {id2}</b> - tworzy połączenie (bot musi mieć dostęp do obu kanałów)</li>
+            <li><b>.portal remove {id}</b> - usuwa połączenie zawierające ID podanego kanału</li>
+            <li><b>.portal search {id}</b> - szuka w bazie danych połączenia zawierającego podane ID kanału</li>
+            <li><b>.portal show</b> - zapisuje zawartość bazy danych (wszystkie połączenia) do pliku tempDB.txt i wysyła jako odpowiedź</li>
+        </ul>
+
+        <br>
+
+        <h2 id="db">Baza Danych (SQLite3)</h2>
         Bot korzysta z bazy danych SQLite3 do przechowywania informacji o użytkownikach takich jak:<br>
         <ul type="square">
             <li>ID użytkownika</li>
             <li>Status użytkownika (Moderator itp.)</li>
             <li>Inne dane związane z użytkownikami (w przyszłości)</li>
         </ul>
-        Baza danych znajduje się w katalogu <a href="#dirs">Files</a> o nazwie 'serverbot.db'. Bot automatycznie tworzy bazę danych i zbiera dane przy każdej wysłanej wiadomości na serwerze.<br>
+        Baza danych znajduje się w '<a href="#dirs">Files</a>/serverbot.db'. Bot automatycznie tworzy bazę danych i zbiera dane przy każdej wysłanej wiadomości na serwerze.<br>
         Jest to wymagane do poprawnego działania funkcji wykorzystujących bazę danych, takie jak: komendy moderatora.<br>
         W przyszłości planowane jest dodanie więcej funkcji wykorzystujących bazę danych, niekoniecznie wykorzystujących ID użytkowników.<br>
         Poniższe komendy pozwalają zarzadzać bazą danych z poziomu Discorda:<br>
@@ -304,7 +327,7 @@
 
         <br>
 
-        <h3 id="comma">Podstawowe Komendy:</h3>
+        <h2 id="comma">Podstawowe Komendy:</h2>
         <table border>
             <tr valign="top" align="center">
                 <td>
@@ -313,6 +336,7 @@
                     bye<br>
                     hi<br>
                     hello_there<br>
+                    psend<br>
                 </td>
 
                 <td>
@@ -346,6 +370,7 @@
                     module<br>
                     db<br>
                     showdb<br>
+                    portal<br>
                 </td>
             </tr>
             <tr valign="top" align="center">
