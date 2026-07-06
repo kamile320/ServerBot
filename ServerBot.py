@@ -473,9 +473,12 @@ async def blank(ctx):
 
 #6
 @client.command(name='ai', help=f"Talk with AI.\nUses {ai_model} model.\n.ai [question]")
-async def ai(ctx, *, question):
+async def ai(ctx, *, question = None):
     if ai_token is None:
         await ctx.reply("AI token not found. Enter valid Gemini API token in the .env file to use this command.")
+        return
+    if question is None:
+        await ctx.reply("Incomplete command.\nType your question after command.")
         return
     try:
         response = ai_client.models.generate_content(
@@ -861,7 +864,7 @@ async def mkservice(ctx, mode):
 
 #7
 if os.getenv('service_monitor') in accept_value:
-    @client.command(name='service', help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemd")
+    @client.command(name='service', help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl (systemd)\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemd")
     async def service(ctx, mode):
         if str(ctx.message.author.id) in admin_usr:
             try:
@@ -2064,10 +2067,13 @@ async def testbot(interaction):
 #4
 @client.tree.command(name='ai', description=f"Talk with AI. Uses {ai_model} model.")
 @app_commands.describe(question="Prompt/question for AI")
-async def ai(interaction: discord.Interaction, question: str):
+async def ai(interaction: discord.Interaction, question: str = None):
     await interaction.response.defer(thinking=True)
     if ai_token is None:
         await interaction.followup.send("AI token not found. Enter valid Gemini API token in the .env file to use this command.")
+        return
+    if question is None:
+        await interaction.followup.send("Incomplete command.\nType your question after command.")
         return
     try:
         response = ai_client.models.generate_content(
