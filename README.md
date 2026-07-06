@@ -29,6 +29,7 @@ If you're using not-Ubuntu 22.04 based distros you need to create python3 virtua
 - .ai command to talk with gemini-based AI
 - Log messages sent by users on discord channels
 - Save every message sent on available (for the bot) discord channels[^3]
+- Connect channels between servers to communicate with each other
 - Use sqlite3 database to register users and grant bot moderators access to mod commands (+level system in future)
 
 ## Advantages of Linux
