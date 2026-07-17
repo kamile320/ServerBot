@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Bot version
-VERSION="v1.11.0"
+VERSION="v1.11.1"
 # Change version below to install newer release from GitHub (if exists)
-UPDATEVER="v1.11.0"
+UPDATEVER="v1.11.1"
 # Systemd service name - change if you created systemd entry with different name; only name WITHOUT .service extension
 SERVICE_NAME="ServerBot"
 
