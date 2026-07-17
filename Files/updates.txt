@@ -246,3 +246,12 @@ on text in .testbot while running Bot on ARM devices
 - Removed showmodulemessages and ACLmodule variables from .env file and functions that used them
 - Updated .env file scheme
 - Added custom_prefix variable in the .env file (prefix '.' still set as default)
+
+
+[ServerBot v1.11.1]
+    Changelog:
+- Added .sync /sync commands for syncing slash commands (useful when you add new cogs with slash commands)
+- Updated .credits command to test embed messages
+- Updated .module command structure
+- Removed creation of the modules/custom directory and updated notes at the beginning of file
+- Small fixes and improvements
