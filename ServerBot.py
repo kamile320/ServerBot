@@ -5,7 +5,7 @@ import datetime
 import sqlite3
 
 # Bot Version
-ver = "1.11.0"
+ver = "1.11.1"
 # Bot Name
 displayname = "ServerBot"
 # Name of service in systemd; change if needed, WITHOUT .service file extension
@@ -21,10 +21,10 @@ ai_chat = f'{maindir}/Files/AI_chat'      # Directory where longer Gemini respon
 #Directory for music files; If you set ForceMediaDir to True, bot will be able to use local sounds only from this dir.
 medialib = f'{maindir}/Media' 
 
-#List of modules/cogs you want to load at start; cogs from 'modules/custom' you have to type like 'custom.cogName' - WITHOUT .py
-#If LoadAllModules is True, this list will nothing do; bot will load every cog from 'modules' directory (not from 'modules/custom'!)
-#If you use cogs from 'modules' and 'modules/custom' dirs and you want to load them all on start, type here all your modules and set LAM to False
-loadList = [] # ['cog1', 'custom.cog2'] <- example
+#List of modules/cogs you want to load at start; cogs from subdirectories (like 'modules/custom') you have to type like 'subdirName.cogName' - WITHOUT .py
+#If LoadAllModules is True, this list will nothing do; bot will load every cog from 'modules' directory (not from subdirs!)
+#If you use cogs from 'modules' directory or subdirectories and you want to load them all on start, type here all your modules and set LAM to False
+loadList = [] # ['cog1', 'custom.cog2'] <- example; custom is the name of a directory inside 'modules' dir
 
 
 # .env file template - if .env not exists, bot will automatically create a new one
@@ -172,6 +172,7 @@ try:
     extendedErrMess = os.getenv('extendedErrMess')
     JLS = os.getenv('JoinLeaveSounds')
     FMD = os.getenv('ForceMediaDir')
+    prefix = os.getenv('custom_prefix') or '.'
     ################################################
 except Exception as err:
     print(f"CAN'T LOAD .env FILE!\nCreate .env file using setup.sh and fill it with proper values!\nException: {err}")
@@ -183,7 +184,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 status = ['Windows 98 SE', 'Minesweeper', f'{platform.system()} {platform.release()}', 'system32', 'Fallout 2', 'Windows Vista', 'MS-DOS', 'Team Fortress 2', 'Discord Moderator Simulator', 'Arch Linux', f'ServerBot v{ver}', displayname]
 choice = random.choice(status)
-client = commands.Bot(command_prefix={os.getenv('custom_prefix') or '.'}, intents=intents, activity=discord.Game(name=choice))
+client = commands.Bot(command_prefix=prefix, intents=intents, activity=discord.Game(name=choice))
 testbot_cpu_type = platform.machine() or 'Unknown'
 accept_value = ['True', 'true', 'Enabled', 'enabled', '1', 'yes', 'Yes', 'YES', True]
 start_time = datetime.datetime.now()
@@ -285,20 +286,6 @@ def os_check():
 
 
 
-#Create modules/custom
-def test_custom():
-    if os.path.exists(f'{maindir}/modules/custom') == False:
-        try:
-            os.makedirs(f'{maindir}/modules/custom')
-            return 0 # Was missing and created
-        except:
-            print(f"Cannot create 'modules/custom' directory!")
-            return 1 # Was missing and cannot create
-    elif os.path.exists(f'{maindir}/modules/custom') == True:
-        return 2 # All OK
-
-
-
 #Information/Errors
 fileerror = "Error: File not found"
 filelarge = "Error: File too large"
@@ -327,17 +314,16 @@ async def on_ready():
     print(f'Welcome in ServerBot v{ver}')
     
     #Load_cog_modules_on_ready
-    #   Load all built-in modules from 'modules' directory; cogs from 'modules/custom' you have to load manually, or add to loading list as 'custom.cogName'
-    test_custom()
+    #   Load all built-in modules from 'modules' directory; cogs from subdirectories you have to load manually, or add to loading list as 'subdirName.cogName'
     if os.getenv('LoadAllModules') in accept_value:
         for i in os.listdir(f'{maindir}/modules'):
             try:
                 if i.endswith('.py'):
                     await client.load_extension(f"modules.{i[:-3]}")
-                if extendedErrMess in accept_value:
-                    message = f"Loaded {i} module."
-                    print(message)
-                    logMessage(message)
+                    if extendedErrMess in accept_value:
+                        message = f"Loaded {i[:-3]} module."
+                        print(message)
+                        logMessage(message)
             except Exception as err:
                 message = f"Failed to load {i} module: {err}"
                 print(message)
@@ -550,22 +536,29 @@ async def manual(ctx, type):
 #2
 @client.command(name='credits', help="Shows Credits")
 async def credits(ctx):
-    await ctx.send(f"""
-***S e r v e r  B o t***
-Version: {ver}
-Created By: *Kamile320*.
-
-Thanks to:
-- friends for testing Bot
-- <@632682413776175107> for some retranslations
-
-Source: ```https://github.com/kamile320/ServerBot```
-Discord Server: [Here](https://discord.gg/UMtYGAx5ac)
-
-Used Sounds:
-    WinXP/98 sounds -> files from OG OS by Microsoft
-    TF2 upgrade station: ```https://youtube.com/watch?v=Q7eJg7hRvqE```
-""")
+    embed = discord.Embed(
+        title="***S e r v e r B o t***",
+        description=f"Version: **{ver}**\nCreated By: [Kamile320](https://github.com/kamile320)",
+        color=0xd6930c
+    )
+    embed.set_author(name=ctx.bot.user.name, icon_url=ctx.bot.user.display_avatar.url)
+    embed.add_field(
+        name="Links:",
+        value="[Discord](https://discord.gg/UMtYGAx5ac)\n" \
+              "[Source code](https://github.com/kamile320/ServerBot)"
+    )
+    embed.add_field(
+        name="Thanks to:",
+        value="- friends for testing Bot",
+        inline=False
+    )
+    embed.add_field(
+        name="Used sounds:",
+        value="- WinXP/98 sounds - files from OG OS by Microsoft\n" \
+              "- [TF2 upgrade station](https://youtube.com/watch?v=Q7eJg7hRvqE)",
+        inline=False
+    )
+    await ctx.send(embed=embed)
 
 #3
 @client.command(name='time', help="Shows local time")
@@ -584,18 +577,11 @@ async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Added 'portal' system - connect two channels and send messages between them with .psend command
-- Added .portal and .psend commands
-- Updated .ShutDown .testbot .rebuild .ai /ai .addbot .yt commands
-- AI commands now save responses longer than 2000 characters and sends them as a file
-- Updated database support
-- Added cog (module) support
-- Updated .module command - now bot can load/unload/reload/list supported cog modules
-- Updated ACL to v4.1 and removed from the main file
-- Added 'modules' directory for 'built-in' modules and 'modules/custom' for additional ones
-- Removed showmodulemessages and ACLmodule variables from .env file and functions that used them
-- Updated .env file scheme
-- Added custom_prefix variable in the .env file (prefix '.' still set as default)
+- Added .sync /sync commands for syncing slash commands (useful when you add new cogs with slash commands)
+- Updated .credits command to test embed messages
+- Updated .module command structure
+- Removed creation of the modules/custom directory and updated notes at the beginning of file
+- Small fixes and improvements
 
 To see older releases, read 'updates.txt' in the 'Files' directory.
 """)
@@ -607,6 +593,7 @@ async def next_update(ctx):
 Ideas for Future Updates
 - Better Informations/Errors
 - More slash commands
+- More embed messages
 - Database support and leveling system (sqlite3)
 - More advanced module system (cogs) or whole code rewrite to make it more modular and easier to update
 You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac)
@@ -655,7 +642,7 @@ async def ShutDown(ctx):
         await ctx.reply(not_allowed)
 
 #2
-@client.command(name='copylog', help="Copies Bot Log file\nappend -> adds new value to older in Files/Logs.txt\nreplace -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs")
+@client.command(name='copylog', help="Copies Bot Log file\nappend   -> adds new value to older in Files/Logs.txt\nreplace  -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs")
 async def copylog(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         if mode == 'append':
@@ -757,9 +744,6 @@ async def rebuild(ctx):
             print("Creating 'modules' directory...")
             os.makedirs(f'{maindir}/modules')
 
-            print("Creating 'modules/custom' directory...")
-            os.makedirs(f'{maindir}/modules/custom')
-
             message = "Information[Rebuild]: Successfully rebuilded files and directories."
             printMessage(message)
             logMessage(message)
@@ -792,7 +776,7 @@ async def shrtct(ctx, desk):
         await ctx.send(not_allowed)
 
 #6
-@client.command(name='mkservice', help="Adds ServerBot to systemd to start with system startup (Bot needs to be running as root)\nMode:\n'def' -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemd startup will not work. Do not place bot in your home dir.")
+@client.command(name='mkservice', help="Adds ServerBot to systemd to start with system startup (Bot needs to be running as root)\nMode:\n'def'  -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemd startup will not work. Do not place bot in your home dir.")
 async def mkservice(ctx, mode):
     if str(ctx.message.author.id) in admin_usr:
         try:
@@ -920,65 +904,11 @@ async def pingip(ctx, ip):
         await ctx.send(not_allowed)
 
 #9
-@client.command(name='module', help="Manage built-in and additional modules (cogs).\nload -> loads module\nunload -> unloads module\nreload -> reload module\nlist -> lists available modules from 'modules' directory. Add 'active' to list only active modules.")
-async def module(ctx, mode, *, name=None):
+@client.command(name='module', help="Manage built-in and additional modules (cogs).\nload   -> loads module\nunload -> unloads module\nreload -> reload module\nlist   -> lists available modules from 'modules' directory. Add 'active' to list only active modules.")
+async def module(ctx, mode=None, *, name=None):
     if str(ctx.message.author.id) in admin_usr:
-        if mode == 'load':
-            try:
-                if name is not None:
-                    await client.load_extension(f'modules.{name}')
-                    await ctx.reply(f"{name} module loaded.")
-                    message = f"Information[modules]: {name} module loaded."
-                    printMessage(message)
-                    logMessage(message)
-                else:
-                    await ctx.reply("Incomplete command. Enter module name.")
-            except Exception as e:
-                await ctx.reply(f'Failed to load {name} module: {e}')
-                message = f'Information[modules]: Failed to load {name} module: {e}'
-                printMessage(message)
-                logMessage(message)
-
-        elif mode == 'unload':
-            try:
-                if name is not None:
-                    await client.unload_extension(f'modules.{name}')
-                    await ctx.reply(f"{name} module unloaded.")
-                    message = f"Information[modules]: {name} module unloaded."
-                    printMessage(message)
-                    logMessage(message)
-                else:
-                    await ctx.reply("Incomplete command. Enter module name.")
-            except Exception as e:
-                await ctx.reply(f'Failed to unload {name} module: {e}')
-                message = f'Information[modules]: Failed to unload {name} module: {e}'
-                printMessage(message)
-                logMessage(message)
-
-        elif mode == 'reload':
-            try:
-                if name is not None:
-                    await client.reload_extension(f'modules.{name}')
-                    await ctx.reply(f"{name} module reloaded.")
-                    message = f"Information[modules]: {name} module reloaded."
-                    printMessage(message)
-                    logMessage(message)
-                else:
-                    await ctx.reply("Incomplete command. Enter module name.")
-            except Exception as e:
-                await ctx.reply(f'Failed to reload {name} module: {e}')
-                message = f'Information[modules]: Failed to reload {name} module: {e}'
-                printMessage(message)
-                logMessage(message)
-
-        elif mode == 'list':
-            if test_custom() == 0:
-                message = "Information[module]: Created missing 'modules/custom' directory."
-                print(message)
-                logMessage(message)
-            elif test_custom() == 1:
-                await ctx.send("The 'modules/custom' directory is missing and cannot be created.")
-
+        if mode is not None: mode = mode.lower()
+        if mode == 'list':
             try:
                 if name == 'active':
                     loaded_modules = [cog for cog in client.cogs.keys()]
@@ -986,32 +916,68 @@ async def module(ctx, mode, *, name=None):
                         await ctx.send("There's no active modules.")
                         return
                     else:
-                        await ctx.send(f"**Active modules:**\n{', '.join(loaded_modules)}")
+                        await ctx.send(f"========== **Active modules:** ==========\n{', '.join(loaded_modules)}")
                 
                 else:
                     listdir = []
-                    listdir_c = []
                     br = '\n- '
                     for f in os.listdir(f'{maindir}/modules'):
                         if f.endswith('.py'):
                             listdir.append(f.replace('.py', ''))
-                    for f in os.listdir(f'{maindir}/modules/custom'):
-                        if f.endswith('.py'):
-                            listdir_c.append(f.replace('.py', ''))
 
                     await ctx.send(f"""
-==========**ServerBot modules: **==========
-Available modules:\n- {br.join(listdir)}
-
-Additional modules (from modules/custom):\n- {br.join(listdir_c)}""")
+========== **ServerBot modules: **==========
+Available modules:\n- {br.join(listdir)}""")
             except Exception as e:
                 await ctx.send(f'Unexpected error occurred. See Logs.txt for details.')
                 message = f'Information[modules]: Failed to list modules: {e}'
                 printMessage(message)
                 logMessage(message)
+            return
+        
+        if mode is None: # If user executed command without selecting mode
+            await ctx.reply("Incomplete command. Select mode [load/unload/reload/list].\nSee '.help module' for more information.")
+            return
+        if name is None: # If user executed command without typing name
+            await ctx.reply("Incomplete command. Enter module name.")
+            return
+
+        try:
+            if mode == 'load':
+                opt = 'loaded'
+                await client.load_extension(f'modules.{name}')
+            elif mode == 'unload':
+                opt = 'unloaded'
+                await client.unload_extension(f'modules.{name}')
+            elif mode == 'reload':
+                opt = 'reloaded'
+                await client.reload_extension(f'modules.{name}')
+            else:
+                await ctx.reply("Incorrect mode selected. Use '.help module' for more information.")
+                return
             
-        else:
-            await ctx.reply("Wrong mode selected. Use '.help module' for help.")
+            await ctx.reply(f"{name} module {opt}.")
+            message = f"Information[modules]: {name} module {opt}."
+            printMessage(message)
+            logMessage(message)
+        except Exception as e:
+            await ctx.reply(f"Failed to {mode} {name} module: {e}")
+            message = f'Information[modules]: Failed to {opt} {name} module: {e}'
+            printMessage(message)
+            logMessage(message)
+
+    else:
+        await ctx.send(not_allowed)
+
+#10
+@client.command(name='sync', help="Sync slash commands")
+async def sync(ctx):
+    if str(ctx.message.author.id) in admin_usr:
+        try:
+            await ctx.bot.tree.sync()
+            await ctx.send("Synced slash commands.")
+        except Exception as err:
+            await ctx.reply(f"Failed to sync slash commands.\nPossible cause: {err}")
     else:
         await ctx.send(not_allowed)
         #AdminOnly-END
@@ -1140,6 +1106,7 @@ Time: **{now.strftime('%H:%M:%S, %d.%m.%Y')} [Day {(now - start_time).days}]**
 Bot name: **{client.user}**
 DisplayName: **{displayname}**
 Version: **{ver}**
+Prefix: **{prefix}**
 CPU Usage: **{psutil.cpu_percent()}%**
 CPU Cores: **{psutil.cpu_count(logical=False)}/{psutil.cpu_count(logical=True)}**
 Arch: **{testbot_cpu_type}**
@@ -2046,6 +2013,7 @@ async def testbot(interaction):
     Bot name: **{client.user}**
     DisplayName: **{displayname}**
     Version: **{ver}**
+    Prefix: **{prefix}**
     CPU Usage: **{psutil.cpu_percent()}%**
     CPU Cores: **{psutil.cpu_count(logical=False)}/{psutil.cpu_count(logical=True)}**
     Arch: **{testbot_cpu_type}**
@@ -2057,7 +2025,7 @@ async def testbot(interaction):
     Bot Current Dir: **{os.getcwd()}**
     Bot Main Dir: **{maindir}**
     Music library: **{medialib}**
-    Loaded modules: **{', '.join(loaded_modules)}**
+    Loaded modules: **{len(loaded_modules)}**
     File size: **{os.path.getsize(f'{maindir}/ServerBot.py')} B**
     Floppy: **{'Yes' if os.path.exists('/dev/fd0') else 'No'}**
     ====================================================""")
@@ -2140,6 +2108,19 @@ async def echo(interaction: discord.Interaction, message: str, channel_id: str =
                 await interaction.response.send_message(f"Error occurred: {err}", ephemeral=True)
             else:
                 await interaction.response.send_message(f"Can't send message. Have you typed command and channel ID correctly?", ephemeral=True)
+    else:
+        await interaction.response.send_message(not_allowed, ephemeral=True)
+
+#7
+@client.tree.command(name='sync', description="Sync slash commands")
+async def sync(interaction: discord.Interaction):
+    if str(interaction.user.id) in admin_usr:
+        await interaction.response.defer(thinking=True)
+        try:
+            await interaction.client.tree.sync()
+            await interaction.followup.send("Synced slash commands.")
+        except Exception as err:
+            await interaction.followup.send(f"Failed to sync slash commands.\nPossible cause: {err}")
     else:
         await interaction.response.send_message(not_allowed, ephemeral=True)
 ################################################ S L A S H   C O M M A N D S  - E N D #######################################################################################
