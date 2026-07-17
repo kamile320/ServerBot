@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot v1.11.0 User Manual [PL]">
+    <meta name="description" content="ServerBot v1.11.1 User Manual [PL]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.11.0</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.11.1</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -95,8 +95,8 @@
             <li>
                 <b>modules</b> - Katalog z <a href="#modules">modułami</a> Bota
                 <ul>
-                    <li><b>custom</b> - Katalog przeznaczony na niestandardowe moduły dla porządku; opcjonalny</li>
                     <li><b>ACL.py</b> - Moduł <a href="#ACL">AdvancedChannelListener</a></li>
+                    <li><b>template.py</b> - Przykładowy moduł cog</li>
                 </ul>
             </li>
             <li>
@@ -127,7 +127,7 @@
         <h2 id="start">Pierwsze uruchomienie:</h2>
         <h4>Bot do uruchomienia wymaga:</h4>
         <ul type="square">
-            <li>Python 3.9 lub nowszy</li>
+            <li>Python 3.11 lub nowszy</li>
             <li>Discord.py 2.6.4 lub nowszy</li>
             <li>Połączenie z internetem</li>
             <li>Zainstalowane wymagane biblioteki pythona (patrz - zawartość setup.sh/setuplib.sh/requirements.txt)</li>
@@ -258,6 +258,9 @@
                 Jeśli nie zamierzasz używać tego modułu - wyłącz go z uruchamiania przy starcie (nieuwzględniony domyślnie).
             </li>
             <li>
+                <b>template.py</b> - Przykładowy moduł (cog) służący jako szablon do tworzenia własnych modułów.
+            </li>
+            <li>
                 <b>.service</b> - komenda pozwalająca na podgląd statusu usług systemctl na serwerze hostującym bota. Włącz ją w pliku .env ustawiając service_monitor = True oraz wpisując listę usług do service_list.
             </li>
         </ul>
@@ -371,6 +374,7 @@
                     db<br>
                     showdb<br>
                     portal<br>
+                    sync<br>
                 </td>
             </tr>
             <tr valign="top" align="center">

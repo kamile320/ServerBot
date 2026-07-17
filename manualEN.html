@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServerBot Manual</title>
     <link rel="icon" type="image/x-icon" href="Files/favicon.ico">
-    <meta name="description" content="ServerBot v1.11.0 User Manual [EN]">
+    <meta name="description" content="ServerBot v1.11.1 User Manual [EN]">
     <meta name="author" content="Kamile320">
 
     <style>
@@ -37,7 +37,7 @@
 <body>
     <div class="card">
         <font size="6">
-            <center><h1><i>ServerBot User Manual v1.11.0</i></h1></center>
+            <center><h1><i>ServerBot User Manual v1.11.1</i></h1></center>
         </font>
         <hr style="height: 5px; background: rgb(5, 5, 99); border: 2px;">
 
@@ -95,8 +95,8 @@
             <li>
                 <b>modules</b> - Directory with bot <a href="#modules">modules</a>
                 <ul>
-                    <li><b>custom</b> - Directory for additional modules; optional</li>
                     <li><b>ACL.py</b> - <a href="#ACL">AdvancedChannelListener</a> module</li>
+                    <li><b>template.py</b> - Example cog module</li>
                 </ul>
             </li>
             <li>
@@ -127,7 +127,7 @@
         <h2 id="start">First run:</h2>
         <h4>The Bot requires:</h4>
         <ul type="square">
-            <li>Python 3.9 or later</li>
+            <li>Python 3.11 or later</li>
             <li>Discord.py 2.6.4 or newer</li>
             <li>Internet connection</li>
             <li>Required python libraries installed (see setup.sh/setuplib.sh/requirements.txt contents)</li>
@@ -258,6 +258,9 @@
                 If you don't want to use this - just disable it from loading at start (disabled as default).
             </li>
             <li>
+                <b>template.py</b> - Example cog module used as a template for making your own modules.
+            </li>
+            <li>
                 <b>.service</b> - command that allows to check status of systemctl services running on your host server. Enable service_monitor and provide a list of services in the service_list in the .env file.
             </li>
         </ul>
@@ -371,6 +374,7 @@
                     db<br>
                     showdb<br>
                     portal<br>
+                    sync<br>
                 </td>
             </tr>
             <tr valign="top" align="center">
