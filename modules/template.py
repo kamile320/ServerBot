@@ -8,7 +8,7 @@ class TemplateCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='test', description="Test command")
+    @commands.command(name='test', help="Test command")
     async def test(self, ctx):
         await ctx.send("Test message")
 
