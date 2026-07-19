@@ -13,8 +13,8 @@ servicename = "ServerBot"
 
 
 #Directory
-maindir = os.getcwd()
-SBbytes = os.path.getsize('ServerBot.py')
+maindir = os.path.dirname(os.path.abspath(__file__))
+SBbytes = os.path.getsize(f'{maindir}/ServerBot.py')
 DB_PATH = f'{maindir}/Files/serverbot.db' # Database path
 ai_chat = f'{maindir}/Files/AI_chat'      # Directory where longer Gemini responses are saved
 
@@ -31,7 +31,7 @@ loadList = [] # ['cog1', 'custom.cog2'] <- example; custom is the name of a dire
 # Do not type values here!
 def create_env():
     try:
-        env = open('.env', 'w', encoding='utf-8')
+        env = open(f'{maindir}/.env', 'w', encoding='utf-8')
         env.write(f"""#ServerBot v{ver} config file
 TOKEN=''
 admin_usr = ['']
@@ -163,16 +163,19 @@ print(banner)
 try:
     load_dotenv()
     ############# token/intents/etc ################
+    TOKEN = os.getenv('TOKEN') or ''
+    prefix = os.getenv('custom_prefix') or '.'
+    
     ai_token = os.getenv('AI_token')
     if ai_token == '': ai_token = None
 
     admin_usr = os.getenv('admin_usr')
     ai_model = f"{os.getenv('AI_model')}" or 'gemini-2.5-flash'
     ai_client = genai.Client(api_key=f"{ai_token}")
-    extendedErrMess = os.getenv('extendedErrMess')
-    JLS = os.getenv('JoinLeaveSounds')
-    FMD = os.getenv('ForceMediaDir')
-    prefix = os.getenv('custom_prefix') or '.'
+    extendedErrMess = str(os.getenv('extendedErrMess')).lower()
+    JLS = str(os.getenv('JoinLeaveSounds')).lower()
+    FMD = str(os.getenv('ForceMediaDir')).lower()
+    LAM = str(os.getenv('LoadAllModules')).lower()
     ################################################
 except Exception as err:
     print(f"CAN'T LOAD .env FILE!\nCreate .env file using setup.sh and fill it with proper values!\nException: {err}")
@@ -186,7 +189,7 @@ status = ['Windows 98 SE', 'Minesweeper', f'{platform.system()} {platform.releas
 choice = random.choice(status)
 client = commands.Bot(command_prefix=prefix, intents=intents, activity=discord.Game(name=choice))
 testbot_cpu_type = platform.machine() or 'Unknown'
-accept_value = ['True', 'true', 'Enabled', 'enabled', '1', 'yes', 'Yes', 'YES', True]
+accept_value = ['true', 'enabled', 'ena', 'yes', 'y', '1', 1, True]
 start_time = datetime.datetime.now()
 
 
@@ -212,7 +215,7 @@ ytdl_search = youtube_dl.YoutubeDL(ytdl_opts_search)
 
 
 #Log_File
-logs = open('Logs.txt', 'w', encoding='utf-8')
+logs = open(f'{maindir}/Logs.txt', 'w', encoding='utf-8')
 def createlogs():
     logs.write(f"""S E R V E R  B O T
 LOGS
@@ -315,7 +318,7 @@ async def on_ready():
     
     #Load_cog_modules_on_ready
     #   Load all built-in modules from 'modules' directory; cogs from subdirectories you have to load manually, or add to loading list as 'subdirName.cogName'
-    if os.getenv('LoadAllModules') in accept_value:
+    if LAM in accept_value:
         for i in os.listdir(f'{maindir}/modules'):
             try:
                 if i.endswith('.py'):
@@ -428,7 +431,7 @@ async def random_num(ctx, min = int(), max = int()):
         randomn = random.randrange(min, max)
         await ctx.reply(f'This is your random number: {randomn}')
     except Exception as err:
-        if extendedErrMess:
+        if extendedErrMess in accept_value:
             await ctx.reply(f'{random_err}\nPossible cause: {err}')
         else:
             await ctx.reply(random_err)
@@ -581,6 +584,10 @@ async def newest_update(ctx):
 - Updated .credits command to test embed messages
 - Updated .module command structure
 - Removed creation of the modules/custom directory and updated notes at the beginning of file
+- Updated .portal command to fix some bugs and improve functionality
+- Updated maindir variable to use more proper way of getting the main directory of the bot
+- Added a token variable to the early try/except block which loads values from the .env file
+- Updated setup.sh
 - Small fixes and improvements
 
 To see older releases, read 'updates.txt' in the 'Files' directory.
@@ -755,7 +762,7 @@ async def rebuild(ctx):
 
 #5
 @client.command(name='mkshortcut', help="Creates a shortcut on your Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of your Desktop Folder (Desktop/Pulpit etc.)]")
-async def shrtct(ctx, desk):
+async def mkshortcut(ctx, desk):
     if str(ctx.message.author.id) in admin_usr:
         try:
             home_dir = os.path.expanduser('~')
@@ -784,10 +791,10 @@ async def mkservice(ctx, mode):
                 try:
                     await ctx.send("Making autorun.sh file..")
                     try:
-                        auto = open('Files/autorun.sh', 'w', encoding='utf-8')
+                        auto = open(f'{maindir}/Files/autorun.sh', 'w', encoding='utf-8')
                         auto.write(f"#!/bin/bash\ncd {maindir}\npython3 ServerBot.py")
                         auto.close()
-                        os.chmod('Files/autorun.sh', 0o775)
+                        os.chmod(f'{maindir}/Files/autorun.sh', 0o775)
                         await ctx.send('Done.')
 
                         message = f"Information[mkservice]: Created autorun.sh file (Files/autorun.sh)"
@@ -815,7 +822,7 @@ async def mkservice(ctx, mode):
                 try:
                     await ctx.send('Making autorun.sh file..')
                     try:
-                        auto = open('Files/autorun.sh', 'w', encoding='utf-8')
+                        auto = open(f'{maindir}/Files/autorun.sh', 'w', encoding='utf-8')
                         auto.write(f'#!/bin/bash\ncd {maindir}\n.venv/bin/python3 ServerBot.py')
                         auto.close()
                         os.chmod('Files/autorun.sh', 0o775)
@@ -847,7 +854,7 @@ async def mkservice(ctx, mode):
         await ctx.send(not_allowed)
 
 #7
-if os.getenv('service_monitor') in accept_value:
+if str(os.getenv('service_monitor')).lower() in accept_value:
     @client.command(name='service', help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl (systemd)\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemd")
     async def service(ctx, mode):
         if str(ctx.message.author.id) in admin_usr:
@@ -910,17 +917,18 @@ async def module(ctx, mode=None, *, name=None):
         if mode is not None: mode = mode.lower()
         if mode == 'list':
             try:
+                br = '\n- '
+                
                 if name == 'active':
                     loaded_modules = [cog for cog in client.cogs.keys()]
                     if not loaded_modules:
                         await ctx.send("There's no active modules.")
                         return
                     else:
-                        await ctx.send(f"========== **Active modules:** ==========\n{', '.join(loaded_modules)}")
+                        await ctx.send(f"========== **Active modules:** ==========\n- {br.join(loaded_modules)}")
                 
                 else:
                     listdir = []
-                    br = '\n- '
                     for f in os.listdir(f'{maindir}/modules'):
                         if f.endswith('.py'):
                             listdir.append(f.replace('.py', ''))
@@ -1460,13 +1468,13 @@ async def play(ctx, *, name):
                     await ctx.reply("Can't find source file.")
         
         except Exception as err:
-            if (extendedErrMess in accept_value):
+            if extendedErrMess in accept_value:
                 await ctx.reply(f"Can't play music.\nPossible cause: {err}")
             else:
                 await ctx.reply("Can't play music.\nSource exist?")
     
     except Exception as err:
-        if (extendedErrMess in accept_value):
+        if extendedErrMess in accept_value:
             await ctx.reply(f"{voice_not_connected_error}\nException: {err}")
         else:
             await ctx.reply(f"{voice_not_connected_error}")
@@ -1798,7 +1806,7 @@ Serv3
     -Port:
     -Link:
 ```""")
-    
+
 #2
 @client.command(name='dscserv', help="Show link to Discord Server")
 async def dscserv(ctx):
@@ -1832,8 +1840,12 @@ async def yt(ctx, YTname):
         #Portal
 #1 - link channels
 @client.command(name='portal', help="Manage connections between channels. Portal creates connection between two channels, allowing to communicate between them. Bot will send message to other channel after using .psend command in one of connected channels.\n.portal create {id1} {id2} -> creates connection\n.portal remove {id} -> removes connection that contains selected channel ID.\n.portal search {id} -> search for connection with selected channel ID\n.portal show -> saves database with all connections in tempDB.txt file")
-async def portal(ctx, mode, channel1=None, channel2=None):
+async def portal(ctx, mode=None, channel1=None, channel2=None):
     if str(ctx.message.author.id) in admin_usr:
+        if mode is None:
+            await ctx.reply("Incomplete command. See '.help portal' for more information.")
+            return
+
         try:
             channel1 = int(channel1) if channel1 is not None else None
             channel2 = int(channel2) if channel2 is not None else None
@@ -1879,9 +1891,19 @@ async def portal(ctx, mode, channel1=None, channel2=None):
                 #DELETE
                 cur.execute(f"DELETE FROM portal WHERE channel1=? OR channel2=?", (c1, c1))
                 SB_DB.commit()
+                return True
+            else:
+                return False
 
 
         if mode == 'create':#create
+            if not client.get_channel(channel1):
+                await ctx.reply(f"Channel '{channel1}' is not accessible by bot.")
+                return
+            if not client.get_channel(channel2):
+                await ctx.reply(f"Channel '{channel2}' is not accessible by bot.")
+                return
+
             await ctx.reply("Creating connection...")
             try:
                 check_portal_db()
@@ -1895,8 +1917,11 @@ async def portal(ctx, mode, channel1=None, channel2=None):
         elif mode == 'remove':#remove
             await ctx.reply("Removing connection...")
             try:
-                portal_disconnect(channel1)
-                await ctx.reply("Success!")
+                rm = portal_disconnect(channel1)
+                if rm is True:
+                    await ctx.reply("Success!")
+                elif rm is False:
+                    await ctx.reply("No connection found for your channel.")
             except Exception as err:
                 await ctx.reply(f"Error occurred: {err}")
 
@@ -1905,10 +1930,18 @@ async def portal(ctx, mode, channel1=None, channel2=None):
 
             res = cur.execute(f"SELECT channel1, channel2 FROM portal WHERE channel1=? OR channel2=?", (channel1, channel1))
             results = res.fetchall()
+
             if results:
-                await ctx.reply(f"Found connection for selected channel: {results}")
+                #ChannelName
+                ch1 = client.get_channel(results[0][0])
+                ch2 = client.get_channel(results[0][1])
+                #ServerName
+                ch1guild = ch1.guild.name if ch1 is not None else "DM_Unknown"
+                ch2guild = ch2.guild.name if ch2 is not None else "DM_Unknown"
+
+                await ctx.reply(f"Found connection for selected channel:\n\n//{ch1guild}/{ch1} ({results[0][0]})\n//{ch2guild}/{ch2} ({results[0][1]})")
             else:
-                await ctx.reply(f"No connection found for your channel.")
+                await ctx.reply("No connection found for your channel.")
 
         elif mode == 'show':#show
             cur = SB_DB.cursor()
@@ -1990,7 +2023,7 @@ async def random_slash(interaction: discord.Interaction, min: int, max: int):
         randomn = random.randrange(min, max)
         await interaction.response.send_message(f'This is your random number: {randomn}')
     except Exception as error:
-        if extendedErrMess:
+        if extendedErrMess in accept_value:
             await interaction.response.send_message(f'{random_err}\nPossible cause: {error}')
         else:
             await interaction.response.send_message(random_err)
@@ -2126,6 +2159,6 @@ async def sync(interaction: discord.Interaction):
 ################################################ S L A S H   C O M M A N D S  - E N D #######################################################################################
 
 try:
-    client.run(os.getenv('TOKEN'))
+    client.run(TOKEN)
 except Exception as err:
-    print(f"Can't load Bot Token!\nEnter valid Token in '.env' file!\nPossible cause: {err}")
+    print(f"Can't load bot token!\nEnter valid token in the '.env' file!\nPossible cause: {err}")
