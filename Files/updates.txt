@@ -254,4 +254,8 @@ on text in .testbot while running Bot on ARM devices
 - Updated .credits command to test embed messages
 - Updated .module command structure
 - Removed creation of the modules/custom directory and updated notes at the beginning of file
+- Updated .portal command to fix some bugs and improve functionality
+- Updated maindir variable to use more proper way of getting the main directory of the bot
+- Added a token variable to the early try/except block which loads values from the .env file
+- Updated setup.sh
 - Small fixes and improvements
