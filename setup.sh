@@ -179,12 +179,11 @@ case $select in
                     2)
                         echo "Install ServerBot from Github..."
                         echo "This option is useful when you want to update Bot or fix/rebuild critical files."
-                        echo "As default, this option will install ServerBot ${UPDATEVER} in a new directory."
-                        echo "You can change it for other release."
                         echo "Installer uses git command. Make sure you have downloaded it."
-                        read -p "Type anything to continue."
+                        read -p "Type your version to install (default: ${UPDATEVER}): " USR_VER
+                        RELEASE_VER=${USR_VER:-$UPDATEVER}
                         cd ..
-                        git clone -b ${VERSION} https://github.com/kamile320/ServerBot SB_Update
+                        git clone -b ${RELEASE_VER} https://github.com/kamile320/ServerBot SB_Update
                         ;;
                     3)
                         clear
