@@ -5,7 +5,7 @@ import datetime
 import sqlite3
 
 # Bot Version
-ver = "1.11.1"
+ver = "1.12.0"
 # Bot Name
 displayname = "ServerBot"
 # Name of service in systemd; change if needed, WITHOUT .service file extension
@@ -50,15 +50,14 @@ ForceMediaDir = False
 #Command_dscserv
 dscserv_link = 'https://discord.gg/UMtYGAx5ac'
 
-#Service_list
-service_monitor = False
-service_list = ','
-
 #Modules
 LoadAllModules = False
 
 #ExtendedErrorMessages
-extendedErrMess = False""")
+extendedErrMess = False
+
+#Service_module
+service_list = ','""")
         env.close()
     except Exception as err:
         print(f"Error occurred while creating .env file.\nPossible cause: {err}")
@@ -304,7 +303,6 @@ leave_error = "How can I left, when I'm not in VC?"
 thread_error = "Something went wrong. Try to type:\n.thread {NameWithoutSpaces} {Reason}\nReason is optional"
 not_allowed = "You're not allowed to use this command."
 SBservice = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo chmod 775 -R /BotDirectory/*\nsudo systemctl enable ServerBot -> Enables automatic startup\nsudo systemctl start ServerBot -> Optional (turns on Service)\nsudo systemctl daemon-reload -> if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
-service_err = "Something went wrong.\nHave you added the service entries to the .env file?"
 badsite = "Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist?"
 random_err = 'Something went wrong. Have you typed correct min/max values?'
 
@@ -424,12 +422,14 @@ async def hello_there(ctx):
 
         #Random/Fun
 #1
-@client.command(name='random', help="Shows your random number.\nType .random [min] [max]")
-async def random_num(ctx, min = int(), max = int()):
+@client.hybrid_command(name='random', description="Shows your random number. Usage: .random <min> <max>")
+@app_commands.describe(min='Minimum value', max='Maximum value')
+async def random_num(ctx, min = commands.parameter(default=int(), description="- Minimum value"), max = commands.parameter(default=int(), description="- Maximum value")):
     import random
+    await ctx.defer()
     try:
-        randomn = random.randrange(min, max)
-        await ctx.reply(f'This is your random number: {randomn}')
+        random_num = random.randrange(min, max)
+        await ctx.reply(f'This is your random number: {random_num}')
     except Exception as err:
         if extendedErrMess in accept_value:
             await ctx.reply(f'{random_err}\nPossible cause: {err}')
@@ -437,12 +437,13 @@ async def random_num(ctx, min = int(), max = int()):
             await ctx.reply(random_err)
 
 #2
-@client.command(name='botbanner', help="Show bot's banner")
+@client.hybrid_command(name='botbanner', description="Show bot's banner")
 async def botbanner(ctx):
     await ctx.send(f'```{banner}```')
 
 #3
-@client.command(name='banner', help="Show your text as Banner")
+@client.hybrid_command(name='banner', description="Show your text as a Banner")
+@app_commands.describe(text='Text to convert to banner')
 async def userbanner(ctx, *, text=None):
     if text is not None:
         userbanner = pyfiglet.figlet_format(text)
@@ -461,8 +462,10 @@ async def blank(ctx):
     await ctx.send('')
 
 #6
-@client.command(name='ai', help=f"Talk with AI.\nUses {ai_model} model.\n.ai [question]")
-async def ai(ctx, *, question = None):
+@client.hybrid_command(name='ai', description=f"Talk with AI. Uses {ai_model} model.")
+@app_commands.describe(question='Prompt/question for AI')
+async def ai(ctx, *, question = commands.parameter(default=None, description="- Your prompt/question")):
+    await ctx.defer()
     if ai_token is None:
         await ctx.reply("AI token not found. Enter valid Gemini API token in the .env file to use this command.")
         return
@@ -483,6 +486,9 @@ async def ai(ctx, *, question = None):
             )
         )
         message = response.text
+        if message is None:
+            await ctx.send("AI couldn't answered for that question; returned None.\nMaybe it cannot find information.")
+            return
         if extendedErrMess in accept_value:
             length = f"Information[AI]: Length of the bot's response is {len(message)}."
             printMessage(length)
@@ -510,8 +516,9 @@ async def gnu(ctx):
     await ctx.send("I’d just like to interject for a moment. What you’re refering to as Linux, is in fact, GNU/Linux, or as I’ve recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX.  Many computer users run a modified version of the GNU system every day, without realizing it. Through a peculiar turn of events, the version of GNU which is widely used today is often called Linux, and many of its users are not aware that it is basically the GNU system, developed by the GNU Project.  There really is a Linux, and these people are using it, but it is just a part of the system they use. Linux is the kernel: the program in the system that allocates the machine’s resources to the other programs that you run. The kernel is an essential part of an operating system, but useless by itself; it can only function in the context of a complete operating system. Linux is normally used in combination with the GNU operating system: the whole system is basically GNU with Linux added, or GNU/Linux. All the so-called Linux distributions are really distributions of GNU/Linux!")
 
 #8
-@client.command(name='badge', help="Shows user badges.\n.badge @user")
-async def badge(ctx, member: discord.Member):
+@client.hybrid_command(name='badge', description="Shows user badges. Usage: .badge @user")
+@app_commands.describe(member='Mention user to check badges')
+async def badge(ctx, member: discord.Member = commands.parameter(description="- Mention user to check badges")):
     try:
         user_flags = member.public_flags.all()
         badges = [flag.name for flag in user_flags]
@@ -524,8 +531,9 @@ async def badge(ctx, member: discord.Member):
 
         #BotInfo
 #1
-@client.command(name='manual', help="Sends HTML manual\n'web' - see manual in browser\n'local' - download HTML manual from Discord")
-async def manual(ctx, type):
+@client.hybrid_command(name='manual', help="Sends HTML manual\n'web' - see manual in browser\n'local' - download HTML manual from Discord", description="Sends HTML manual")
+@app_commands.describe(type="{web | local} to see in browser or download from discord")
+async def manual(ctx, type = commands.parameter(description="- {web | local} to see in browser or download from discord")):
     try:
         if type == 'web':
             await ctx.send("ServerBot user Manual [PL](https://Kamile320.github.io/ServerBot/manualPL.html) [EN](https://Kamile320.github.io/ServerBot/manualEN.html)")
@@ -537,7 +545,7 @@ async def manual(ctx, type):
         await ctx.send(f"Something went wrong. Try again.")
 
 #2
-@client.command(name='credits', help="Shows Credits")
+@client.hybrid_command(name='credits', description="Shows credits")
 async def credits(ctx):
     embed = discord.Embed(
         title="***S e r v e r B o t***",
@@ -564,37 +572,36 @@ async def credits(ctx):
     await ctx.send(embed=embed)
 
 #3
-@client.command(name='time', help="Shows local time")
+@client.hybrid_command(name='time', description="Shows local time")
 async def time(ctx):
     now = datetime.datetime.now()
     await ctx.send(now.strftime("Time: %H:%M:%S\nDay: %d.%m.%Y"))
 
 #4
-@client.command(name='ping', help="Pings the Bot")
+@client.hybrid_command(name='ping', description="Pings the bot")
 async def ping(ctx):
     await ctx.send(f':tennis: Pong! ({round(client.latency * 1000)}ms)')
 
 #5
-@client.command(name='release', help="Shows last changes of Bot functions/Changelog")
+@client.hybrid_command(name='release', description="Shows last changes of Bot functions/Changelog")
 async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
     Changelog:
-- Added .sync /sync commands for syncing slash commands (useful when you add new cogs with slash commands)
-- Updated .credits command to test embed messages
-- Updated .module command structure
-- Removed creation of the modules/custom directory and updated notes at the beginning of file
-- Updated .portal command to fix some bugs and improve functionality
-- Updated maindir variable to use more proper way of getting the main directory of the bot
-- Added a token variable to the early try/except block which loads values from the .env file
-- Updated setup.sh
-- Small fixes and improvements
+- Enhanced pingip: added count parameter, OS detection and better error handling; changed to hybrid command
+- Updated .module command - now synces slash commands after every load/reload/unload
+- Updated .service command; moved to separate module (service.py) and changed to hybrid command (prefix and slash at once)
+- Changed .testbot .ping .random .ai to hybrid commands; removed separate slash versions of these commands
+- Updating structure of Admin and Mod only commands - in progress
+- Moving most of the commands to hybrid commands (supporting prefix and slash commands at once) - in progress
+- Updated .env file scheme
+- Fixes and improvements
 
 To see older releases, read 'updates.txt' in the 'Files' directory.
 """)
 
 #6
-@client.command(name='next_update', help="Shows future functions/updates")
+@client.hybrid_command(name='next_update', description="Shows future functions/updates")
 async def next_update(ctx):
     await ctx.send("""
 Ideas for Future Updates
@@ -611,303 +618,273 @@ You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac
 
         #AdminOnly
 #1
-@client.command(name='ShutDown', help="Turns Off the Bot")
+@client.command(name='ShutDown', help="Turns off the Bot")
 async def ShutDown(ctx):
-    if str(ctx.message.author.id) in admin_usr:
-        await ctx.send(f'Shutting down...')
-        print("Information[ShutDown]: Started turning off the Bot")
-        await asyncio.sleep(1)
+    if str(ctx.message.author.id) not in admin_usr:
+        await ctx.reply(not_allowed)
+        return
+    
+    await ctx.send(f'Shutting down...')
+    print("Information[ShutDown]: Started turning off the Bot")
+    await asyncio.sleep(1)
  
+    try:
+        print("Saving Logs.txt...")
+        src = open(f'{maindir}/Logs.txt', 'r')
+        logs = open(f'{maindir}/Files/Logs.txt', 'a')
+        append = f"\n\n{src.read()}"
+        logs.write(append)
+        logs.close()
+        src.close()
+    except:
+        print("Error occurred while saving log.")
+
+    try:
+        print("Closing Discord connection...")
+        await client.close()
+    except Exception as err:
+        message = f"Information[ShutDown]: Failed to disconnect from Discord.\nPossible cause: {err}"
+        printMessage(message)
+        logMessage(message)
+        await ctx.send("Failed to disconnect from Discord. See Logs.txt or console for details.")
+
+    try:
+        print("Closing database...")
+        SB_DB.close()
+    except:
+        print("Failed to close databse.")
+
+    print("Information[ShutDown]: Shutting down...")
+
+
+#2
+@client.command(name='copylog', help="Copies Bot Log file\nappend   -> adds new value to older in Files/Logs.txt\nreplace  -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs")
+async def copylog(ctx, mode):
+    if str(ctx.message.author.id) not in admin_usr:
+        await ctx.reply(not_allowed)
+        return
+
+    if mode == 'append':
         try:
-            print("Saving Logs.txt...")
             src = open(f'{maindir}/Logs.txt', 'r')
             logs = open(f'{maindir}/Files/Logs.txt', 'a')
             append = f"\n\n{src.read()}"
             logs.write(append)
             logs.close()
             src.close()
+            await ctx.send('Appending logs to Files/Logs.txt succeed.')
         except:
-            print("Error occurred while saving log.")
-        
+            await ctx.send(f"Error occurred while copying log.")
+    elif mode == 'replace':
         try:
-            print("Closing Discord connection...")
-            await client.close()
-        except Exception as err:
-            message = f"Information[ShutDown]: Failed to disconnect from Discord.\nPossible cause: {err}"
-            printMessage(message)
-            logMessage(message)
-            await ctx.send("Failed to disconnect from Discord. See Logs.txt or console for details.")
-
-        try:
-            print("Closing database...")
-            SB_DB.close()
+            src_path = fr"{maindir}/Logs.txt"
+            dst_path = fr"{maindir}/Files/Logs.txt"
+            shutil.copy(src_path, dst_path)
+            print(copiedlog)
+            await ctx.send(f'Successfully replaced Files/Logs.txt content.')
         except:
-            print("Failed to close databse.")
-
-        print("Information[ShutDown]: Shutting down...")
+            await ctx.send("Error occurred while copying log. Maybe folder doesn't exist?")
+    elif mode == 'clearall':
+        try:
+            l1 = open(f"{maindir}/Logs.txt", 'w', encoding='utf-8')
+            l1.write("")
+            l1.close()
+            l2 = open(f"{maindir}/Files/Logs.txt", 'w', encoding='utf-8')
+            l2.write("")
+            l2.close()
+            await ctx.send("Successfully cleared Logs.")
+        except:
+            await ctx.send("Can't clear logs.")
     else:
-        await ctx.reply(not_allowed)
+        await ctx.send("Wrong copylog mode.")
 
-#2
-@client.command(name='copylog', help="Copies Bot Log file\nappend   -> adds new value to older in Files/Logs.txt\nreplace  -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs")
-async def copylog(ctx, mode):
-    if str(ctx.message.author.id) in admin_usr:
-        if mode == 'append':
-            try:
-                src = open(f'{maindir}/Logs.txt', 'r')
-                logs = open(f'{maindir}/Files/Logs.txt', 'a')
-                append = f"\n\n{src.read()}"
-                logs.write(append)
-                logs.close()
-                src.close()
-                await ctx.send('Appending logs to Files/Logs.txt succeed.')
-            except:
-                await ctx.send(f"Error occurred while copying log.")
-        elif mode == 'replace':
-            try:
-                src_path = fr"{maindir}/Logs.txt"
-                dst_path = fr"{maindir}/Files/Logs.txt"
-                shutil.copy(src_path, dst_path)
-                print(copiedlog)
-                await ctx.send(f'Successfully replaced Files/Logs.txt content.')
-            except:
-                await ctx.send("Error occurred while copying log. Maybe folder doesn't exist?")
-        elif mode == 'clearall':
-            try:
-                l1 = open(f"{maindir}/Logs.txt", 'w', encoding='utf-8')
-                l1.write("")
-                l1.close()
-                l2 = open(f"{maindir}/Files/Logs.txt", 'w', encoding='utf-8')
-                l2.write("")
-                l2.close()
-                await ctx.send("Successfully cleared Logs.")
-            except:
-                await ctx.send("Can't clear logs.")
-        else:
-            await ctx.send("Wrong copylog mode.")        
-    else:
-        await ctx.reply(not_allowed)
 
 #3
 @client.command(name='bash', help="Runs Bash like scripts on hosting computer (Linux only)\nUses .sh extensions\nBest to work with .touch command")
 async def bash(ctx, file=None):
-    if str(ctx.message.author.id) in admin_usr:
-        try:
-            if file is not None:
-                message = f'Information[Bash]: User {ctx.message.author.id} executed script: {file}'
-                printMessage(message)
-                logMessage(message)
+    if str(ctx.message.author.id) not in admin_usr:
+        await ctx.reply(not_allowed)
+        return
 
-                subprocess.run(['bash', file])
-            else:
-                await ctx.reply("Incomplete command.\nType '.bash {filename}'")
-        except Exception as err:
-            message = f'Information[Bash]: User {ctx.message.author.id} failed to run script {file}.\nPossible cause: {err}'
+    try:
+        if file is not None:
+            message = f'Information[Bash]: User {ctx.message.author.id} executed script: {file}'
             printMessage(message)
             logMessage(message)
 
-            if extendedErrMess in accept_value:
-                await ctx.send(f'Failed to run Script\nPossible cause: {err}')
-            else:
-                await ctx.send(f'Failed to run Script')
-    else:
-        await ctx.reply(not_allowed)
+            subprocess.run(['bash', file])
+        else:
+            await ctx.reply("Incomplete command.\nType '.bash {filename}'")
+    except Exception as err:
+        message = f'Information[Bash]: User {ctx.message.author.id} failed to run script {file}.\nPossible cause: {err}'
+        printMessage(message)
+        logMessage(message)
+
+        if extendedErrMess in accept_value:
+            await ctx.send(f'Failed to run Script\nPossible cause: {err}')
+        else:
+            await ctx.send(f'Failed to run Script')
+
 
 #4
 @client.command(name='rebuild', help="Rebuilds files and directories")
 async def rebuild(ctx):
-    if str(ctx.message.author.id) in admin_usr:
-        await ctx.send('Trying to rebuild files...')
-        message = "Information[Rebuild]: Started rebuilding files and directories."
+    if str(ctx.message.author.id) not in admin_usr:
+        await ctx.reply(not_allowed)
+        return
+
+    await ctx.send('Trying to rebuild files...')
+    message = "Information[Rebuild]: Started rebuilding files and directories."
+    printMessage(message)
+    logMessage(message)
+
+    try:
+        print("Creating 'Logs.txt'...")
+        os.chdir(maindir)
+        logs1 = open('Logs.txt', 'w')
+        logs1.close()
+
+        print("Creating 'Files' directory...")
+        os.makedirs(f'{maindir}/Files')
+        os.chdir(f'{maindir}/Files')
+            
+        print("Creating 'updates.txt'...")
+        updates = open('updates.txt', 'w')
+        updates.close()
+
+        print("Creating 'Files/Logs.txt'...")
+        logs2 = open('Logs.txt', 'w')
+        logs2.close()
+            
+        print("Creating 'Files/setup' directory...")
+        os.makedirs(f'{maindir}/Files/setup')
+
+        print("Creating 'Media' directory...")
+        os.makedirs(f'{maindir}/Media')
+            
+        os.chdir(maindir)
+
+        print("Creating 'modules' directory...")
+        os.makedirs(f'{maindir}/modules')
+
+        message = "Information[Rebuild]: Successfully rebuilded files and directories."
         printMessage(message)
         logMessage(message)
+        await ctx.send("Success.\nRebuilded Files with no content")
+    except Exception as error:
+        await ctx.send(f"Rebuilding files failed.\nException: {error}")
 
-        try:
-            print("Creating 'Logs.txt'...")
-            os.chdir(maindir)
-            logs1 = open('Logs.txt', 'w')
-            logs1.close()
-
-            print("Creating 'Files' directory...")
-            os.makedirs(f'{maindir}/Files')
-            os.chdir(f'{maindir}/Files')
-            
-            print("Creating 'updates.txt'...")
-            updates = open('updates.txt', 'w')
-            updates.close()
-
-            print("Creating 'Files/Logs.txt'...")
-            logs2 = open('Logs.txt', 'w')
-            logs2.close()
-            
-            print("Creating 'Files/setup' directory...")
-            os.makedirs(f'{maindir}/Files/setup')
-
-            print("Creating 'Media' directory...")
-            os.makedirs(f'{maindir}/Media')
-            
-            os.chdir(maindir)
-
-            print("Creating 'modules' directory...")
-            os.makedirs(f'{maindir}/modules')
-
-            message = "Information[Rebuild]: Successfully rebuilded files and directories."
-            printMessage(message)
-            logMessage(message)
-            await ctx.send("Success.\nRebuilded Files with no content")
-        except Exception as error:
-            await ctx.send(f"Rebuilding files failed.\nException: {error}")
-    else:
-        await ctx.reply(not_allowed)
 
 #5
 @client.command(name='mkshortcut', help="Creates a shortcut on your Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of your Desktop Folder (Desktop/Pulpit etc.)]")
 async def mkshortcut(ctx, desk):
-    if str(ctx.message.author.id) in admin_usr:
-        try:
-            home_dir = os.path.expanduser('~')
-            os.chdir(home_dir)
-            os.chdir(desk)
-            shrt = open('ServerBot.sh', 'w', encoding='utf-8')
-            shrt.write(f'cd {maindir}\npython3 ServerBot.py')
-            shrt.close()
-            os.chdir(maindir)
-            await ctx.send('Done.')
-            
-            message = f"Information[mkshortcut]: Created desktop shortcut ({home_dir})"
-            printMessage(message)
-            logMessage(message)
-        except:
-            await ctx.send('Something went wrong, please try again.')
-    else:
-        await ctx.send(not_allowed)
+    if str(ctx.message.author.id) not in admin_usr:
+        await ctx.reply(not_allowed)
+        return
+
+    try:
+        home_dir = os.path.expanduser('~')
+        os.chdir(home_dir)
+        os.chdir(desk)
+        shrt = open('ServerBot.sh', 'w', encoding='utf-8')
+        shrt.write(f'cd {maindir}\npython3 ServerBot.py')
+        shrt.close()
+        os.chdir(maindir)
+        await ctx.send('Done.')
+        
+        message = f"Information[mkshortcut]: Created desktop shortcut ({home_dir})"
+        printMessage(message)
+        logMessage(message)
+    except:
+        await ctx.send('Something went wrong, please try again.')
+
 
 #6
 @client.command(name='mkservice', help="Adds ServerBot to systemd to start with system startup (Bot needs to be running as root)\nMode:\n'def'  -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemd startup will not work. Do not place bot in your home dir.")
 async def mkservice(ctx, mode):
-    if str(ctx.message.author.id) in admin_usr:
-        try:
-            if mode == 'def':
+    if str(ctx.message.author.id) not in admin_usr:
+        await ctx.reply(not_allowed)
+        return
+
+    try:
+        if mode == 'def':
+            try:
+                await ctx.send("Making autorun.sh file..")
                 try:
-                    await ctx.send("Making autorun.sh file..")
-                    try:
-                        auto = open(f'{maindir}/Files/autorun.sh', 'w', encoding='utf-8')
-                        auto.write(f"#!/bin/bash\ncd {maindir}\npython3 ServerBot.py")
-                        auto.close()
-                        os.chmod(f'{maindir}/Files/autorun.sh', 0o775)
-                        await ctx.send('Done.')
+                    auto = open(f'{maindir}/Files/autorun.sh', 'w', encoding='utf-8')
+                    auto.write(f"#!/bin/bash\ncd {maindir}\npython3 ServerBot.py")
+                    auto.close()
+                    os.chmod(f'{maindir}/Files/autorun.sh', 0o775)
+                    await ctx.send('Done.')
 
-                        message = f"Information[mkservice]: Created autorun.sh file (Files/autorun.sh)"
-                        logMessage(message)
-                        printMessage(message)
-                    except:
-                        await ctx.send("Can't create file!")
+                    message = f"Information[mkservice]: Created autorun.sh file (Files/autorun.sh)"
+                    logMessage(message)
+                    printMessage(message)
+                except:
+                    await ctx.send("Can't create file!")
 
-                    await ctx.send(f'Making {servicename}.service in /etc/systemd/system..')
-                    try:
-                        sys = open(f'/etc/systemd/system/{servicename}.service', 'w', encoding='utf-8')
-                        sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
-                        sys.close()
-                        await ctx.send('Done!')
-                        await ctx.send(SBservice)
-
-                        message = f"Information[mkservice]: Created {servicename} service file (/etc/systemd/system/)\n{SBservice}"
-                        logMessage(message)
-                        printMessage(message)
-                    except:
-                        await ctx.send("Can't create service file!\nAre you root?")
-                except Exception as error:
-                    await ctx.send(f'Got 1 error (or more) while creating systemd entry.\nPossible cause: {error}')
-            elif mode == 'venv':
+                await ctx.send(f'Making {servicename}.service in /etc/systemd/system..')
                 try:
-                    await ctx.send('Making autorun.sh file..')
-                    try:
-                        auto = open(f'{maindir}/Files/autorun.sh', 'w', encoding='utf-8')
-                        auto.write(f'#!/bin/bash\ncd {maindir}\n.venv/bin/python3 ServerBot.py')
-                        auto.close()
-                        os.chmod('Files/autorun.sh', 0o775)
-                        await ctx.send('Done.')
+                    sys = open(f'/etc/systemd/system/{servicename}.service', 'w', encoding='utf-8')
+                    sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
+                    sys.close()
+                    await ctx.send('Done!')
+                    await ctx.send(SBservice)
 
-                        message = f"Information[mkservice]: Created autorun.sh file (Files/autorun.sh)"
-                        logMessage(message)
-                        printMessage(message)
-                    except:
-                        await ctx.send("Can't create file!")
+                    message = f"Information[mkservice]: Created {servicename} service file (/etc/systemd/system/)\n{SBservice}"
+                    logMessage(message)
+                    printMessage(message)
+                except:
+                    await ctx.send("Can't create service file!\nAre you root?")
+            except Exception as error:
+                await ctx.send(f'Got 1 error (or more) while creating systemd entry.\nPossible cause: {error}')
+        elif mode == 'venv':
+            try:
+                await ctx.send('Making autorun.sh file..')
+                try:
+                    auto = open(f'{maindir}/Files/autorun.sh', 'w', encoding='utf-8')
+                    auto.write(f'#!/bin/bash\ncd {maindir}\n.venv/bin/python3 ServerBot.py')
+                    auto.close()
+                    os.chmod('Files/autorun.sh', 0o775)
+                    await ctx.send('Done.')
 
-                    await ctx.send(f'Making {servicename}.service in /etc/systemd/system..')
-                    try:
-                        sys = open(f'/etc/systemd/system/{servicename}.service', 'w', encoding='utf-8')
-                        sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
-                        await ctx.send("Done!")
-                        await ctx.send(SBservice)
+                    message = f"Information[mkservice]: Created autorun.sh file (Files/autorun.sh)"
+                    logMessage(message)
+                    printMessage(message)
+                except:
+                    await ctx.send("Can't create file!")
 
-                        message = f"Information[mkservice]: Created {servicename} service file (/etc/systemd/system/)\n{SBservice}"
-                        logMessage(message)
-                        printMessage(message)
-                    except:
-                        await ctx.send("Can't create service file!\nAre you root?")
-                except Exception as error:
-                    await ctx.send(f'Got 1 error (or more) while creating systemd entry.\nPossible cause: {error}')
-        except:
-            await ctx.send(f"""```{bluescreenface}``` Unexpected problem occurred""")
-    else:
-        await ctx.send(not_allowed)
+                await ctx.send(f'Making {servicename}.service in /etc/systemd/system..')
+                try:
+                    sys = open(f'/etc/systemd/system/{servicename}.service', 'w', encoding='utf-8')
+                    sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
+                    await ctx.send("Done!")
+                    await ctx.send(SBservice)
+
+                    message = f"Information[mkservice]: Created {servicename} service file (/etc/systemd/system/)\n{SBservice}"
+                    logMessage(message)
+                    printMessage(message)
+                except:
+                    await ctx.send("Can't create service file!\nAre you root?")
+            except Exception as error:
+                await ctx.send(f'Got 1 error (or more) while creating systemd entry.\nPossible cause: {error}')
+    except:
+        await ctx.send(f"""```{bluescreenface}``` Unexpected problem occurred""")
+
 
 #7
-if str(os.getenv('service_monitor')).lower() in accept_value:
-    @client.command(name='service', help="Lists active/inactive services. To add service entry, enter service name in .env file (service_list)\nUses systemctl (systemd)\n\nlist -> lists entries in '.env' file\nstatus -> lists service entries and checks if they're active\nstatus-detailed -> same as above, but with details (systemctl status [service name])\n[service name] -> shows current status of service in systemd")
-    async def service(ctx, mode):
-        if str(ctx.message.author.id) in admin_usr:
-            try:
-                if mode == 'list':
-                    try:
-                        listdir_env = os.getenv('service_list')
-                        await ctx.send(f'**Service Entries:**\n{listdir_env}')
-                    except:
-                        await ctx.send(service_err)
+@client.hybrid_command(name='pingip', description="Pings selected IPv4 address. Usage: .pingip <ip address> [count]")
+@app_commands.describe(ip="IP address or domain/hostname", count="How many pings/ICMP packets to send")
+async def pingip(ctx, ip = commands.parameter(description="IP address or domain/hostname"), count = commands.parameter(default=1, description="How many pings/ICMP packets to send")):
+    if str(ctx.message.author.id) not in admin_usr:
+        await ctx.reply(not_allowed)
+        return
+    
+    ipaddr = ip
+    param = '-n' if platform.system().lower() == 'windows' else '-c'
+    cmd = f'ping {ipaddr} {param} {count}'
+    await ctx.send(f"```{subprocess.getoutput(cmd)}```")
 
-                elif mode == 'status':
-                    try:
-                        listdir_env = os.getenv('service_list')
-                        listdir = [item.strip() for item in listdir_env.split(',')]
-                        await ctx.send("**Service Activity:**")
-                        for file in listdir:
-                            await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl is-active {file}'])}```")
-                    except:
-                        await ctx.send(service_err)
-
-                elif mode == 'status-detailed':
-                    try:
-                        listdir_env = os.getenv('service_list')
-                        listdir = [item.strip() for item in listdir_env.split(',')]
-                        await ctx.send("**Service Activity:**")
-                        for file in listdir:
-                            await ctx.send(f"```{file}: {subprocess.getoutput([f'systemctl status {file}'])}```")
-                    except:
-                        await ctx.send(service_err)
-
-                else:
-                    try:
-                        await ctx.send(f"**Service {mode}:**")
-                        await ctx.send(f"```{subprocess.getoutput([f'systemctl status {mode}'])}```")
-                    except Exception as err:
-                        await ctx.send(f'Something went wrong.\nPossible cause: {err}')
-
-            except Exception as err:
-                await ctx.send(f'Something went wrong.\nPossible cause: {err}')
-        else:
-            await ctx.send(not_allowed)
-
-#8
-@client.command(name='pingip', help="Pings selected IPv4 address.\n.pingip <ip address> [count]")
-async def pingip(ctx, ip, count=1):
-    if str(ctx.message.author.id) in admin_usr:
-        ipaddr = ip
-        param = '-n' if platform.system().lower() == 'windows' else '-c'
-        cmd = f'ping {ipaddr} {param} {count}'
-        await ctx.send(f"```{subprocess.getoutput(cmd)}```")
-    else:
-        await ctx.send(not_allowed)
 @pingip.error
 async def pingip_error(ctx, error):
     if isinstance(error, commands.BadArgument):
@@ -917,84 +894,100 @@ async def pingip_error(ctx, error):
     else:
         await ctx.send(f'Something went wrong: {error}')
 
-#9
+
+#8
 @client.command(name='module', help="Manage built-in and additional modules (cogs).\nload   -> loads module\nunload -> unloads module\nreload -> reload module\nlist   -> lists available modules from 'modules' directory. Add 'active' to list only active modules.")
 async def module(ctx, mode=None, *, name=None):
-    if str(ctx.message.author.id) in admin_usr:
-        if mode is not None: mode = mode.lower()
-        if mode == 'list':
-            try:
-                br = '\n- '
-                
-                if name == 'active':
-                    loaded_modules = [cog for cog in client.cogs.keys()]
-                    if not loaded_modules:
-                        await ctx.send("There's no active modules.")
-                        return
-                    else:
-                        await ctx.send(f"========== **Active modules:** ==========\n- {br.join(loaded_modules)}")
-                
-                else:
-                    listdir = []
-                    for f in os.listdir(f'{maindir}/modules'):
-                        if f.endswith('.py'):
-                            listdir.append(f.replace('.py', ''))
+    if str(ctx.message.author.id) not in admin_usr:
+        await ctx.reply(not_allowed)
+        return
 
-                    await ctx.send(f"""
+    async def sync_cmd():
+        try:
+            sync = await ctx.bot.tree.sync()
+            message = f"Synced {len(sync)} slash commands."
+            printMessage(message)
+            logMessage(message)
+        except Exception as err:
+            message = f"Failed to sync slash commands.\nPossible cause: {err}"
+            printMessage(message)
+            logMessage(message)
+
+    if mode is not None: mode = mode.lower()
+    if mode == 'list':
+        try:
+            br = '\n- '
+                
+            if name == 'active':
+                loaded_modules = [cog for cog in client.cogs.keys()]
+                if not loaded_modules:
+                    await ctx.send("There's no active modules.")
+                    return
+                else:
+                    await ctx.send(f"========== **Active modules:** ==========\n- {br.join(loaded_modules)}")
+                
+            else:
+                listdir = []
+                for f in os.listdir(f'{maindir}/modules'):
+                    if f.endswith('.py'):
+                        listdir.append(f.replace('.py', ''))
+
+                await ctx.send(f"""
 ========== **ServerBot modules: **==========
 Available modules:\n- {br.join(listdir)}""")
-            except Exception as e:
-                await ctx.send(f'Unexpected error occurred. See Logs.txt for details.')
-                message = f'Information[modules]: Failed to list modules: {e}'
-                printMessage(message)
-                logMessage(message)
-            return
-        
-        if mode is None: # If user executed command without selecting mode
-            await ctx.reply("Incomplete command. Select mode [load/unload/reload/list].\nSee '.help module' for more information.")
-            return
-        if name is None: # If user executed command without typing name
-            await ctx.reply("Incomplete command. Enter module name.")
-            return
-
-        try:
-            if mode == 'load':
-                opt = 'loaded'
-                await client.load_extension(f'modules.{name}')
-            elif mode == 'unload':
-                opt = 'unloaded'
-                await client.unload_extension(f'modules.{name}')
-            elif mode == 'reload':
-                opt = 'reloaded'
-                await client.reload_extension(f'modules.{name}')
-            else:
-                await ctx.reply("Incorrect mode selected. Use '.help module' for more information.")
-                return
-            
-            await ctx.reply(f"{name} module {opt}.")
-            message = f"Information[modules]: {name} module {opt}."
-            printMessage(message)
-            logMessage(message)
         except Exception as e:
-            await ctx.reply(f"Failed to {mode} {name} module: {e}")
-            message = f'Information[modules]: Failed to {opt} {name} module: {e}'
+            await ctx.send(f'Unexpected error occurred. See Logs.txt for details.')
+            message = f'Information[modules]: Failed to list modules: {e}'
             printMessage(message)
             logMessage(message)
+        return
+        
+    if mode is None: # If user executed command without selecting mode
+        await ctx.reply("Incomplete command. Select mode [load/unload/reload/list].\nSee '.help module' for more information.")
+        return
+    if name is None: # If user executed command without typing name
+        await ctx.reply("Incomplete command. Enter module name.")
+        return
 
-    else:
-        await ctx.send(not_allowed)
+    try:
+        if mode == 'load':
+            opt = 'loaded'
+            await client.load_extension(f'modules.{name}')
+        elif mode == 'unload':
+            opt = 'unloaded'
+            await client.unload_extension(f'modules.{name}')
+        elif mode == 'reload':
+            opt = 'reloaded'
+            await client.reload_extension(f'modules.{name}')
+        else:
+            await ctx.reply("Incorrect mode selected. Use '.help module' for more information.")
+            return
+            
+        await sync_cmd()
+        await ctx.reply(f"{name} module {opt}.")
+        message = f"Information[modules]: {name} module {opt}."
+        printMessage(message)
+        logMessage(message)
+    except Exception as e:
+        await ctx.reply(f"Failed to {mode} {name} module: {e}")
+        message = f'Information[modules]: Failed to {opt} {name} module: {e}'
+        printMessage(message)
+        logMessage(message)
 
-#10
-@client.command(name='sync', help="Sync slash commands")
+
+#9
+@client.hybrid_command(name='sync', description="Sync slash commands")
 async def sync(ctx):
-    if str(ctx.message.author.id) in admin_usr:
-        try:
-            await ctx.bot.tree.sync()
-            await ctx.send("Synced slash commands.")
-        except Exception as err:
-            await ctx.reply(f"Failed to sync slash commands.\nPossible cause: {err}")
-    else:
+    if str(ctx.message.author.id) not in admin_usr:
         await ctx.send(not_allowed)
+        return
+
+    await ctx.defer()
+    try:
+        await ctx.bot.tree.sync()
+        await ctx.send("Synced slash commands.")
+    except Exception as err:
+        await ctx.reply(f"Failed to sync slash commands.\nPossible cause: {err}")
         #AdminOnly-END
 
 
@@ -1109,8 +1102,9 @@ async def showdb(ctx):
 
         #ModeratorOnly
 #1
-@client.command(name='testbot', help="Tests some functions of Host and Bot")
+@client.hybrid_command(name='testbot', help="Test some functions of Host and Bot")
 async def testbot(ctx):
+    await ctx.defer()
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         now = datetime.datetime.now()
         loaded_modules = [cog for cog in client.cogs.keys()]
@@ -2020,112 +2014,15 @@ async def portal_send(ctx, *, mess):
 
 
 
-################################################ S L A S H   C O M M A N D S ###########################################################################################
+################################################ S L A S H   C O M M A N D S ################################################
 #1
-@client.tree.command(name='random', description="Shows your random number. Type .random [min] [max]")
-@app_commands.describe(min='Minimum value', max='Maximum value')
-async def random_slash(interaction: discord.Interaction, min: int, max: int):
-    import random
-    try:
-        randomn = random.randrange(min, max)
-        await interaction.response.send_message(f'This is your random number: {randomn}')
-    except Exception as error:
-        if extendedErrMess in accept_value:
-            await interaction.response.send_message(f'{random_err}\nPossible cause: {error}')
-        else:
-            await interaction.response.send_message(random_err)
-
-#2
-@client.tree.command(name='ping', description="Pings the Bot")
-async def ping(interaction):
-    await interaction.response.send_message(f':tennis: Pong! ({round(client.latency * 1000)}ms)')
-
-#3
-@client.tree.command(name='testbot', description="Tests some functions of Bot")
-async def testbot(interaction):
-    if str(interaction.user.id) in admin_usr or is_mod(interaction.user.id):
-        now = datetime.datetime.now()
-        loaded_modules = [cog for cog in client.cogs.keys()]
-        await interaction.response.send_message(f"""
-    ***S e r v e r  B o t***  *test*:
-    ====================================================
-    Time: **{now.strftime('%H:%M:%S, %d.%m.%Y')} [Day {(now - start_time).days}]**
-    Bot name: **{client.user}**
-    DisplayName: **{displayname}**
-    Version: **{ver}**
-    Prefix: **{prefix}**
-    CPU Usage: **{psutil.cpu_percent()}%**
-    CPU Cores: **{psutil.cpu_count(logical=False)}/{psutil.cpu_count(logical=True)}**
-    Arch: **{testbot_cpu_type}**
-    RAM Usage: **{psutil.virtual_memory().percent}%**
-    Ping: **{round(client.latency * 1000)} ms**
-    OS Type: **{os_check()}**
-    OS Version: **{platform.system()} {platform.release()}**
-    OS Kernel: **{platform.version()}**
-    Bot Current Dir: **{os.getcwd()}**
-    Bot Main Dir: **{maindir}**
-    Music library: **{medialib}**
-    Loaded modules: **{len(loaded_modules)}**
-    File size: **{os.path.getsize(f'{maindir}/ServerBot.py')} B**
-    Floppy: **{'Yes' if os.path.exists('/dev/fd0') else 'No'}**
-    ====================================================""")
-    else:
-        await interaction.response.send_message(not_allowed)
-
-#4
-@client.tree.command(name='ai', description=f"Talk with AI. Uses {ai_model} model.")
-@app_commands.describe(question="Prompt/question for AI")
-async def ai(interaction: discord.Interaction, question: str = None):
-    await interaction.response.defer(thinking=True)
-    if ai_token is None:
-        await interaction.followup.send("AI token not found. Enter valid Gemini API token in the .env file to use this command.")
-        return
-    if question is None:
-        await interaction.followup.send("Incomplete command.\nType your question after command.")
-        return
-    try:
-        response = ai_client.models.generate_content(
-            model=f"{ai_model}", 
-            contents=f"{question}", 
-            config=types.GenerateContentConfig(
-                system_instruction=[f'{os.getenv("instructions")}', f'You are a {displayname} Discord Bot based on your language model ({ai_model}) and ServerBot v{ver} from GitHub project (https://github.com/kamile320/serverbot).'],
-                tools=[
-                    types.Tool(
-                        google_search=types.GoogleSearch()
-                    )
-                ]
-            )
-        )
-        message = response.text
-        if extendedErrMess in accept_value:
-            length = f"Information[AI]: Length of the bot's response is {len(message)}."
-            printMessage(length)
-            logMessage(length)
-        if len(message) <= 2000:
-            await interaction.followup.send(message)
-        else:
-            if os.path.exists(ai_chat) == False:
-                os.makedirs(ai_chat)
-            name = f"ai_response_{datetime.datetime.now().strftime('%d.%m.%Y_%H-%M-%S')}.txt"
-            file = open(f"{ai_chat}/{name}", 'w', encoding='utf-8')
-            file.write(message)
-            file.close()
-            await interaction.followup.send(file=discord.File(f"{ai_chat}/{name}"))
-    except Exception as error:
-        await interaction.followup.send(f"Something went wrong, possible cause:\n{error}")
-        
-        error_message = f"DiscordCommandException[AI]: {error}"
-        printMessage(error_message)
-        logMessage(error_message)
-
-#5
 @client.tree.command(name='random_old', description="Shows your random number [Old version]")
 async def random_old(interaction):
     import random
     randomn = random.randrange(-1, 999999)
     await interaction.response.send_message(f'This is your random number: {randomn}')
 
-#6
+#2
 @client.tree.command(name='echo', description="Make the bot say something.")
 @app_commands.describe(message="Message to send", channel_id="Channel ID where message will be sent")
 async def echo(interaction: discord.Interaction, message: str, channel_id: str = None):
@@ -2150,20 +2047,7 @@ async def echo(interaction: discord.Interaction, message: str, channel_id: str =
                 await interaction.response.send_message(f"Can't send message. Have you typed command and channel ID correctly?", ephemeral=True)
     else:
         await interaction.response.send_message(not_allowed, ephemeral=True)
-
-#7
-@client.tree.command(name='sync', description="Sync slash commands")
-async def sync(interaction: discord.Interaction):
-    if str(interaction.user.id) in admin_usr:
-        await interaction.response.defer(thinking=True)
-        try:
-            await interaction.client.tree.sync()
-            await interaction.followup.send("Synced slash commands.")
-        except Exception as err:
-            await interaction.followup.send(f"Failed to sync slash commands.\nPossible cause: {err}")
-    else:
-        await interaction.response.send_message(not_allowed, ephemeral=True)
-################################################ S L A S H   C O M M A N D S  - E N D #######################################################################################
+############################################ S L A S H   C O M M A N D S - E N D ############################################
 
 try:
     client.run(TOKEN)
