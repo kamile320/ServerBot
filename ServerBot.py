@@ -899,16 +899,23 @@ if str(os.getenv('service_monitor')).lower() in accept_value:
             await ctx.send(not_allowed)
 
 #8
-@client.command(name='pingip', help="Pings selected IPv4 address.")
-async def pingip(ctx, ip):
+@client.command(name='pingip', help="Pings selected IPv4 address.\n.pingip <ip address> [count]")
+async def pingip(ctx, ip, count=1):
     if str(ctx.message.author.id) in admin_usr:
-        try:
-            ipaddr = ip
-            await ctx.send(f"```{subprocess.getoutput([f'ping {ipaddr} -c 1'])}```")
-        except Exception as err:
-            await ctx.send(f'Something went wrong.\nPossible cause: {err}')
+        ipaddr = ip
+        param = '-n' if platform.system().lower() == 'windows' else '-c'
+        cmd = f'ping {ipaddr} {param} {count}'
+        await ctx.send(f"```{subprocess.getoutput(cmd)}```")
     else:
         await ctx.send(not_allowed)
+@pingip.error
+async def pingip_error(ctx, error):
+    if isinstance(error, commands.BadArgument):
+        await ctx.send("Invalid argument. Usage: .pingip <ip_address> [count]")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("Missing argument. Usage: .pingip <ip_address> [count]")
+    else:
+        await ctx.send(f'Something went wrong: {error}')
 
 #9
 @client.command(name='module', help="Manage built-in and additional modules (cogs).\nload   -> loads module\nunload -> unloads module\nreload -> reload module\nlist   -> lists available modules from 'modules' directory. Add 'active' to list only active modules.")
