@@ -289,22 +289,24 @@ def os_check():
 
 
 #Information/Errors
-fileerror = "Error: File not found"
-filelarge = "Error: File too large"
-direrror = "Error: Directory not found"
-cannotcreatedir = "Error: Can't create directory."
-cannotcreatefile = "Error: Can't create file."
-chksize_error = "Error occurred while checking file size."
-copiedlog = f"Information[ServerLog]: Copied Log to {maindir}/Files"
-ffmpeg_error = "FFmpeg is not installed or File not found"
-voice_not_connected_error = "You must be connected to VC first!"
-not_playing = "Music is not playing right now."
-leave_error = "How can I left, when I'm not in VC?"
-thread_error = "Something went wrong. Try to type:\n.thread {NameWithoutSpaces} {Reason}\nReason is optional"
-not_allowed = "You're not allowed to use this command."
-SBservice = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo chmod 775 -R /BotDirectory/*\nsudo systemctl enable ServerBot -> Enables automatic startup\nsudo systemctl start ServerBot -> Optional (turns on Service)\nsudo systemctl daemon-reload -> if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
-badsite = "Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist?"
-random_err = 'Something went wrong. Have you typed correct min/max values?'
+file_error                  = "Error: File not found"
+file_large                  = "Error: File too large"
+dir_error                   = "Error: Directory not found"
+create_dir_fail             = "Error: Can't create directory."
+create_file_fail            = "Error: Can't create file."
+file_incomplete_cmd         = "Incomplete command. Usage: .file { open | mkdir | size | create } <filename> [content]"
+touch_incomplete_cmd        = "Incomplete command. Usage: .touch <filename> [content]"
+chksize_error               = "Error occurred while checking file size."
+copiedlog                   = f"Information[ServerLog]: Copied Log to {maindir}/Files"
+ffmpeg_error                = "FFmpeg is not installed or File not found"
+voice_not_connected_error   = "You must be connected to VC first!"
+not_playing                 = "Music is not playing right now."
+leave_error                 = "How can I left, when I'm not in VC?"
+thread_error                = "Something went wrong. Try to type:\n.thread <NameWithoutSpaces> [Reason]\nReason is optional"
+not_allowed                 = "You're not allowed to use this command."
+SBservice                   = "Run post installation commands to enable ServerBot.service to start with system startup:\nsudo chmod 775 -R /BotDirectory/*\nsudo systemctl enable ServerBot -> Enables automatic startup\nsudo systemctl start ServerBot -> Optional (turns on Service)\nsudo systemctl daemon-reload -> if you're running this command second time\nREMEBER about Reading/Executing permissions for others!"
+badsite                     = "Something went wrong.\nHave you typed the correct address?\n..Or maybe the website just doesn't exist?"
+random_err                  = 'Something went wrong. Have you typed correct min/max values?'
 
 
 
@@ -595,6 +597,8 @@ async def newest_update(ctx):
 - Updating structure of Admin and Mod only commands - in progress
 - Moving most of the commands to hybrid commands (supporting prefix and slash commands at once) - in progress
 - Updated .env file scheme
+- Updated ACL to v5.0
+- Updated file manager/directory commands
 - Fixes and improvements
 
 To see older releases, read 'updates.txt' in the 'Files' directory.
@@ -1617,139 +1621,172 @@ if (FMD in accept_value):
 
         #FileManager/Directory
 #1
-@client.command(name='cd', help="Changes directory\nYou can go back using '.dir <return>'")
-async def chdir(ctx, *, directory):
-    if str(ctx.message.author.id) in admin_usr:
-        try:
-            os.chdir(directory)
-            await ctx.send(f"changed directory to {os.getcwd()}")
-        except:
-            await ctx.send("You can't go to this directory; make it or enter existing one")
-    else:
+@client.command(name='cd', help="Changes directory.\nYou can go back using '.dir <return>'.")
+async def chdir(ctx, *, directory = commands.parameter(description="- Directory name or path.")):
+    if str(ctx.message.author.id) not in admin_usr:
         await ctx.send(not_allowed)
+        return
+
+    try:
+        os.chdir(directory)
+        await ctx.send(f"Changed directory to {os.getcwd()}")
+    except:
+        await ctx.send("You can't go to this directory; make it or enter existing one")
 
 #2
-@client.command(name='dir', help="Directory commands\n.dir return -> Goes back to main dir\n.dir check -> checks where you are\n.dir list -> list of files and directories in your dir\n.dir listall -> same but easier to read")
-async def dir(ctx, *, mode):
-    if str(ctx.message.author.id) in admin_usr:
-        if mode == 'return':#
-            os.chdir(maindir)
-            await ctx.send(f"Returned to main directory ({maindir})")
-
-        elif mode == 'check':#
-            await ctx.send(f"You are here: {os.getcwd()}")
-
-        elif mode == 'list':#
-            listdir = os.listdir()
-            await ctx.send(f"Files in **{os.getcwd()}**:\n{', '.join(listdir)}")
-
-        elif mode == 'listall':#
-            listdir = os.listdir()
-            files_dir = '\n'.join(listdir)
-            await ctx.send(f"Files in **{os.getcwd()}**:\n{files_dir}")
-    else:
+@client.command(name='dir', help="Directory commands\n.dir return  -> Go back to main dir.\n.dir check   -> Check where you are.\n.dir list    -> List of files and directories in your current dir.\n.dir listall -> Same but easier to read.")
+async def dir(ctx, *, mode = commands.parameter(default=None, description="- { return | check | list | listall }")):
+    if str(ctx.message.author.id) not in admin_usr:
         await ctx.send(not_allowed)
+        return
+    
+    if mode == 'return':#
+        os.chdir(maindir)
+        await ctx.send(f"Returned to main directory ({maindir})")
+
+    elif mode == 'check':#
+        await ctx.send(f"You are here: {os.getcwd()}")
+
+    elif mode == 'list':#
+        listdir = os.listdir()
+        await ctx.send(f"Files in **{os.getcwd()}**:\n{', '.join(listdir)}")
+
+    elif mode == 'listall':#
+        listdir = os.listdir()
+        files_dir = '\n'.join(listdir)
+        await ctx.send(f"Files in **{os.getcwd()}**:\n{files_dir}")
 
 #3
-@client.command(name='file', help="Manage/open/create files and directories\n.file open {filename} -> open (send as reply) file (REMEMBER to add extension - .py/.png/etc)\n.file mkdir {dir_name} -> create directory (folder)\n.file size {filename} -> check size of selected file\n.file create {filename} {content} -> create file with content (like .touch command; content is optional)")
-async def file(ctx, mode, filename, *, value=None):
-    if str(ctx.message.author.id) in admin_usr:
-        if mode == 'open':#open
-            try:
-                await ctx.send(file=discord.File(filename))
-            except Exception as err:
-                if extendedErrMess in accept_value:
-                    await ctx.send(f"{fileerror}\nPossible cause: {err}")
-                else:
-                    await ctx.send(fileerror)
-
-        elif mode == 'mkdir':#mkdir
-            try:
-                directory = os.getcwd()
-                message = f"Information[FileManager]: Created directory {filename}, in directory {directory}."
-                
-                os.makedirs(filename)
-                
-                await ctx.send("Created new directory.\nUse '.dir list' to check this")
-                printMessage(message)
-                logMessage(message)
-            except Exception as err:
-                if extendedErrMess in accept_value:
-                    await ctx.send(f"{cannotcreatedir}\nPossible cause: {err}")
-                else:
-                    await ctx.send(cannotcreatedir)
-
-        elif mode == 'size':#size
-            try:
-                size = os.path.getsize(filename)
-                await ctx.send(f"Size of {filename} is {size} bytes")
-            except Exception as err:
-                if extendedErrMess in accept_value:
-                    await ctx.send(f"{chksize_error}\nPossible cause: {err}")
-                else:
-                    await ctx.send(f"{chksize_error} File exist?")
-
-        elif mode == 'create':#create
-            try:
-                directory = os.getcwd()
-                response = f"Created '{filename}'.\nUse '.file open {filename}' to see content."
-                response_empty = "Created new empty file.\nUse '.dir list' to check this"
-                message = f"Information[FileManager]: Created file {filename}, in directory {directory}.\nContent: {value}"
-
-                if value is not None:    
-                    mkfile = open(filename, 'wt', encoding='utf-8')
-                    mkfile.write(value)
-                    mkfile.close()
-
-                    await ctx.send(response)
-                    printMessage(message)
-                    logMessage(message)
-                else:
-                    mkfile = open(filename, 'wt', encoding='utf-8')
-                    mkfile.close()
-
-                    await ctx.send(response_empty)
-                    printMessage(message)
-                    logMessage(message)
-            except Exception as err:
-                if extendedErrMess in accept_value:
-                    await ctx.send(f"{cannotcreatefile}\nPossible cause: {err}")
-                else:
-                    await ctx.send(cannotcreatefile)
-
-        else:#else
-            await ctx.send("Incorrect mode selected.\nSee '.help file' for help.")
-    else:
+@client.command(name='file', help="Manage/open/create files and directories.\n.file open   <filename> -> Sends selected file (REMEMBER to add extension - .py/.png/etc.).\n.file mkdir  <dir_name> -> Create directory (folder).\n.file size   <filename> -> Check size of selected file.\n.file create <filename> [content] -> Create file with content (like .touch command).")
+async def file(
+    ctx, 
+    mode        = commands.parameter(default=None, description="- { open | mkdir | size | create }"), 
+    filename    = commands.parameter(default=None, description="- Name of the file or complete path."), 
+ *, value       = commands.parameter(default=None, description="- The content you want to write while creating a file.")
+    ):
+    if str(ctx.message.author.id) not in admin_usr:
         await ctx.send(not_allowed)
+        return
 
-#4
-@client.command(name='touch', help="Create files with selected extension and content.\n.touch {filename} {content} - content is optional")
-async def makefile(ctx, name, *, content=None):
-    if str(ctx.message.author.id) in admin_usr:
+    if mode is None:
+        await ctx.send(file_incomplete_cmd)
+        return
+
+    if mode == 'open':#open
+        if filename is None:
+            await ctx.send(file_incomplete_cmd)
+            return
+        try:
+            await ctx.send(file=discord.File(filename))
+        except Exception as err:
+            if extendedErrMess in accept_value:
+                await ctx.send(f"{file_error}\nPossible cause: {err}")
+            else:
+                await ctx.send(file_error)
+
+    elif mode == 'mkdir':#mkdir
+        if filename is None:
+            await ctx.send(file_incomplete_cmd)
+            return
         try:
             directory = os.getcwd()
-            response = f"Created file {name}, in directory {directory}."
-            message = f"Information[FileManager]: Created file {name}, in directory {directory}.\nContent: {content}"
-            
-            if content is not None:
-                mkfile = open(name, 'wt', encoding='utf-8')
-                mkfile.write(content)
+            message = f"Information[FileManager]: Created directory {filename}, in directory {directory}."
+                
+            os.makedirs(filename)
+                
+            await ctx.send("Created new directory.\nUse '.dir list' to check this")
+            printMessage(message)
+            logMessage(message)
+        except Exception as err:
+            if extendedErrMess in accept_value:
+                await ctx.send(f"{create_dir_fail}\nPossible cause: {err}")
+            else:
+                await ctx.send(create_dir_fail)
+
+    elif mode == 'size':#size
+        if filename is None:
+            await ctx.send(file_incomplete_cmd)
+            return
+        try:
+            size = os.path.getsize(filename)
+            await ctx.send(f"Size of {filename} is {size} bytes")
+        except Exception as err:
+            if extendedErrMess in accept_value:
+                await ctx.send(f"{chksize_error}\nPossible cause: {err}")
+            else:
+                await ctx.send(f"{chksize_error} File exist?")
+
+    elif mode == 'create':#create
+        if filename is None:
+            await ctx.send(file_incomplete_cmd)
+            return
+        try:
+            directory = os.getcwd()
+            response = f"Created '{filename}'.\nUse '.file open {filename}' to see content."
+            response_empty = "Created new empty file.\nUse '.dir list' to check this"
+            message = f"Information[FileManager]: Created file {filename}, in directory {directory}.\nContent: {value}"
+
+            if value is not None:    
+                mkfile = open(filename, 'wt', encoding='utf-8')
+                mkfile.write(value)
                 mkfile.close()
 
                 await ctx.send(response)
                 printMessage(message)
                 logMessage(message)
             else:
-                mkfile = open(name, 'wt', encoding='utf-8')
+                mkfile = open(filename, 'wt', encoding='utf-8')
                 mkfile.close()
 
-                await ctx.send(response)
+                await ctx.send(response_empty)
                 printMessage(message)
                 logMessage(message)
         except Exception as err:
-            await ctx.send(f"Something went wrong while creating file.\nException: {err}")
-    else:
+            if extendedErrMess in accept_value:
+                await ctx.send(f"{create_file_fail}\nPossible cause: {err}")
+            else:
+                await ctx.send(create_file_fail)
+
+    else:#else
+        await ctx.send("Incorrect mode selected.\nSee '.help file' for more information.")
+
+#4
+@client.command(name='touch', help="Create files with selected extension and content.\n.touch <filename> [content]")
+async def makefile(
+    ctx, 
+    filename = commands.parameter(default=None, description="- Filename or complete path to file."), 
+ *, content  = commands.parameter(default=None, description="- File content you want to write.")
+    ):
+    if str(ctx.message.author.id) not in admin_usr:
         await ctx.send(not_allowed)
+        return
+
+    if filename is None:
+        await ctx.send(touch_incomplete_cmd)
+        return
+
+    try:
+        directory = os.getcwd()
+        response = f"Created file {filename}, in directory {directory}."
+        message = f"Information[FileManager]: Created file {filename}, in directory {directory}.\nContent: {content}"
+            
+        if content is not None:
+            mkfile = open(filename, 'wt', encoding='utf-8')
+            mkfile.write(content)
+            mkfile.close()
+
+            await ctx.send(response)
+            printMessage(message)
+            logMessage(message)
+        else:
+            mkfile = open(filename, 'wt', encoding='utf-8')
+            mkfile.close()
+
+            await ctx.send(response)
+            printMessage(message)
+            logMessage(message)
+    except Exception as err:
+        await ctx.send(f"Something went wrong while creating file: {err}")
         #FileManager/Directory-END
 
 
