@@ -397,31 +397,7 @@ async def on_message(message):
 
 
 
-        #Commands
-    #Chat
-#1
-@client.command()
-async def hello(ctx):
-    await ctx.send(f'Hello, {ctx.author.mention}!')
-
-#2
-@client.command()
-async def bye(ctx):
-    await ctx.send(f'See you later, {ctx.author.mention}!')
-
-#3
-@client.command()
-async def hi(ctx):
-    await ctx.send(f'hi!')
-
-#4
-@client.command()
-async def hello_there(ctx):
-    await ctx.send(f'OH, HELLO THERE!')
-        #Chat-END
-
-
-
+#Commands
         #Random/Fun
 #1
 @client.hybrid_command(name='random', description="Shows your random number. Usage: .random <min> <max>")
@@ -454,16 +430,6 @@ async def userbanner(ctx, *, text=None):
         await ctx.send("Incomplete command.\nType text to convert to banner.")
 
 #4
-@client.command(name='blankthing', help="Just blank thing")
-async def blank(ctx):
-    await ctx.send('ㅤ')
-
-#5
-@client.command(name='apple', help="Test for be an Apple")
-async def blank(ctx):
-    await ctx.send('')
-
-#6
 @client.hybrid_command(name='ai', description=f"Talk with AI. Uses {ai_model} model.")
 @app_commands.describe(question='Prompt/question for AI')
 async def ai(ctx, *, question = commands.parameter(default=None, description="- Your prompt/question")):
@@ -512,12 +478,7 @@ async def ai(ctx, *, question = commands.parameter(default=None, description="- 
         printMessage(error_message)
         logMessage(error_message)
 
-#7
-@client.command(name='GNU+Linux', help="Richard Stallman.")
-async def gnu(ctx):
-    await ctx.send("I’d just like to interject for a moment. What you’re refering to as Linux, is in fact, GNU/Linux, or as I’ve recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX.  Many computer users run a modified version of the GNU system every day, without realizing it. Through a peculiar turn of events, the version of GNU which is widely used today is often called Linux, and many of its users are not aware that it is basically the GNU system, developed by the GNU Project.  There really is a Linux, and these people are using it, but it is just a part of the system they use. Linux is the kernel: the program in the system that allocates the machine’s resources to the other programs that you run. The kernel is an essential part of an operating system, but useless by itself; it can only function in the context of a complete operating system. Linux is normally used in combination with the GNU operating system: the whole system is basically GNU with Linux added, or GNU/Linux. All the so-called Linux distributions are really distributions of GNU/Linux!")
-
-#8
+#5
 @client.hybrid_command(name='badge', description="Shows user badges. Usage: .badge @user")
 @app_commands.describe(member='Mention user to check badges')
 async def badge(ctx, member: discord.Member = commands.parameter(description="- Mention user to check badges")):
@@ -599,6 +560,7 @@ async def newest_update(ctx):
 - Updated .env file scheme
 - Updated ACL to v5.0
 - Updated file manager/directory commands
+- Removed old unused/useless commands
 - Fixes and improvements
 
 To see older releases, read 'updates.txt' in the 'Files' directory.
@@ -1808,14 +1770,6 @@ async def thread(ctx, name, *, reason=None):
             await ctx.send(f"{thread_error}\nPossible cause: {err}")
         else:
             await ctx.send(thread_error)
-
-#2
-@client.command(name='Teensie', help="TeensieGif")
-async def Teensie(ctx):
-    try:
-        await ctx.send(file=discord.File(f'{maindir}/Files/Teensie.gif'))
-    except:
-        await ctx.send('https://media.discordapp.net/attachments/1099605026948780143/1099605179193622570/Teensien.gif')
         #Other-END
  
 
@@ -2053,13 +2007,6 @@ async def portal_send(ctx, *, mess):
 
 ################################################ S L A S H   C O M M A N D S ################################################
 #1
-@client.tree.command(name='random_old', description="Shows your random number [Old version]")
-async def random_old(interaction):
-    import random
-    randomn = random.randrange(-1, 999999)
-    await interaction.response.send_message(f'This is your random number: {randomn}')
-
-#2
 @client.tree.command(name='echo', description="Make the bot say something.")
 @app_commands.describe(message="Message to send", channel_id="Channel ID where message will be sent")
 async def echo(interaction: discord.Interaction, message: str, channel_id: str = None):
