@@ -115,7 +115,7 @@ class AdvancedChannelListener(commands.Cog):
             print("[ACL] New user detected. Creating new entry...")
             try:
                 os.makedirs(f'{self.maindir}/ACL/User/{usr_id}')
-                with open(f'{self.maindir}/ACL/User/{usr_id}/message.txt', 'a', encoding='utf-8') as usrmessage
+                with open(f'{self.maindir}/ACL/User/{usr_id}/message.txt', 'a', encoding='utf-8') as usrmessage:
                     usrmessage.write(f'{self.displayname} user message log\nUsername: {usr}\nUserID: {usr_id}\nDetected: {time}\n##############################\n\n')
                     usrmessage.write(f'[{time}] [{srv}({srv_id}) / {chnl}({chnl_id})] {usr}: {usrmsg}\n')
         
@@ -145,7 +145,7 @@ class AdvancedChannelListener(commands.Cog):
         else:
             print("[ACL] Global message history not detected. Creating new entry...")
             try:
-                with open(f'{self.maindir}/ACL/global.txt', 'a', encoding='utf-8') as usrmessage
+                with open(f'{self.maindir}/ACL/global.txt', 'a', encoding='utf-8') as usrmessage:
                     usrmessage.write(f"[{time}] [Message//{srv}/{chnl}] {usr}: {usrmsg}\n")
                 
             except Exception as err:
@@ -166,7 +166,6 @@ class AdvancedChannelListener(commands.Cog):
             try:
                 with open(f'{self.maindir}/ACL/Server/{srv_id}/serverlog.txt', 'a', encoding='utf-8') as usrmessage:
                     usrmessage.write(message)
-                
 
             except Exception as err:
                 if self.extendedErrMess in self.accept_value:
@@ -192,9 +191,8 @@ class AdvancedChannelListener(commands.Cog):
 
         if os.path.exists(f'{self.maindir}/ACL/Server/{srv_id}/{chnl_id}.txt') == True:
             try:
-                usrmessage = open(f'{self.maindir}/ACL/Server/{srv_id}/{chnl_id}.txt', 'a', encoding='utf-8')
-                usrmessage.write(message)
-                usrmessage.close()
+                with open(f'{self.maindir}/ACL/Server/{srv_id}/{chnl_id}.txt', 'a', encoding='utf-8') as usrmessage:
+                    usrmessage.write(message)
 
             except Exception as err:
                 if self.extendedErrMess in self.accept_value:
@@ -219,9 +217,9 @@ class AdvancedChannelListener(commands.Cog):
     #LogMessage
     def logMessage(self, info):
         time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
-        with (f'{self.maindir}/Logs.txt', 'a', encoding='utf-8') as logs:
+        with open(f'{self.maindir}/Logs.txt', 'a', encoding='utf-8') as logs:
             logs.write(f'[{time}] {info}\n')
-        
+
     #PrintMessage
     def printMessage(self, info):
         time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
@@ -274,8 +272,8 @@ class AdvancedChannelListener(commands.Cog):
         value2  = commands.parameter(default=None, description=cmd_value2_desc)
     ):
         if str(ctx.message.author.id) not in self.admin_usr:
-            await ctx.send(self.ACL_nopermission)
-            message = f"Information[ACL]: User {ctx.message.author.id} tried to use .ACL command without permission.\nSee {self.maindir}/ACL/Users/{ctx.message.author.id} for more information.\n"
+            await ctx.send(ACL_nopermission)
+            message = f"Information[ACL]: User {ctx.message.author.id} tried to use .ACL command without permission.\nSee {self.maindir}/ACL/User/{ctx.message.author.id} for more information.\n"
             self.printMessage(message)
             self.logMessage(message)
             return
@@ -447,7 +445,7 @@ class AdvancedChannelListener(commands.Cog):
                     self.printMessage(message)
                     self.logMessage(message)
                 return
-                
+
 
             elif value == 'global':#   Remove global log
                 if self.global_Log not in self.accept_value:
@@ -470,7 +468,7 @@ class AdvancedChannelListener(commands.Cog):
                     self.printMessage(message)
                     self.logMessage(message)
                 return
-                
+
 
             else:
                 await ctx.send(ACL_wrong_mode)
@@ -482,7 +480,7 @@ class AdvancedChannelListener(commands.Cog):
         elif mode == 'update-env':
             try:
                 await ctx.send(ACL_env_create_pending)
-                with open(f'.env', 'a', encoding='utf-8') as env
+                with open(f'.env', 'a', encoding='utf-8') as env:
                     env.write("\n#AdvancedChannelListener\nadmin_usr = ['']\nextendedErrMess = False\nglobalLog = False\nuntrackableUser = ['']\n")
                 
                 await ctx.send(ACL_env_create_success)
@@ -514,8 +512,6 @@ Option { all } removes ALL saved records. Option { global } only removes global 
 """)
             return
 
-
-
         else:
             await ctx.send(ACL_wrong_mode)
             return
@@ -544,6 +540,7 @@ Changelog v{self.ACLver}:
   Added 'update-env' option to add required variables to the '.env' file, and 'about' to see more information about the module.
 - Better error handling.
 - Updated maindir variable - now module will save the logs in the same directory as ACL.py
+- Improved file opening/writing ('with open') for proper file closing (@sbw120's ServerBot PR #2).
 - Other improvements and fixes""")
 
 async def setup(bot):
