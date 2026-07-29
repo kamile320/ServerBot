@@ -426,11 +426,11 @@ async def hello_there(ctx):
 #1
 @client.hybrid_command(name='random', description="Shows your random number. Usage: .random <min> <max>")
 @app_commands.describe(min='Minimum value', max='Maximum value')
-async def random_num(ctx, min = commands.parameter(default=int(), description="- Minimum value"), max = commands.parameter(default=int(), description="- Maximum value")):
+async def random_num(ctx, min = commands.parameter(default=int(1), description="- Minimum value"), max = commands.parameter(default=int(100), description="- Maximum value")):
     import random
     await ctx.defer()
     try:
-        random_num = random.randrange(min, max)
+        random_num = random.randint(min, max)
         await ctx.reply(f'This is your random number: {random_num}')
     except Exception as err:
         if extendedErrMess in accept_value:
