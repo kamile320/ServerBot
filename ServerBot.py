@@ -561,6 +561,7 @@ async def newest_update(ctx):
 - Updated ACL to v5.0
 - Updated file manager/directory commands
 - Removed old unused/useless commands
+- Updated template cog
 - Fixes and improvements
 
 To see older releases, read 'updates.txt' in the 'Files' directory.
