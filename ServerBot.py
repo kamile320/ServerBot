@@ -31,8 +31,8 @@ loadList = [] # ['cog1', 'custom.cog2'] <- example; custom is the name of a dire
 # Do not type values here!
 def create_env():
     try:
-        env = open(f'{maindir}/.env', 'w', encoding='utf-8')
-        env.write(f"""#ServerBot v{ver} config file
+        with open(f'{maindir}/.env', 'w', encoding='utf-8') as env:
+            env.write(f"""#ServerBot v{ver} config file
 TOKEN=''
 admin_usr = ['']
 custom_prefix = ''
@@ -58,7 +58,7 @@ extendedErrMess = False
 
 #Service_module
 service_list = ','""")
-        env.close()
+
     except Exception as err:
         print(f"Error occurred while creating .env file.\nPossible cause: {err}")
 
@@ -214,22 +214,21 @@ ytdl_search = youtube_dl.YoutubeDL(ytdl_opts_search)
 
 
 #Log_File
-logs = open(f'{maindir}/Logs.txt', 'w', encoding='utf-8')
 def createlogs():
-    logs.write(f"""S E R V E R  B O T
+    with open(f'{maindir}/Logs.txt', 'w', encoding='utf-8') as logs:
+        logs.write(f"""S E R V E R  B O T
 LOGS
 Time: {datetime.datetime.now().strftime('%H:%M:%S, %d.%m.%Y')}
 Info: Remember to shut down bot by .ShutDown command or log will be empty.
 =============================================================================\n\n""")
-    logs.close()
 createlogs()
 
 #LogMessage
 def logMessage(info):
     time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
-    logs = open(f'{maindir}/Logs.txt', 'a', encoding='utf-8')
-    logs.write(f'[{time}] {info}\n')
-    logs.close()
+    with open(f'{maindir}/Logs.txt', 'a', encoding='utf-8') as logs:
+        logs.write(f'[{time}] {info}\n')
+
 #PrintMessage
 def printMessage(info):
     time = datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')
@@ -422,7 +421,7 @@ async def botbanner(ctx):
 #3
 @client.hybrid_command(name='banner', description="Show your text as a Banner")
 @app_commands.describe(text='Text to convert to banner')
-async def userbanner(ctx, *, text=None):
+async def userbanner(ctx, *, text = commands.parameter(default=None, description='Text to convert to banner')):
     if text is not None:
         userbanner = pyfiglet.figlet_format(text)
         await ctx.send(f'```{userbanner}```')
@@ -467,9 +466,8 @@ async def ai(ctx, *, question = commands.parameter(default=None, description="- 
             if os.path.exists(ai_chat) == False:
                 os.makedirs(ai_chat)
             name = f"ai_response_{datetime.datetime.now().strftime('%d.%m.%Y_%H-%M-%S')}.txt"
-            file = open(f"{ai_chat}/{name}", 'w', encoding='utf-8')
-            file.write(message)
-            file.close()
+            with open(f"{ai_chat}/{name}", 'w', encoding='utf-8') as file:
+                file.write(message)
             await ctx.reply(file=discord.File(f"{ai_chat}/{name}"))
     except Exception as err:
         await ctx.reply(f"Something went wrong, possible cause:\n{err}")
@@ -573,7 +571,6 @@ async def next_update(ctx):
     await ctx.send("""
 Ideas for Future Updates
 - Better Informations/Errors
-- More slash commands
 - More embed messages
 - Database support and leveling system (sqlite3)
 - More advanced module system (cogs) or whole code rewrite to make it more modular and easier to update
@@ -590,19 +587,17 @@ async def ShutDown(ctx):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
-    
+
     await ctx.send(f'Shutting down...')
     print("Information[ShutDown]: Started turning off the Bot")
     await asyncio.sleep(1)
- 
+
     try:
         print("Saving Logs.txt...")
-        src = open(f'{maindir}/Logs.txt', 'r')
-        logs = open(f'{maindir}/Files/Logs.txt', 'a')
-        append = f"\n\n{src.read()}"
-        logs.write(append)
-        logs.close()
-        src.close()
+        with open(f'{maindir}/Logs.txt', 'r') as src:
+            append = f"\n\n{src.read()}"
+        with open(f'{maindir}/Files/Logs.txt', 'a') as logs:
+            logs.write(append)
     except:
         print("Error occurred while saving log.")
 
@@ -625,20 +620,20 @@ async def ShutDown(ctx):
 
 
 #2
-@client.command(name='copylog', help="Copies Bot Log file\nappend   -> adds new value to older in Files/Logs.txt\nreplace  -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs")
-async def copylog(ctx, mode):
+@client.hybrid_command(name='copylog', help="Copies Bot Log file\nappend   -> adds new value to older in Files/Logs.txt\nreplace  -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs")
+@app_commands.describe(mode="{ append | replace | clearall }")
+async def copylog(ctx, mode = commands.parameter(description="- { append | replace | clearall }")):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
 
+    await ctx.defer()
     if mode == 'append':
         try:
-            src = open(f'{maindir}/Logs.txt', 'r')
-            logs = open(f'{maindir}/Files/Logs.txt', 'a')
-            append = f"\n\n{src.read()}"
-            logs.write(append)
-            logs.close()
-            src.close()
+            with open(f'{maindir}/Logs.txt', 'r') as src:
+                append = f"\n\n{src.read()}"
+            with open(f'{maindir}/Files/Logs.txt', 'a') as logs:
+                logs.write(append)
             await ctx.send('Appending logs to Files/Logs.txt succeed.')
         except:
             await ctx.send(f"Error occurred while copying log.")
@@ -653,12 +648,10 @@ async def copylog(ctx, mode):
             await ctx.send("Error occurred while copying log. Maybe folder doesn't exist?")
     elif mode == 'clearall':
         try:
-            l1 = open(f"{maindir}/Logs.txt", 'w', encoding='utf-8')
-            l1.write("")
-            l1.close()
-            l2 = open(f"{maindir}/Files/Logs.txt", 'w', encoding='utf-8')
-            l2.write("")
-            l2.close()
+            with open(f"{maindir}/Logs.txt", 'w', encoding='utf-8') as l1:
+                l1.write("")
+            with open(f"{maindir}/Files/Logs.txt", 'w', encoding='utf-8') as l2:
+                l2.write("")
             await ctx.send("Successfully cleared Logs.")
         except:
             await ctx.send("Can't clear logs.")
@@ -694,12 +687,13 @@ async def bash(ctx, file=None):
 
 
 #4
-@client.command(name='rebuild', help="Rebuilds files and directories")
+@client.hybrid_command(name='rebuild', help="Rebuilds files and directories")
 async def rebuild(ctx):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
 
+    await ctx.defer()
     await ctx.send('Trying to rebuild files...')
     message = "Information[Rebuild]: Started rebuilding files and directories."
     printMessage(message)
@@ -743,22 +737,23 @@ async def rebuild(ctx):
 
 
 #5
-@client.command(name='mkshortcut', help="Creates a shortcut on your Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of your Desktop Folder (Desktop/Pulpit etc.)]")
-async def mkshortcut(ctx, desk):
+@client.hybrid_command(name='mkshortcut', help="Creates a shortcut on your Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of your Desktop Folder (Desktop/Pulpit etc.)]")
+@app_commands.describe(desk="Name of your desktop folder/directory")
+async def mkshortcut(ctx, desk = commands.parameter(description="- Name of your desktop folder/directory")):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
 
+    await ctx.defer()
     try:
         home_dir = os.path.expanduser('~')
         os.chdir(home_dir)
         os.chdir(desk)
-        shrt = open('ServerBot.sh', 'w', encoding='utf-8')
-        shrt.write(f'cd {maindir}\npython3 ServerBot.py')
-        shrt.close()
+        with open('ServerBot.sh', 'w', encoding='utf-8') as shrt:
+            shrt.write(f'cd {maindir}\npython3 ServerBot.py')
         os.chdir(maindir)
         await ctx.send('Done.')
-        
+
         message = f"Information[mkshortcut]: Created desktop shortcut ({home_dir})"
         printMessage(message)
         logMessage(message)
@@ -767,20 +762,21 @@ async def mkshortcut(ctx, desk):
 
 
 #6
-@client.command(name='mkservice', help="Adds ServerBot to systemd to start with system startup (Bot needs to be running as root)\nMode:\n'def'  -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemd startup will not work. Do not place bot in your home dir.")
-async def mkservice(ctx, mode):
+@client.hybrid_command(name='mkservice', help="Adds ServerBot to systemd to start with system startup (Bot needs to be running as root)\nMode:\n'def'  -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemd startup will not work. Do not place bot in your home dir.")
+@app_commands.describe(mode="'def' for default autorun entry; 'your venv name' for entry in selected venv")
+async def mkservice(ctx, mode = commands.parameter(description="- { 'def' | 'your venv name' }")):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
 
+    await ctx.defer()
     try:
         if mode == 'def':
             try:
                 await ctx.send("Making autorun.sh file..")
                 try:
-                    auto = open(f'{maindir}/Files/autorun.sh', 'w', encoding='utf-8')
-                    auto.write(f"#!/bin/bash\ncd {maindir}\npython3 ServerBot.py")
-                    auto.close()
+                    with open(f'{maindir}/Files/autorun.sh', 'w', encoding='utf-8') as auto:
+                        auto.write(f"#!/bin/bash\ncd {maindir}\npython3 ServerBot.py")
                     os.chmod(f'{maindir}/Files/autorun.sh', 0o775)
                     await ctx.send('Done.')
 
@@ -792,9 +788,8 @@ async def mkservice(ctx, mode):
 
                 await ctx.send(f'Making {servicename}.service in /etc/systemd/system..')
                 try:
-                    sys = open(f'/etc/systemd/system/{servicename}.service', 'w', encoding='utf-8')
-                    sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
-                    sys.close()
+                    with open(f'/etc/systemd/system/{servicename}.service', 'w', encoding='utf-8') as sys:
+                        sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
                     await ctx.send('Done!')
                     await ctx.send(SBservice)
 
@@ -809,9 +804,8 @@ async def mkservice(ctx, mode):
             try:
                 await ctx.send('Making autorun.sh file..')
                 try:
-                    auto = open(f'{maindir}/Files/autorun.sh', 'w', encoding='utf-8')
-                    auto.write(f'#!/bin/bash\ncd {maindir}\n.venv/bin/python3 ServerBot.py')
-                    auto.close()
+                    with open(f'{maindir}/Files/autorun.sh', 'w', encoding='utf-8') as auto:
+                        auto.write(f'#!/bin/bash\ncd {maindir}\n.venv/bin/python3 ServerBot.py')
                     os.chmod('Files/autorun.sh', 0o775)
                     await ctx.send('Done.')
 
@@ -823,8 +817,8 @@ async def mkservice(ctx, mode):
 
                 await ctx.send(f'Making {servicename}.service in /etc/systemd/system..')
                 try:
-                    sys = open(f'/etc/systemd/system/{servicename}.service', 'w', encoding='utf-8')
-                    sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
+                    with open(f'/etc/systemd/system/{servicename}.service', 'w', encoding='utf-8') as sys:
+                        sys.write(f"[Unit]\nDescription=ServerBot autorun service\n\n[Service]\nExecStart={maindir}/Files/autorun.sh\n\n[Install]\nWantedBy=multi-user.target")
                     await ctx.send("Done!")
                     await ctx.send(SBservice)
 
@@ -842,11 +836,12 @@ async def mkservice(ctx, mode):
 #7
 @client.hybrid_command(name='pingip', description="Pings selected IPv4 address. Usage: .pingip <ip address> [count]")
 @app_commands.describe(ip="IP address or domain/hostname", count="How many pings/ICMP packets to send")
-async def pingip(ctx, ip = commands.parameter(description="IP address or domain/hostname"), count = commands.parameter(default=1, description="How many pings/ICMP packets to send")):
+async def pingip(ctx, ip = commands.parameter(description="- IP address or domain/hostname"), count = commands.parameter(default=1, description="- How many pings/ICMP packets to send")):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
-    
+
+    await ctx.defer()
     ipaddr = ip
     param = '-n' if platform.system().lower() == 'windows' else '-c'
     cmd = f'ping {ipaddr} {param} {count}'
@@ -863,12 +858,14 @@ async def pingip_error(ctx, error):
 
 
 #8
-@client.command(name='module', help="Manage built-in and additional modules (cogs).\nload   -> loads module\nunload -> unloads module\nreload -> reload module\nlist   -> lists available modules from 'modules' directory. Add 'active' to list only active modules.")
-async def module(ctx, mode=None, *, name=None):
+@client.hybrid_command(name='module', help="Manage built-in and additional modules (cogs).\nload   -> loads module\nunload -> unloads module\nreload -> reload module\nlist   -> lists available modules from 'modules' directory. Add 'active' to list only active modules.")
+@app_commands.describe(mode="{ load | unload | reload | list }", name="Name of your cog/module or 'active' to see active modules when 'list' mode selected")
+async def module(ctx, mode = commands.parameter(default=None, description="- { load | unload | reload | list }"), *, name = commands.parameter(default=None, description="- Cog/module name or 'active' when using 'list'")):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
 
+    await ctx.defer()
     async def sync_cmd():
         try:
             sync = await ctx.bot.tree.sync()
@@ -884,7 +881,7 @@ async def module(ctx, mode=None, *, name=None):
     if mode == 'list':
         try:
             br = '\n- '
-                
+
             if name == 'active':
                 loaded_modules = [cog for cog in client.cogs.keys()]
                 if not loaded_modules:
@@ -1055,9 +1052,8 @@ async def showdb(ctx):
         #SELECT
         result = cur.execute("SELECT * FROM users")
         #SAVE
-        save = open(f"{maindir}/tempDB.txt", 'w', encoding='utf-8')
-        save.write(str(result.fetchall()))
-        save.close()
+        with open(f"{maindir}/tempDB.txt", 'w', encoding='utf-8') as save:
+            save.write(str(result.fetchall()))
 
         await ctx.reply("Database content saved in tempDB.txt file.")
         await ctx.send(file=discord.File(f"{maindir}/tempDB.txt"))
@@ -1690,9 +1686,8 @@ async def file(
             message = f"Information[FileManager]: Created file {filename}, in directory {directory}.\nContent: {value}"
 
             if value is not None:    
-                mkfile = open(filename, 'wt', encoding='utf-8')
-                mkfile.write(value)
-                mkfile.close()
+                with open(filename, 'wt', encoding='utf-8') as mkfile:
+                    mkfile.write(value)
 
                 await ctx.send(response)
                 printMessage(message)
@@ -1734,9 +1729,8 @@ async def makefile(
         message = f"Information[FileManager]: Created file {filename}, in directory {directory}.\nContent: {content}"
             
         if content is not None:
-            mkfile = open(filename, 'wt', encoding='utf-8')
-            mkfile.write(content)
-            mkfile.close()
+            with open(filename, 'wt', encoding='utf-8') as mkfile:
+                mkfile.write(content)
 
             await ctx.send(response)
             printMessage(message)
@@ -1941,9 +1935,8 @@ async def portal(ctx, mode=None, channel1=None, channel2=None):
             #SELECT
             result = cur.execute("SELECT * FROM portal")
             #SAVE
-            save = open(f"{maindir}/tempDB.txt", 'w', encoding='utf-8')
-            save.write(str(result.fetchall()))
-            save.close()
+            with open(f"{maindir}/tempDB.txt", 'w', encoding='utf-8') as save:
+                save.write(str(result.fetchall()))
 
             await ctx.reply("Database content saved in tempDB.txt file.")
             await ctx.send(file=discord.File(f"{maindir}/tempDB.txt"))
