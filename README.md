@@ -68,6 +68,8 @@ Ways to contribute:
   3) Test your modified version of bot
   4) If everything works without problems - create a Pull Request.  
 
+**[NOTE!]** - Before creating a Pull Request that modifies files from 'modules' directory, make sure they don't have their own dedicated repository. 
+
 You can also share your feedback or ask any questions on my [Discord](https://discord.gg/UMtYGAx5ac) server.
 
 [^1]: No one without your permission can go to your host PC using Discord - user IDs of bot admins must be copied to .env file (more info in html manual)
