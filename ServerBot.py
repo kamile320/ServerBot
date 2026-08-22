@@ -399,9 +399,19 @@ async def on_message(message):
 #Commands
         #Random/Fun
 #1
-@client.hybrid_command(name='random', description="Shows your random number. Usage: .random <min> <max>")
-@app_commands.describe(min='Minimum value', max='Maximum value')
-async def random_num(ctx, min = commands.parameter(default=int(1), description="- Minimum value"), max = commands.parameter(default=int(100), description="- Maximum value")):
+@client.hybrid_command(
+    name        = 'random', 
+    description = "Shows your random number. Usage: .random <min> <max>"
+    )
+@app_commands.describe(
+    min='Minimum value', 
+    max='Maximum value'
+    )
+async def random_num(
+    ctx, 
+    min = commands.parameter(description="- Minimum value", default=int(1)), 
+    max = commands.parameter(description="- Maximum value", default=int(100))
+    ):
     import random
     await ctx.defer()
     try:
@@ -413,25 +423,46 @@ async def random_num(ctx, min = commands.parameter(default=int(1), description="
         else:
             await ctx.reply(random_err)
 
+
 #2
-@client.hybrid_command(name='botbanner', description="Show bot's banner")
+@client.hybrid_command(
+    name        = 'botbanner', 
+    description = "Show bot's banner"
+    )
 async def botbanner(ctx):
     await ctx.send(f'```{banner}```')
 
+
 #3
-@client.hybrid_command(name='banner', description="Show your text as a Banner")
-@app_commands.describe(text='Text to convert to banner')
-async def userbanner(ctx, *, text = commands.parameter(default=None, description='Text to convert to banner')):
+@client.hybrid_command(
+    name        = 'banner', 
+    description = "Show your text as a Banner"
+    )
+@app_commands.describe(
+    text='Text to convert to banner'
+    )
+async def userbanner(
+    ctx, *, 
+    text = commands.parameter(description='Text to convert to banner', default=None)):
     if text is not None:
         userbanner = pyfiglet.figlet_format(text)
         await ctx.send(f'```{userbanner}```')
     else:
         await ctx.send("Incomplete command.\nType text to convert to banner.")
 
+
 #4
-@client.hybrid_command(name='ai', description=f"Talk with AI. Uses {ai_model} model.")
-@app_commands.describe(question='Prompt/question for AI')
-async def ai(ctx, *, question = commands.parameter(default=None, description="- Your prompt/question")):
+@client.hybrid_command(
+    name        = 'ai', 
+    description = f"Talk with AI. Uses {ai_model} model."
+    )
+@app_commands.describe(
+    question='Prompt/question for AI'
+    )
+async def ai(
+    ctx, *, 
+    question = commands.parameter(description="- Your prompt/question", default=None)
+    ):
     await ctx.defer()
     if ai_token is None:
         await ctx.reply("AI token not found. Enter valid Gemini API token in the .env file to use this command.")
@@ -476,10 +507,19 @@ async def ai(ctx, *, question = commands.parameter(default=None, description="- 
         printMessage(error_message)
         logMessage(error_message)
 
+
 #5
-@client.hybrid_command(name='badge', description="Shows user badges. Usage: .badge @user")
-@app_commands.describe(member='Mention user to check badges')
-async def badge(ctx, member: discord.Member = commands.parameter(description="- Mention user to check badges")):
+@client.hybrid_command(
+    name        = 'badge', 
+    description = "Shows user badges. Usage: .badge @user"
+    )
+@app_commands.describe(
+    member = 'Mention user to check badges'
+    )
+async def badge(
+    ctx, 
+    member: discord.Member = commands.parameter(description="- Mention user to check badges")
+    ):
     try:
         user_flags = member.public_flags.all()
         badges = [flag.name for flag in user_flags]
@@ -492,9 +532,18 @@ async def badge(ctx, member: discord.Member = commands.parameter(description="- 
 
         #BotInfo
 #1
-@client.hybrid_command(name='manual', help="Sends HTML manual\n'web' - see manual in browser\n'local' - download HTML manual from Discord", description="Sends HTML manual")
-@app_commands.describe(type="{web | local} to see in browser or download from discord")
-async def manual(ctx, type = commands.parameter(description="- {web | local} to see in browser or download from discord")):
+@client.hybrid_command(
+    name        = 'manual', 
+    help        = "Sends HTML manual\n'web' - see manual in browser\n'local' - download HTML manual from Discord", 
+    description = "Sends HTML manual"
+    )
+@app_commands.describe(
+    type = "{web | local} to see in browser or download from discord"
+    )
+async def manual(
+    ctx, 
+    type = commands.parameter(description="- {web | local} to see in browser or download from discord")
+    ):
     try:
         if type == 'web':
             await ctx.send("ServerBot user Manual [PL](https://Kamile320.github.io/ServerBot/manualPL.html) [EN](https://Kamile320.github.io/ServerBot/manualEN.html)")
@@ -505,8 +554,12 @@ async def manual(ctx, type = commands.parameter(description="- {web | local} to 
     except:
         await ctx.send(f"Something went wrong. Try again.")
 
+
 #2
-@client.hybrid_command(name='credits', description="Shows credits")
+@client.hybrid_command(
+    name        = 'credits', 
+    description = "See credits"
+    )
 async def credits(ctx):
     embed = discord.Embed(
         title="***S e r v e r B o t***",
@@ -516,7 +569,7 @@ async def credits(ctx):
     embed.set_author(name=ctx.bot.user.name, icon_url=ctx.bot.user.display_avatar.url)
     embed.add_field(
         name="Links:",
-        value="[Discord](https://discord.gg/UMtYGAx5ac)\n" \
+        value="[Discord](https://discord.gg/UMtYGAx5ac)\n"
               "[Source code](https://github.com/kamile320/ServerBot)"
     )
     embed.add_field(
@@ -526,25 +579,37 @@ async def credits(ctx):
     )
     embed.add_field(
         name="Used sounds:",
-        value="- WinXP/98 sounds - files from OG OS by Microsoft\n" \
+        value="- WinXP/98 sounds - files from OG OS by Microsoft\n"
               "- [TF2 upgrade station](https://youtube.com/watch?v=Q7eJg7hRvqE)",
         inline=False
     )
     await ctx.send(embed=embed)
 
+
 #3
-@client.hybrid_command(name='time', description="Shows local time")
+@client.hybrid_command(
+    name        = 'time', 
+    description = "Shows local time"
+    )
 async def time(ctx):
     now = datetime.datetime.now()
     await ctx.send(now.strftime("Time: %H:%M:%S\nDay: %d.%m.%Y"))
 
+
 #4
-@client.hybrid_command(name='ping', description="Pings the bot")
+@client.hybrid_command(
+    name        = 'ping', 
+    description = "Pings the bot"
+    )
 async def ping(ctx):
     await ctx.send(f':tennis: Pong! ({round(client.latency * 1000)}ms)')
 
+
 #5
-@client.hybrid_command(name='release', description="Shows last changes of Bot functions/Changelog")
+@client.hybrid_command(
+    name        = 'release', 
+    description = "View the latest changes made to the bot's code"
+    )
 async def newest_update(ctx):
     await ctx.send(f"""
 [ServerBot v{ver}]
@@ -560,13 +625,18 @@ async def newest_update(ctx):
 - Updated file manager/directory commands
 - Removed old unused/useless commands
 - Updated template cog
+- Updated converter commands to v2.0 and moved to separate module (converters.py)
 - Fixes and improvements
 
 To see older releases, read 'updates.txt' in the 'Files' directory.
 """)
 
+
 #6
-@client.hybrid_command(name='next_update', description="Shows future functions/updates")
+@client.hybrid_command(
+    name        = 'next_update', 
+    description = "Shows future functions/updates"
+    )
 async def next_update(ctx):
     await ctx.send("""
 Ideas for Future Updates
@@ -582,7 +652,10 @@ You can give your own ideas on my [Discord Server](https://discord.gg/UMtYGAx5ac
 
         #AdminOnly
 #1
-@client.command(name='ShutDown', help="Turns off the Bot")
+@client.command(
+    name='ShutDown', 
+    help="Turn off the Bot"
+    )
 async def ShutDown(ctx):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
@@ -620,9 +693,17 @@ async def ShutDown(ctx):
 
 
 #2
-@client.hybrid_command(name='copylog', help="Copies Bot Log file\nappend   -> adds new value to older in Files/Logs.txt\nreplace  -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs")
-@app_commands.describe(mode="{ append | replace | clearall }")
-async def copylog(ctx, mode = commands.parameter(description="- { append | replace | clearall }")):
+@client.hybrid_command(
+    name='copylog', 
+    help="Copies Bot Log file\nappend   -> adds new value to older in Files/Logs.txt\nreplace  -> clears old Files/Logs.txt and adds new content\nclearall -> clears all Logs")
+@app_commands.describe(
+    mode="{ append | replace | clearall }"
+    )
+async def copylog(
+    ctx, 
+    mode = commands.parameter(description="- { append | replace | clearall }")
+    ):
+
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
@@ -660,7 +741,10 @@ async def copylog(ctx, mode = commands.parameter(description="- { append | repla
 
 
 #3
-@client.command(name='bash', help="Runs Bash like scripts on hosting computer (Linux only)\nUses .sh extensions\nBest to work with .touch command")
+@client.command(
+    name='bash', 
+    help="Runs Bash like scripts on hosting computer (Linux only)\nUses .sh extensions\nBest to work with .touch command"
+    )
 async def bash(ctx, file=None):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
@@ -687,7 +771,10 @@ async def bash(ctx, file=None):
 
 
 #4
-@client.hybrid_command(name='rebuild', help="Rebuilds files and directories")
+@client.hybrid_command(
+    name='rebuild', 
+    help="Rebuilds files and directories"
+    )
 async def rebuild(ctx):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
@@ -737,9 +824,18 @@ async def rebuild(ctx):
 
 
 #5
-@client.hybrid_command(name='mkshortcut', help="Creates a shortcut on your Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of your Desktop Folder (Desktop/Pulpit etc.)]")
-@app_commands.describe(desk="Name of your desktop folder/directory")
-async def mkshortcut(ctx, desk = commands.parameter(description="- Name of your desktop folder/directory")):
+@client.hybrid_command(
+    name='mkshortcut', 
+    help="Creates a shortcut on your Desktop. (Linux (Ubuntu 22.04 based) only)\nType: .mkshortcut [Name of your Desktop Folder (Desktop/Pulpit etc.)]"
+    )
+@app_commands.describe(
+    desk="Name of your desktop folder/directory"
+    )
+async def mkshortcut(
+    ctx, 
+    desk = commands.parameter(description="- Name of your desktop folder/directory")
+    ):
+
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
@@ -762,9 +858,18 @@ async def mkshortcut(ctx, desk = commands.parameter(description="- Name of your 
 
 
 #6
-@client.hybrid_command(name='mkservice', help="Adds ServerBot to systemd to start with system startup (Bot needs to be running as root)\nMode:\n'def'  -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemd startup will not work. Do not place bot in your home dir.")
-@app_commands.describe(mode="'def' for default autorun entry; 'your venv name' for entry in selected venv")
-async def mkservice(ctx, mode = commands.parameter(description="- { 'def' | 'your venv name' }")):
+@client.hybrid_command(
+    name='mkservice', 
+    help="Adds ServerBot to systemd to start with system startup (Bot needs to be running as root)\nMode:\n'def'  -> creates default autorun entry (python3)\n'venv' -> creates autorun entry that uses python virtual environment created by setup.sh (mkvenv.sh)\n.venv directory is located in the ServerBot main directory\nIt's recommended to save bot files into main (root) directory (/ServerBot) with 775 permissions (chmod 775 recursive). Without these permissions to bot files, systemd startup will not work. Do not place bot in your home dir."
+    )
+@app_commands.describe(
+    mode="'def' for default autorun entry; 'your venv name' for entry in selected venv"
+    )
+async def mkservice(
+    ctx, 
+    mode = commands.parameter(description="- { 'def' | 'your venv name' }")
+    ):
+
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
@@ -834,9 +939,20 @@ async def mkservice(ctx, mode = commands.parameter(description="- { 'def' | 'you
 
 
 #7
-@client.hybrid_command(name='pingip', description="Pings selected IPv4 address. Usage: .pingip <ip address> [count]")
-@app_commands.describe(ip="IP address or domain/hostname", count="How many pings/ICMP packets to send")
-async def pingip(ctx, ip = commands.parameter(description="- IP address or domain/hostname"), count = commands.parameter(default=1, description="- How many pings/ICMP packets to send")):
+@client.hybrid_command(
+    name        = 'pingip', 
+    description = "Pings selected IPv4 address. Usage: .pingip <ip address> [count]"
+    )
+@app_commands.describe(
+    ip    = "IP address or domain/hostname", 
+    count = "How many pings/ICMP packets to send"
+    )
+async def pingip(
+    ctx, 
+    ip    = commands.parameter(description="- IP address or domain/hostname"), 
+    count = commands.parameter(description="- How many pings/ICMP packets to send", default=1)
+    ):
+
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
@@ -858,9 +974,20 @@ async def pingip_error(ctx, error):
 
 
 #8
-@client.hybrid_command(name='module', help="Manage built-in and additional modules (cogs).\nload   -> loads module\nunload -> unloads module\nreload -> reload module\nlist   -> lists available modules from 'modules' directory. Add 'active' to list only active modules.")
-@app_commands.describe(mode="{ load | unload | reload | list }", name="Name of your cog/module or 'active' to see active modules when 'list' mode selected")
-async def module(ctx, mode = commands.parameter(default=None, description="- { load | unload | reload | list }"), *, name = commands.parameter(default=None, description="- Cog/module name or 'active' when using 'list'")):
+@client.hybrid_command(
+    name='module', 
+    help="Manage built-in and additional modules (cogs).\nload   -> loads module\nunload -> unloads module\nreload -> reload module\nlist   -> lists available modules from 'modules' directory. Add 'active' to list only active modules."
+    )
+@app_commands.describe(
+    mode="{ load | unload | reload | list }", 
+    name="Name of your cog/module or 'active' to see active modules when 'list' mode selected"
+    )
+async def module(
+    ctx, 
+    mode = commands.parameter(description="- { load | unload | reload | list }", default=None), *, 
+    name = commands.parameter(description="- Cog/module name or 'active' when using 'list'", default=None)
+    ):
+
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
         return
@@ -940,7 +1067,10 @@ Available modules:\n- {br.join(listdir)}""")
 
 
 #9
-@client.hybrid_command(name='sync', description="Sync slash commands")
+@client.hybrid_command(
+    name='sync', 
+    description="Sync slash commands"
+    )
 async def sync(ctx):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.send(not_allowed)
@@ -1061,7 +1191,10 @@ async def db(
 
 
 #2
-@client.hybrid_command(name='showdb', help="Save and send database content in .txt file")
+@client.hybrid_command(
+    name='showdb', 
+    help="Save and send database content in .txt file"
+    )
 async def showdb(ctx):
     if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
@@ -1293,78 +1426,6 @@ async def echo (ctx, channel_id: int, *, message):
     else:
         await ctx.reply(not_allowed)
         #ModeratorOnly-END
-
-
-
-        #Converters
-#1
-@client.command(name='convert', help="Advanced Converter v1.0\n========================\n\nConverts one number to other number systems - binary, octal, decimal, hexa (hexadecimal)")
-async def multiconv(ctx, type, number):
-    try:
-        if type == 'decimal':
-            number = int(number)
-            hexa = hex(number)
-            octa = oct(number)
-            bina = bin(number)
-            try:
-                await ctx.send(f'Conversion of {number} ({type}):\nHexadecimal: {hexa}\nDecimal: {number}\nOctal: {octa}\nBinary: {bina}')
-            except:
-                await ctx.send(f'Unexpected Error\nPlease try again')
-        elif type == 'octal':
-            deci = int(number, base=8)
-            bina1 = int(number, base=8)
-            bina2 = bin(bina1)
-            hexa1 = int(number, base=8)
-            hexa2 = hex(hexa1)
-            try:
-                await ctx.send(f'Conversion of {number} ({type}):\nHexadecimal: {hexa2}\nDecimal: {deci}\nOctal: {number}\nBinary: {bina2}')
-            except:
-                await ctx.send(f'Unexpected Error\nPlease try again')
-        elif type == 'binary':
-            deci = int(number, base=2)
-            octa1 = int(number, base=2)
-            octa2 = oct(octa1)
-            hexa1 = int(number, base=2)
-            hexa2 = hex(hexa1)
-            try:
-                await ctx.send(f'Conversion of {number} ({type}):\nHexadecimal: {hexa2}\nDecimal: {deci}\nOctal: {octa2}\nBinary: {number}')
-            except:
-                await ctx.send(f'Unexpected Error\nPlease try again')
-        elif type == 'hexa':
-            deci = int(number, base=16)
-            octa1 = int(number, base=16)
-            octa2 = oct(octa1)
-            bina1 = int(number, base=16)
-            bina2 = bin(bina1)
-            try:
-                await ctx.send(f'Conversion of {number} ({type}):\nHexadecimal: {number}\nDecimal: {deci}\nOctal: {octa2}\nBinary: {bina2}')
-            except:
-                await ctx.send(f'Unexpected Error\nPlease try again')
-        else:
-            await ctx.send('Wrong value.\nType: .convert binary/octal/decimal/hexa and value for selected number system')
-    except:
-        await ctx.send(f'```{bluescreenface}\nUnexpected error occurred```')
-
-#2
-@client.command(name='binary', help="Convert decimal number to binary.\n.binary <dec number>; eg. binary 2019")
-async def binary(ctx, number):
-    binn = bin(int(number))
-    await ctx.send(f'{number} in binary: {binn}')
-    
-    message = f'Information[Command]: Converted {number} to {binn} using .binary'
-    printMessage(message)
-    logMessage(message)
-
-#3
-@client.command(name='hexa', help="Convert decimal number to hexadecimal.\n.hexa <dec number>; eg. hexa 2007")
-async def hexadecimal(ctx, number):
-    hexa = hex(int(number))
-    await ctx.send(f'{number} in hexadecimal: {hexa}')
-    
-    message = f'Information[Command]: Converted {number} to {hexa} using .hexa'
-    printMessage(message)
-    logMessage(message)
-        #Converters-END
 
 
 
