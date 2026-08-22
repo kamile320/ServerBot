@@ -958,107 +958,123 @@ async def sync(ctx):
 
         #Database
 #1
-@client.command(name='db', help="Database commands\n.db register {userID} {nickname} - manually registers user in database. Nickname is optional\n.db remove {userID} - removes user from database.\n.db op {userID} - gives Moderator role to user (Discord bot mod).\n.db deop {userID} - removes Mod role from user.\n.db select {userID} - search user data in database.\n.db setnickname {nickname} {userID} - updates user nickname.")
-async def db(ctx, mode, value1, *, value2=None):
-    if str(ctx.message.author.id) in admin_usr:
-        cur = SB_DB.cursor()
+@client.hybrid_command(
+    name='db', 
+    help="Database commands\n.db register {userID} {nickname} - manually registers user in database. Nickname is optional.\n.db remove {userID} - removes user from database.\n.db op {userID} - gives Moderator role to user (Discord bot mod).\n.db deop {userID} - removes Mod role from user.\n.db select {userID} - search user data in database.\n.db setnickname {nickname} {userID} - updates user nickname."
+    )
+@app_commands.describe(
+    mode     = "{ register | remove | op | deop | select | setnickname }", 
+    user     = "UserID", 
+    nickname = "Nickname (optional)"
+    )
+async def db(
+    ctx, 
+    mode     = commands.parameter(description="{ register | remove | op | deop | select | setnickname }"), 
+    user     = commands.parameter(description="UserID"), *, 
+    nickname = commands.parameter(description="Nickname (optional)", default=None)
+    ):
 
-        if mode == 'register':
-            try:
-                if value2 is None:
-                    value2 = "No nickname"
-                #INSERT
-                cur.execute(f"INSERT INTO users (discord_id, username) VALUES (?, ?)", (value1, value2,))
-                SB_DB.commit()
-                #SELECT
-                res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (value1,))
+    if str(ctx.message.author.id) not in admin_usr:
+        await ctx.send(not_allowed)
+        return
+    
+    cur = SB_DB.cursor()
 
-                await ctx.reply(f"Registered user <@{value1}>.\n{res.fetchall()}")
-            except Exception as err:
-                await ctx.reply(f"Error: {err}")
-        
-        elif mode == 'remove':
-            try:
-                #DELETE
-                cur.execute(f"DELETE FROM users WHERE discord_id = ?", (value1,))
-                SB_DB.commit()
-                #SELECT
-                res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (value1,))
+    if mode == 'register':
+        try:
+            if nickname is None:
+                nickname = "No nickname"
+            #INSERT
+            cur.execute(f"INSERT INTO users (discord_id, username) VALUES (?, ?)", (user, nickname,))
+            SB_DB.commit()
+            #SELECT
+            res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (user,))
 
-                await ctx.reply(f"Removed user with ID {value1}.")
-            except Exception as err:
-                await ctx.reply(f"Error: {err}")
+            await ctx.reply(f"Registered user <@{user}>.\n{res.fetchall()}")
+        except Exception as err:
+            await ctx.reply(f"Error: {err}")
 
-        elif mode == 'op':
-            try:
-                #UPDATE
-                cur.execute(f"UPDATE users SET SBrole='mod' WHERE discord_id=?", (value1,))
-                SB_DB.commit()
+    elif mode == 'remove':
+        try:
+            #DELETE
+            cur.execute(f"DELETE FROM users WHERE discord_id = ?", (user,))
+            SB_DB.commit()
+            #SELECT
+            res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (user,))
 
-                gained = f"User <@{value1}> gained Moderator privileges."
-                await ctx.reply(gained)
-                logMessage(gained)
-                printMessage(gained)
-            except Exception as err:
-                await ctx.reply(f"Error: {err}")
+            await ctx.reply(f"Removed user with ID {user}.")
+        except Exception as err:
+            await ctx.reply(f"Error: {err}")
 
-        elif mode == 'deop':
-            try:
-                #UPDATE
-                cur.execute(f"UPDATE users SET SBrole='None' WHERE discord_id=?", (value1,))
-                SB_DB.commit()
+    elif mode == 'op':
+        try:
+            #UPDATE
+            cur.execute(f"UPDATE users SET SBrole='mod' WHERE discord_id=?", (user,))
+            SB_DB.commit()
 
-                revoked = f"Revoked Moderator privileges from <@{value1}>"
-                await ctx.reply(revoked)
-                logMessage(revoked)
-                printMessage(revoked)
-            except Exception as err:
-                await ctx.reply(f"Error: {err}")
+            gained = f"User <@{user}> gained Moderator privileges."
+            await ctx.reply(gained)
+            logMessage(gained)
+            printMessage(gained)
+        except Exception as err:
+            await ctx.reply(f"Error: {err}")
 
-        elif mode == 'select':
-            try:
-                #SELECT
-                res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (value1,))
+    elif mode == 'deop':
+        try:
+            #UPDATE
+            cur.execute(f"UPDATE users SET SBrole='None' WHERE discord_id=?", (user,))
+            SB_DB.commit()
 
-                await ctx.reply(f"Data of user <@{value1}>:\n{res.fetchall()}")
-            except Exception as err:
-                await ctx.reply(f"Error: {err}")
+            revoked = f"Revoked Moderator privileges from <@{user}>"
+            await ctx.reply(revoked)
+            logMessage(revoked)
+            printMessage(revoked)
+        except Exception as err:
+            await ctx.reply(f"Error: {err}")
 
-        elif mode == 'setnickname':
-            try:
-                if value2 is None:
-                    value2 = ctx.message.author.id
-                #UPDATE
-                cur.execute(f"UPDATE users SET username=? WHERE discord_id=?", (value1, value2,))
-                SB_DB.commit()
+    elif mode == 'select':
+        try:
+            #SELECT
+            res = cur.execute(f"SELECT * FROM users WHERE discord_id=?", (user,))
 
-                #SELECT
-                res = cur.execute(f"SELECT username, discord_id FROM users WHERE discord_id=?", (value2,))
+            await ctx.reply(f"Data of user <@{user}>:\n{res.fetchall()}")
+        except Exception as err:
+            await ctx.reply(f"Error: {err}")
 
-                await ctx.reply(f"Updated nickname of <@{value2}> in the database.\n{res.fetchall()}")
-            except Exception as err:
-                await ctx.reply(f"Error: {err}")
+    elif mode == 'setnickname':
+        try:
+            if nickname is None:
+                nickname = ctx.message.author.id
+            #UPDATE
+            cur.execute(f"UPDATE users SET username=? WHERE discord_id=?", (user, nickname,))
+            SB_DB.commit()
 
-        else:
-            await ctx.reply("Wrong mode selected. Use '.help db' for help.")
+            #SELECT
+            res = cur.execute(f"SELECT username, discord_id FROM users WHERE discord_id=?", (nickname,))
+
+            await ctx.reply(f"Updated nickname of <@{nickname}> in the database.\n{res.fetchall()}")
+        except Exception as err:
+            await ctx.reply(f"Error: {err}")
+
     else:
-        await ctx.reply(not_allowed)
+        await ctx.reply("Wrong mode selected. Use '.help db' for help.")
+
 
 #2
-@client.command(name='showdb', help="Shows database content in .txt file")
+@client.hybrid_command(name='showdb', help="Save and send database content in .txt file")
 async def showdb(ctx):
-    if str(ctx.message.author.id) in admin_usr:
-        cur = SB_DB.cursor()
-        #SELECT
-        result = cur.execute("SELECT * FROM users")
-        #SAVE
-        with open(f"{maindir}/tempDB.txt", 'w', encoding='utf-8') as save:
-            save.write(str(result.fetchall()))
-
-        await ctx.reply("Database content saved in tempDB.txt file.")
-        await ctx.send(file=discord.File(f"{maindir}/tempDB.txt"))
-    else:
+    if str(ctx.message.author.id) not in admin_usr:
         await ctx.reply(not_allowed)
+        return
+    
+    cur = SB_DB.cursor()
+    #SELECT
+    result = cur.execute("SELECT * FROM users")
+    #SAVE
+    with open(f"{maindir}/tempDB.txt", 'w', encoding='utf-8') as save:
+        save.write(str(result.fetchall()))
+
+    await ctx.reply("Database content saved in tempDB.txt file.", file=discord.File(f"{maindir}/tempDB.txt"))
         #Database-END
 
 
