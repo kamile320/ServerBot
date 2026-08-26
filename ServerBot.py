@@ -617,8 +617,8 @@ async def newest_update(ctx):
 - Enhanced pingip: added count parameter, OS detection and better error handling; changed to hybrid command
 - Updated .module command - now synces slash commands after every load/reload/unload
 - Updated .service command; moved to separate module (service.py) and changed to hybrid command (prefix and slash at once)
-- Changed .testbot .ping .random .ai to hybrid commands; removed separate slash versions of these commands
-- Updating structure of Admin and Mod only commands - in progress
+- Changed .testbot .ping .random .ai .echo to hybrid commands; removed separate slash versions of these commands
+- Updating structure of Admin only commands - in progress
 - Moving most of the commands to hybrid commands (supporting prefix and slash commands at once) - in progress
 - Updated .env file scheme
 - Updated ACL to v5.0
@@ -1214,7 +1214,10 @@ async def showdb(ctx):
 
         #ModeratorOnly
 #1
-@client.hybrid_command(name='testbot', help="Test some functions of Host and Bot")
+@client.hybrid_command(
+    name='testbot', 
+    help="Test some functions of Host and Bot."
+    )
 async def testbot(ctx):
     await ctx.defer()
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
@@ -1246,8 +1249,12 @@ Floppy: **{'Yes' if os.path.exists('/dev/fd0') else 'No'}**
     else:
         await ctx.send(not_allowed)
 
+
 #2
-@client.command(name='testos', help="Check information about Operating System and Hardware")
+@client.hybrid_command(
+    name='testos', 
+    help="Check information about Operating System and Hardware."
+    )
 async def testos(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         await ctx.send(f"""
@@ -1267,8 +1274,12 @@ Hardware info:
     else:
         await ctx.send(not_allowed)
 
+
 #3
-@client.command(name='disks', help="Shows mounted disks with free disk space (Linux only - uses 'df -h' command)")
+@client.hybrid_command(
+    name='disks', 
+    help="Shows mounted disks with free disk space (Linux only - uses 'df -h' command)."
+    )
 async def disk(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
@@ -1278,10 +1289,23 @@ async def disk(ctx):
     else:
         await ctx.send(not_allowed)
 
+
 #4
-@client.command(name='delete', help="Deletes set amount of messages\n.delete 6 -> will delete 6 messages")
-async def delete(ctx, amount: int = 1):
+@client.hybrid_command(
+    name='delete', 
+    help="Deletes set amount of messages.\n.delete <amount>"
+    )
+@app_commands.describe(
+    amount="Amount of recent messages to delete."
+    )
+async def delete(
+    ctx, 
+    amount: int = commands.parameter(description="Amount of recent messages to delete.", default=1)
+    ):
+
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
+        await ctx.defer()
+
         deleted = await ctx.channel.purge(limit=amount+1)
         await ctx.channel.send(f'Deleted {len(deleted)-1} message(s)')
         
@@ -1291,8 +1315,12 @@ async def delete(ctx, amount: int = 1):
     else:
         await ctx.reply(not_allowed)
 
+
 #5
-@client.command(name='cleaner', help="Wipes out last 100 messages on channel")
+@client.hybrid_command(
+    name='cleaner', 
+    help="Wipes out last 100 messages on channel."
+    )
 async def cleaner(ctx):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         deleted = await ctx.channel.purge(limit=100)
@@ -1304,9 +1332,22 @@ async def cleaner(ctx):
     else:
         await ctx.reply(not_allowed)
 
+
 #6
-@client.command(name='webreq', help="Sends website request codes and headers\n.webreq {get/getheader} {website}")
-async def webreq(ctx, mode, *, web):
+@client.hybrid_command(
+    name='webreq', 
+    help="Sends website request codes and headers.\n.webreq { get | getheader } <website>"
+    )
+@app_commands.describe(
+    mode = "{ get | getheader } to get response status code or header.",
+    web  = "Link to website."
+    )
+async def webreq(
+    ctx, 
+    mode = commands.parameter(description="{ get | getheader } to get response status code or header."), *, 
+    web  = commands.parameter(description="Link to website.")
+    ):
+
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
             if mode == 'get':
@@ -1322,7 +1363,7 @@ async def webreq(ctx, mode, *, web):
                 except:
                     await ctx.reply(badsite)
             else:
-                await ctx.reply('Wrong mode.\nSee .help webreq for help.')
+                await ctx.reply("Wrong mode.\nSee '.help webreq' for help.")
         except Exception as err:
             message = f"DiscordCommandException[webreq]: {err}"
             if extendedErrMess in accept_value:
@@ -1336,9 +1377,22 @@ async def webreq(ctx, mode, *, web):
     else:
         await ctx.reply(not_allowed)
 
+
 #7
-@client.command(name='kick', help="Kick Members\n.kick @member {reason} - reason is optional")
-async def kick(ctx, member: discord.Member, *, reason=None):
+@client.hybrid_command(
+    name='kick', 
+    help="Kick members.\n.kick @member [reason]"
+    )
+@app_commands.describe(
+    member="@Mention of user you want to kick.",
+    reason="Optional reason for kicking the user."
+    )
+async def kick(
+    ctx, 
+    member: discord.Member  = commands.parameter(description="@Mention of user you want to kick."), *, 
+    reason                  = commands.parameter(description="Optional reason for kicking the user.", default=None)
+    ):
+
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
             await member.kick(reason=reason)
@@ -1352,9 +1406,22 @@ async def kick(ctx, member: discord.Member, *, reason=None):
     else:
         await ctx.reply(not_allowed)
 
+
 #8
-@client.command(name='ban', help="Ban Members\n.ban @member {reason} - reason is optional")
-async def ban(ctx, member: discord.Member, *, reason=None):
+@client.hybrid_command(
+    name='ban', 
+    help="Ban members.\n.ban @member [reason]"
+    )
+@app_commands.describe(
+    member="@Mention of user you want to ban.",
+    reason="Optional reason for banning the user."
+    )
+async def ban(
+    ctx, 
+    member: discord.Member  = commands.parameter(description="@Mention of user you want to ban."), *, 
+    reason                  = commands.parameter(description="Optional reason for banning the user.", default=None)
+    ):
+
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
             await member.ban(reason=reason)
@@ -1368,9 +1435,22 @@ async def ban(ctx, member: discord.Member, *, reason=None):
     else:
         await ctx.reply(not_allowed)
 
+
 #9
-@client.command(name='unban', help="Unban Members\n.unban @member {reason} - reason is optional")
-async def unban(ctx, member: discord.User, *, reason=None):
+@client.hybrid_command(
+    name='unban', 
+    help="Unban members.\n.unban @member [reason]"
+    )
+@app_commands.describe(
+    member="@Mention of user you want to unban.",
+    reason="Optional reason for unbanning the user."
+    )
+async def unban(
+    ctx, 
+    member: discord.Member  = commands.parameter(description="@Mention of user you want to unban."), *, 
+    reason                  = commands.parameter(description="Optional reason for unbanning the user.", default=None)
+    ):
+
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
             await ctx.guild.unban(member, reason=reason)
@@ -1386,9 +1466,20 @@ async def unban(ctx, member: discord.User, *, reason=None):
     else:
         await ctx.reply(not_allowed)
 
+
 #10
-@client.command(name='invitegen', help="Create invite link to specific channel via ID.\n.invitegen {channelID} - if None, bot will create invite link to current channel.")
-async def invitegen (ctx, channel_id: int = None):
+@client.hybrid_command(
+    name='invitegen', 
+    help="Create invite link to specific channel via ID.\n.invitegen [channelID] - if None, bot will create invite link to current channel."
+    )
+@app_commands.describe(
+    channel_id="ID of selected channel."
+    )
+async def invitegen(
+    ctx, 
+    channel_id: int = commands.parameter(description="ID of selected channel.", default=None)
+    ):
+
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
         try:
             if channel_id is None:
@@ -1406,25 +1497,45 @@ async def invitegen (ctx, channel_id: int = None):
     else:
         await ctx.reply(not_allowed)
 
+
 #11
-@client.command(name='echo', help="Make the bot say something.\n.echo {channelID} {message} - you have to type channel ID. It's recommended to use slash version of this command (easier to use).")
-async def echo (ctx, channel_id: int, *, message):
+@client.hybrid_command(
+    name='echo', 
+    help="Make the bot say something.\n.echo <channelID> <message> - you have to type channel ID. It's recommended to use slash version of this command (easier to use)."
+    )
+@app_commands.describe(
+    message     = "Message to send", 
+    channel_id  = "Channel ID where message will be sent"
+    )
+async def echo(
+    ctx, 
+    channel_id: str = commands.parameter(description="Channel ID where message will be sent", default=None), *, 
+    message         = commands.parameter(description="Message to send")
+    ):
     if str(ctx.message.author.id) in admin_usr or is_mod(ctx.message.author.id):
+        await ctx.defer(ephemeral=True)
         try:
-            channel = client.get_channel(channel_id)
+            if channel_id is None:
+                channel_id = ctx.channel.id
+                channel = client.get_channel(int(channel_id))
+            else:
+                channel = client.get_channel(int(channel_id))
 
             if channel is not None:
                 await channel.send(message)
+                await ctx.reply("Message sent successfully.", ephemeral=True)
             else:
-                await ctx.reply(f"Can't find channel. Type proper channel ID.")
-        
+                await ctx.reply(f"Can't find channel. Type proper channel ID.", ephemeral=True)
+
+        except ValueError:
+            await ctx.reply(f"Invalid channel ID. Type proper channel ID.", ephemeral=True)
         except Exception as err:
             if extendedErrMess in accept_value:
-                await ctx.reply(f"Error occurred: {err}")
+                await ctx.reply(f"Error occurred: {err}", ephemeral=True)
             else:
-                await ctx.reply(f"Can't send message. Have you typed command and channel ID correctly?")
+                await ctx.reply(f"Can't send message. Have you typed command and channel ID correctly?", ephemeral=True)
     else:
-        await ctx.reply(not_allowed)
+        await ctx.reply(not_allowed, ephemeral=True)
         #ModeratorOnly-END
 
 
@@ -2075,34 +2186,6 @@ async def portal_send(ctx, *, mess):
         #Test_Commands-END
 
 
-
-################################################ S L A S H   C O M M A N D S ################################################
-#1
-@client.tree.command(name='echo', description="Make the bot say something.")
-@app_commands.describe(message="Message to send", channel_id="Channel ID where message will be sent")
-async def echo(interaction: discord.Interaction, message: str, channel_id: str = None):
-    if str(interaction.user.id) in admin_usr or is_mod(interaction.user.id):
-        try:
-            if channel_id is None:
-                channel_id = interaction.channel_id
-                channel = client.get_channel(int(channel_id))
-            else:
-                channel = client.get_channel(int(channel_id))
-
-            if channel is not None:
-                await channel.send(message)
-                await interaction.response.send_message("Message sent successfully.", ephemeral=True)
-            else:
-                await interaction.response.send_message(f"Can't find channel. Type proper channel ID.", ephemeral=True)
-
-        except Exception as err:
-            if extendedErrMess in accept_value:
-                await interaction.response.send_message(f"Error occurred: {err}", ephemeral=True)
-            else:
-                await interaction.response.send_message(f"Can't send message. Have you typed command and channel ID correctly?", ephemeral=True)
-    else:
-        await interaction.response.send_message(not_allowed, ephemeral=True)
-############################################ S L A S H   C O M M A N D S - E N D ############################################
 
 try:
     client.run(TOKEN)
